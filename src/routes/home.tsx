@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import logoAsset from "@/assets/live-teka-logo.png.asset.json";
+import logoAsset from "@/assets/live-market-logo.png.asset.json";
 import homeHero from "@/assets/marketing/home-hero.jpg";
 import organicosAsset from "@/assets/sellers/organicos.jpg.asset.json";
 import techAsset from "@/assets/sellers/tech.jpg.asset.json";
