@@ -13,8 +13,8 @@ const searchSchema = z.object({ c: z.string().uuid().optional() });
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
-      { title: "Chat — Live Market" },
-      { name: "description", content: "Converse em tempo real com as lojas do Live Market." },
+      { title: "Chat — Live Teká" },
+      { name: "description", content: "Converse em tempo real com as lojas do Live Teká." },
     ],
   }),
   validateSearch: searchSchema,
@@ -259,7 +259,7 @@ function ConversationView({ conversationId, userId, onBack }: { conversationId: 
       </header>
       <div className="flex-1 space-y-3 px-4 py-4">
         <div className="mx-auto flex max-w-[80%] items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[11px] text-accent-foreground">
-          <ShieldCheck size={12} /> Conversa protegida pelo Live Market
+          <ShieldCheck size={12} /> Conversa protegida pelo Live Teká
         </div>
         {msgs.map((m) => {
           const mine = m.sender_id === userId;

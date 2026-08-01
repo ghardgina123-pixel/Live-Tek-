@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/termos")({
-  head: () => ({ meta: [{ title: "Termos e privacidade — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Termos e privacidade — Live Teká" }] }),
   component: Termos,
 });
 
@@ -16,7 +16,7 @@ function Termos() {
       </header>
       <article className="prose prose-sm max-w-none px-5 py-5 text-sm leading-relaxed text-foreground">
         <h2 className="text-base font-bold">Termos de uso</h2>
-        <p>Ao usar a Live Market, você concorda em respeitar as regras de convivência, não publicar conteúdo ilegal e cumprir as obrigações fiscais aplicáveis.</p>
+        <p>Ao usar a Live Teká, você concorda em respeitar as regras de convivência, não publicar conteúdo ilegal e cumprir as obrigações fiscais aplicáveis.</p>
         <h2 className="mt-4 text-base font-bold">Privacidade</h2>
         <p>Coletamos apenas os dados necessários para operar a plataforma: nome, contato, endereço e histórico de compras. Não vendemos dados a terceiros.</p>
         <h2 className="mt-4 text-base font-bold">Lojistas</h2>

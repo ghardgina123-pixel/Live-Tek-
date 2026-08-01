@@ -7,7 +7,7 @@ import { loadGoogleMaps } from "@/lib/google-maps";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/rastreio/$orderId")({
-  head: () => ({ meta: [{ title: "Rastreio de encomenda — Live Market" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Rastreio de encomenda — Live Teká" }, { name: "robots", content: "noindex" }] }),
   component: RastreioPage,
 });
 

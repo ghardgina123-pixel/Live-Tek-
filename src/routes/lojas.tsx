@@ -25,10 +25,10 @@ export const Route = createFileRoute("/lojas")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Lojas — Live Market" },
-      { name: "description", content: "Explore todas as lojas ativas da Live Market em Angola, com lives ao vivo, produtos e avaliações." },
-      { property: "og:title", content: "Lojas — Live Market" },
-      { property: "og:description", content: "Explore todas as lojas ativas da Live Market em Angola." },
+      { title: "Lojas — Live Teká" },
+      { name: "description", content: "Explore todas as lojas ativas da Live Teká em Angola, com lives ao vivo, produtos e avaliações." },
+      { property: "og:title", content: "Lojas — Live Teká" },
+      { property: "og:description", content: "Explore todas as lojas ativas da Live Teká em Angola." },
       { property: "og:url", content: "https://www.livemarketplece.live/lojas" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/lojas" }],
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/lojas")({
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        name: "Lojas — Live Market",
+        name: "Lojas — Live Teká",
         url: "https://www.livemarketplece.live/lojas",
       }),
     }],
@@ -139,7 +139,7 @@ function Lojas() {
                     </span>
                   )}
                 </div>
-                <p className="line-clamp-2 text-xs text-muted-foreground">{s.description ?? s.category ?? "Loja ativa na Live Market"}</p>
+                <p className="line-clamp-2 text-xs text-muted-foreground">{s.description ?? s.category ?? "Loja ativa na Live Teká"}</p>
                 {s.category && (
                   <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
                     <span className="rounded-full bg-accent px-2 py-0.5 text-accent-foreground">{s.category}</span>

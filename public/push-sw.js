@@ -1,11 +1,11 @@
-/* Live Market — Web Push service worker */
+/* Live Teká — Web Push service worker */
 self.addEventListener("install", (e) => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Live Market", body: event.data && event.data.text() }; }
-  const title = data.title || "Live Market";
+  try { data = event.data ? event.data.json() : {}; } catch { data = { title: "Live Teká", body: event.data && event.data.text() }; }
+  const title = data.title || "Live Teká";
   const options = {
     body: data.body || "",
     icon: "/icon-192.png",

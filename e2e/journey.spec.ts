@@ -1,5 +1,5 @@
 /**
- * Jornada crítica E2E — Live Market
+ * Jornada crítica E2E — Live Teká
  *
  * Cobre: chat realtime (cliente → lojista), checkout, notificação instantânea
  * para o lojista (Sonner toast disparado por subscription Supabase Realtime na

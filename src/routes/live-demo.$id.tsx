@@ -7,7 +7,7 @@ import modaAsset from "@/assets/sellers/moda.jpg.asset.json";
 import organicosAsset from "@/assets/sellers/organicos.jpg.asset.json";
 
 export const Route = createFileRoute("/live-demo/$id")({
-  head: () => ({ meta: [{ title: "Live demonstrativa — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Live demonstrativa — Live Teká" }] }),
   component: LiveDemo,
 });
 

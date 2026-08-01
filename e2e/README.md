@@ -1,4 +1,4 @@
-# E2E — Live Market
+# E2E — Live Teká
 
 Cenários End-to-End que cobrem a jornada crítica da plataforma. As specs
 abaixo são estruturadas para Playwright (`@playwright/test`). Para executar

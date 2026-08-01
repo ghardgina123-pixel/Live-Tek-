@@ -14,10 +14,10 @@ import { z } from "zod";
 export const Route = createFileRoute("/imoveis/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `Detalhes do imóvel — Live Market` },
-      { name: "description", content: "Veja fotos, preço, localização e marque visita a este imóvel em Angola na Live Market." },
-      { property: "og:title", content: `Detalhes do imóvel — Live Market` },
-      { property: "og:description", content: "Veja fotos, preço e localização deste imóvel em Angola na Live Market." },
+      { title: `Detalhes do imóvel — Live Teká` },
+      { name: "description", content: "Veja fotos, preço, localização e marque visita a este imóvel em Angola na Live Teká." },
+      { property: "og:title", content: `Detalhes do imóvel — Live Teká` },
+      { property: "og:description", content: "Veja fotos, preço e localização deste imóvel em Angola na Live Teká." },
       { property: "og:url", content: `https://www.livemarketplece.live/imoveis/${params.id}` },
     ],
     links: [{ rel: "canonical", href: `https://www.livemarketplece.live/imoveis/${params.id}` }],
@@ -105,7 +105,7 @@ function ImovelDetailPage() {
   }
 
   if (typeof document !== "undefined") {
-    document.title = `${p.title} — Live Market`;
+    document.title = `${p.title} — Live Teká`;
   }
 
   const whatsapp = p.real_estate_agencies?.phone

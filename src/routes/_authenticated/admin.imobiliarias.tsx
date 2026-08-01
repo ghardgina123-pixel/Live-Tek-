@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/imobiliarias")({
-  head: () => ({ meta: [{ title: "Admin · Imobiliárias — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Admin · Imobiliárias — Live Teká" }] }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) throw redirect({ to: "/login" });

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
 
 export const Route = createFileRoute("/_authenticated/lojista-crm")({
-  head: () => ({ meta: [{ title: "CRM Premium — Live Market" }] }),
+  head: () => ({ meta: [{ title: "CRM Premium — Live Teká" }] }),
   component: CRM,
 });
 
@@ -644,7 +644,7 @@ function PaymentForm({ sub, storeId, onSaved, forceResubmit }: { sub: Sub; store
       </Button>
 
       <p className="text-[11px] text-muted-foreground">
-        Após validação pela equipa Live Market, o acesso ao CRM será ativado automaticamente.
+        Após validação pela equipa Live Teká, o acesso ao CRM será ativado automaticamente.
       </p>
     </div>
   );

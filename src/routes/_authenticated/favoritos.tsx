@@ -3,7 +3,7 @@ import { ArrowLeft, Heart } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/_authenticated/favoritos")({
-  head: () => ({ meta: [{ title: "Favoritos — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Favoritos — Live Teká" }] }),
   component: Favoritos,
 });
 

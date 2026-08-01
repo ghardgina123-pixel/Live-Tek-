@@ -1,8 +1,8 @@
-# Live Market
+# Live Teká
 
 > Marketplace ao vivo de Angola: lojas, lives, imóveis e pagamentos locais (Express, e-Kwanza, Unitel Money, Afrimoney, Kwik, Multicaixa Referência).
 
-Live Market conecta clientes e lojas em tempo real — compre direto da live, converse com o vendedor e receba em casa.
+Live Teká conecta clientes e lojas em tempo real — compre direto da live, converse com o vendedor e receba em casa.
 
 ## Pages
 
@@ -10,7 +10,7 @@ Live Market conecta clientes e lojas em tempo real — compre direto da live, co
 - [Lojas](/lojas): catálogo de lojas e vendedores ao vivo.
 - [Imóveis](/imoveis): casas, apartamentos e terrenos para venda e arrendamento.
 - [Ajuda e suporte](/ajuda): contactos e perguntas frequentes.
-- [Sobre](/sobre): a missão e a equipa por trás da Live Market.
+- [Sobre](/sobre): a missão e a equipa por trás da Live Teká.
 - [Termos](/termos): termos de uso e política da plataforma.
 
 ## Optional

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/compras")({
-  head: () => ({ meta: [{ title: "Minhas compras — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Minhas compras — Live Teká" }] }),
   component: Compras,
 });
 

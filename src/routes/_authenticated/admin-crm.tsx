@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
 
 export const Route = createFileRoute("/_authenticated/admin-crm")({
-  head: () => ({ meta: [{ title: "Admin · CRM — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Admin · CRM — Live Teká" }] }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) throw redirect({ to: "/login" });

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/seguranca")({
-  head: () => ({ meta: [{ title: "Segurança — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Segurança — Live Teká" }] }),
   component: Seguranca,
 });
 
@@ -48,7 +48,7 @@ function Seguranca() {
         </section>
         <section className="rounded-2xl border border-border p-4 text-sm text-muted-foreground">
           <h2 className="mb-2 text-sm font-bold text-foreground">Privacidade</h2>
-          <p>Seus dados são usados apenas para operar a Live Market. Nunca os vendemos a terceiros.</p>
+          <p>Seus dados são usados apenas para operar a Live Teká. Nunca os vendemos a terceiros.</p>
         </section>
       </div>
     </AppShell>

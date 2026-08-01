@@ -7,10 +7,10 @@ import { formatPrice, useCurrency } from "@/lib/currency";
 export const Route = createFileRoute("/loja/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: "Loja — Live Market" },
-      { name: "description", content: "Conheça esta loja, veja produtos, lives e converse com o vendedor na Live Market." },
-      { property: "og:title", content: "Loja — Live Market" },
-      { property: "og:description", content: "Conheça esta loja, veja produtos e lives na Live Market." },
+      { title: "Loja — Live Teká" },
+      { name: "description", content: "Conheça esta loja, veja produtos, lives e converse com o vendedor na Live Teká." },
+      { property: "og:title", content: "Loja — Live Teká" },
+      { property: "og:description", content: "Conheça esta loja, veja produtos e lives na Live Teká." },
       { property: "og:url", content: `https://www.livemarketplece.live/loja/${params.id}` },
     ],
     links: [{ rel: "canonical", href: `https://www.livemarketplece.live/loja/${params.id}` }],
@@ -35,7 +35,7 @@ function LojaPage() {
   if (!store) return <div className="p-6">Loja não encontrada</div>;
 
   if (typeof document !== "undefined") {
-    document.title = `${store.name} — Live Market`;
+    document.title = `${store.name} — Live Teká`;
   }
 
   return (

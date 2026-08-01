@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 
 export const Route = createFileRoute("/_authenticated/idioma")({
-  head: () => ({ meta: [{ title: "Idioma e moeda — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Idioma e moeda — Live Teká" }] }),
   component: Idioma,
 });
 

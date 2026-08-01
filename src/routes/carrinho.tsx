@@ -8,7 +8,7 @@ import { formatPrice, useCurrency } from "@/lib/currency";
 export const Route = createFileRoute("/carrinho")({
   head: () => ({
     meta: [
-      { title: "Carrinho — Live Market" },
+      { title: "Carrinho — Live Teká" },
       { property: "og:url", content: "https://www.livemarketplece.live/carrinho" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/carrinho" }],

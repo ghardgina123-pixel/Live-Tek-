@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/editar-perfil")({
-  head: () => ({ meta: [{ title: "Editar perfil — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Editar perfil — Live Teká" }] }),
   component: EditarPerfil,
 });
 

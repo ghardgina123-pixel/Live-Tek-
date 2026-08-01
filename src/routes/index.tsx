@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, Store as StoreIcon } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
-import logoAsset from "@/assets/live-market-logo.png.asset.json";
+import logoAsset from "@/assets/live-teka-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Live Market — Bem-vindo · Compre, Converse, Receba" },
-      { name: "description", content: "Bem-vindo à Live Market: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
-      { property: "og:title", content: "Live Market — Bem-vindo · Compre, Converse, Receba" },
-      { property: "og:description", content: "Bem-vindo à Live Market: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
+      { title: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
+      { name: "description", content: "Bem-vindo à Live Teká: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
+      { property: "og:title", content: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
+      { property: "og:description", content: "Bem-vindo à Live Teká: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
       { property: "og:url", content: `${SITE_URL}/` },
     ],
     links: [
@@ -26,7 +26,7 @@ function Splash() {
       <div className="flex flex-1 flex-col items-center justify-center gap-6">
         <img
           src={logoAsset.url}
-          alt="Live Market — Compre, Converse e Receba"
+          alt="Live Teká — Compre, Converse e Receba"
           width={512}
           height={512}
           className="mx-auto block h-auto max-h-[40vh] w-auto max-w-[80%] object-contain"
@@ -34,7 +34,7 @@ function Splash() {
           decoding="async"
           fetchPriority="high"
         />
-        <h1 className="sr-only">Live Market — Compre · Converse · Receba.</h1>
+        <h1 className="sr-only">Live Teká — Compre · Converse · Receba.</h1>
         <p className="text-center text-sm font-bold tracking-[0.18em] text-foreground/95">
           COMPRE <span className="text-primary-glow">•</span> CONVERSE{" "}
           <span className="text-primary-glow">•</span> RECEBA
