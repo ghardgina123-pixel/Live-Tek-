@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, Store as StoreIcon } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
-import logoAsset from "@/assets/live-market-logo.png.asset.json";
+import logoAsset from "@/assets/live-teka-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
