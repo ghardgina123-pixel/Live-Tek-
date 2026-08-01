@@ -12,7 +12,7 @@ import { BrandLogo, getBrand } from "@/lib/payment-brands";
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Live Market" },
+      { title: "Checkout — Live Teká" },
       { property: "og:url", content: "https://www.livemarketplece.live/checkout" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/checkout" }],
@@ -214,7 +214,7 @@ function Checkout() {
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
-        <ShieldCheck size={14} /> Garantia Live Market: reembolso total se algo der errado
+        <ShieldCheck size={14} /> Garantia Live Teká: reembolso total se algo der errado
       </div>
 
       <div className="fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background p-3">

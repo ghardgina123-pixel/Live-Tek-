@@ -31,7 +31,7 @@ const COUNTRY_TO_CURRENCY: Record<string, CurrencyCode> = {
 const STORAGE_KEY = "lm:currency";
 
 function detectCurrency(): CurrencyCode {
-  // Live Market opera exclusivamente em Angola — moeda fixa em Kwanza (AOA).
+  // Live Teká opera exclusivamente em Angola — moeda fixa em Kwanza (AOA).
   return "AOA";
 }
 

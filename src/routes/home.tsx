@@ -19,9 +19,9 @@ type FeedProduct = { id: string; name: string; price: number; oldPrice?: number;
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
-      { title: "Live Market — Mercado ao Vivo em Angola" },
+      { title: "Live Teká — Mercado ao Vivo em Angola" },
       { name: "description", content: "Descubra lojas ao vivo em Angola, compre direto da live, converse com vendedores e receba em casa." },
-      { property: "og:title", content: "Live Market — Mercado ao Vivo em Angola" },
+      { property: "og:title", content: "Live Teká — Mercado ao Vivo em Angola" },
       { property: "og:description", content: "Descubra lojas ao vivo em Angola, compre direto da live e receba em casa." },
       { property: "og:url", content: "https://www.livemarketplece.live/home" },
     ],
@@ -174,7 +174,7 @@ function Home() {
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <img
               src={logoAsset.url}
-              alt="Live Market"
+              alt="Live Teká"
               width={44}
               height={44}
               loading="eager"
@@ -183,7 +183,7 @@ function Home() {
             />
             <div className="min-w-0">
               <p className="text-xs text-white/70">Olá, bem-vindo 👋</p>
-              <h1 className="text-base font-bold leading-tight">Live Market — Mercado ao Vivo em Angola</h1>
+              <h1 className="text-base font-bold leading-tight">Live Teká — Mercado ao Vivo em Angola</h1>
               <p className="text-[10px] uppercase tracking-wider text-white/70">O mercado ao vivo no seu ecrã.</p>
             </div>
           </div>
@@ -227,7 +227,7 @@ function Home() {
         <Link to="/lojas" className="group relative block overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
           <img
             src={homeHero}
-            alt="Compre ao vivo nas lojas angolanas do Live Market"
+            alt="Compre ao vivo nas lojas angolanas do Live Teká"
             width={1280}
             height={896}
             loading="eager"
@@ -345,7 +345,7 @@ function Home() {
       </section>
 
       <footer className="mx-5 mb-8 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
-        <p className="font-bold tracking-wide">LIVE MARKET — Mercado Ao Vivo</p>
+        <p className="font-bold tracking-wide">LIVE TEKÁ — Mercado Ao Vivo</p>
         <p className="mt-1 text-[11px] opacity-80">O seu marketplace completo em Angola.</p>
         <div className="mt-3 space-y-1 text-[11px]">
           <p>

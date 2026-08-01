@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/entregador/$deliveryId")({
-  head: () => ({ meta: [{ title: "Entregador — Live Market" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
   component: EntregadorPage,
 });
 

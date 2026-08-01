@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/public/push-dispatch")({
         webpush.setVapidDetails(subject, publicKey, privateKey);
 
         const notif = JSON.stringify({
-          title: json.payload?.title ?? "Live Market",
+          title: json.payload?.title ?? "Live Teká",
           body: json.payload?.body ?? "",
           url: json.payload?.url ?? "/",
           kind: json.payload?.kind ?? "general",

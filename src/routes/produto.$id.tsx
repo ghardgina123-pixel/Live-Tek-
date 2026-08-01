@@ -8,10 +8,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/produto/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: "Detalhes do produto — Live Market" },
-      { name: "description", content: "Veja detalhes, preço e disponibilidade deste produto e compre direto da live na Live Market." },
-      { property: "og:title", content: "Detalhes do produto — Live Market" },
-      { property: "og:description", content: "Veja detalhes, preço e disponibilidade deste produto na Live Market." },
+      { title: "Detalhes do produto — Live Teká" },
+      { name: "description", content: "Veja detalhes, preço e disponibilidade deste produto e compre direto da live na Live Teká." },
+      { property: "og:title", content: "Detalhes do produto — Live Teká" },
+      { property: "og:description", content: "Veja detalhes, preço e disponibilidade deste produto na Live Teká." },
       { property: "og:type", content: "product" },
       { property: "og:url", content: `https://www.livemarketplece.live/produto/${params.id}` },
     ],
@@ -38,7 +38,7 @@ function ProdutoPage() {
   const store = findStore(p.storeId);
 
   if (typeof document !== "undefined") {
-    document.title = `${p.name} — Live Market`;
+    document.title = `${p.name} — Live Teká`;
   }
 
   return (

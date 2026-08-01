@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/perfil")({
   head: () => ({
     meta: [
-      { title: "Perfil — Live Market" },
+      { title: "Perfil — Live Teká" },
       { property: "og:url", content: "https://www.livemarketplece.live/perfil" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/perfil" }],
@@ -222,7 +222,7 @@ function Perfil() {
             Entrar
           </Link>
         )}
-        <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Market v1.0 · Feito com 💚</p>
+        <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Teká v1.0 · Feito com 💚</p>
       </div>
     </AppShell>
   );

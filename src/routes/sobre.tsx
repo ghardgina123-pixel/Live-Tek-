@@ -12,9 +12,9 @@ import escalaLocal from "@/assets/marketing/escala-local.png.asset.json";
 export const Route = createFileRoute("/sobre")({
   head: () => ({
     meta: [
-      { title: "Sobre o Live Market — Compre, Converse e Receba em Angola" },
-      { name: "description", content: "Conheça o Live Market: o marketplace angolano onde lives atraem, o pagamento é num toque e a entrega é em tempo real." },
-      { property: "og:title", content: "Sobre o Live Market" },
+      { title: "Sobre o Live Teká — Compre, Converse e Receba em Angola" },
+      { name: "description", content: "Conheça o Live Teká: o marketplace angolano onde lives atraem, o pagamento é num toque e a entrega é em tempo real." },
+      { property: "og:title", content: "Sobre o Live Teká" },
       { property: "og:description", content: "O marketplace angolano em tempo real." },
       { property: "og:image", content: livesAtraem.url },
       { property: "og:url", content: `${SITE_URL}/sobre` },
@@ -39,7 +39,7 @@ function Sobre() {
       <header className="flex items-center gap-3 px-5 pt-6 pb-4 text-white" style={{ background: "var(--gradient-brand)" }}>
         <Link to="/home" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15" aria-label="Voltar"><ArrowLeft size={18} /></Link>
         <div>
-          <h1 className="text-lg font-semibold">Sobre o Live Market</h1>
+          <h1 className="text-lg font-semibold">Sobre o Live Teká</h1>
           <p className="text-xs text-white/80">Compre · Converse · Receba — em Angola</p>
         </div>
       </header>

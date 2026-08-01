@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/imoveis")({
   head: () => ({
     meta: [
-      { title: "Imóveis — Live Market" },
+      { title: "Imóveis — Live Teká" },
       { name: "description", content: "Casas, apartamentos e terrenos para venda e arrendamento em Angola." },
-      { property: "og:title", content: "Imóveis — Live Market" },
+      { property: "og:title", content: "Imóveis — Live Teká" },
       { property: "og:description", content: "Encontre casas, apartamentos e terrenos para venda ou arrendamento." },
       { property: "og:url", content: "https://www.livemarketplece.live/imoveis" },
     ],
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/imoveis")({
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        name: "Imóveis — Live Market",
+        name: "Imóveis — Live Teká",
         url: "https://www.livemarketplece.live/imoveis",
       }),
     }],

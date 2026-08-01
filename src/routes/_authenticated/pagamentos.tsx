@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/pagamentos")({
-  head: () => ({ meta: [{ title: "Métodos de pagamento — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Métodos de pagamento — Live Teká" }] }),
   component: Pagamentos,
 });
 

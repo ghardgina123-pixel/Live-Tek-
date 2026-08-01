@@ -12,8 +12,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/shorts")({
   head: () => ({
     meta: [
-      { title: "Shorts — Live Market" },
-      { name: "description", content: "Vídeos curtos dos produtos das lojas em destaque no Live Market." },
+      { title: "Shorts — Live Teká" },
+      { name: "description", content: "Vídeos curtos dos produtos das lojas em destaque no Live Teká." },
     ],
   }),
   component: ShortsFeed,
@@ -153,8 +153,8 @@ function ShortCard({ short }: { short: Short }) {
 
   const share = async () => {
     const url = `${window.location.origin}/shorts?v=${short.id}`;
-    const title = short.product?.name ?? "Live Market — Shorts";
-    const text = short.caption ?? "Confira este vídeo no Live Market";
+    const title = short.product?.name ?? "Live Teká — Shorts";
+    const text = short.caption ?? "Confira este vídeo no Live Teká";
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {
         await navigator.share({ title, text, url });

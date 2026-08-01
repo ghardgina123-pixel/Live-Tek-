@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/transportador")({
-  head: () => ({ meta: [{ title: "Cadastro de transportador — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Cadastro de transportador — Live Teká" }] }),
   component: TransportadorPage,
 });
 

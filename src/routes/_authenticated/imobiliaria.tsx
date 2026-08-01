@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria")({
-  head: () => ({ meta: [{ title: "Imobiliária — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Imobiliária — Live Teká" }] }),
   component: ImobiliariaPage,
 });
 

@@ -14,7 +14,7 @@ const LivePlayer = lazy(() => import("@/components/LivePlayer").then((m) => ({ d
 export const Route = createFileRoute("/live/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: "Live — Live Market" },
+      { title: "Live — Live Teká" },
       { name: "description", content: "Assista à transmissão ao vivo e compre direto da live." },
       { property: "og:url", content: `https://www.livemarketplece.live/live/${params.id}` },
     ],
@@ -197,8 +197,8 @@ function LivePage() {
   // ------------ Share ------------
   const share = useCallback(async () => {
     const url = typeof window !== "undefined" ? window.location.href : `https://www.livemarketplece.live/live/${id}`;
-    const title = live?.title ?? "Live Market";
-    const shareText = `Assiste a live "${title}" agora na Live Market`;
+    const title = live?.title ?? "Live Teká";
+    const shareText = `Assiste a live "${title}" agora na Live Teká`;
     try {
       if (typeof navigator !== "undefined" && "share" in navigator) {
         await (navigator as Navigator).share({ title, text: shareText, url });

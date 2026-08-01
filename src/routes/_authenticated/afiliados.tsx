@@ -3,7 +3,7 @@ import { ArrowLeft, Users, Share2, Gift } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/_authenticated/afiliados")({
-  head: () => ({ meta: [{ title: "Afiliados — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Afiliados — Live Teká" }] }),
   component: Afiliados,
 });
 
@@ -19,7 +19,7 @@ function Afiliados() {
           <Users className="text-primary" size={28} />
           <h2 className="mt-3 text-lg font-bold">Indique e ganhe</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Convide amigos e lojas para a Live Market e receba comissão sobre cada venda realizada por eles.
+            Convide amigos e lojas para a Live Teká e receba comissão sobre cada venda realizada por eles.
           </p>
         </div>
         <div className="mt-6 space-y-3">

@@ -12,7 +12,7 @@ import { LocationCascade, type LocationValue } from "@/components/LocationCascad
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/enderecos")({
-  head: () => ({ meta: [{ title: "Endereços para entrega — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Endereços para entrega — Live Teká" }] }),
   component: AddressesPage,
 });
 

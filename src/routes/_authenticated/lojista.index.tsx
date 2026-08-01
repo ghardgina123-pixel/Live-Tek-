@@ -12,7 +12,7 @@ import { LocationCascade, type LocationValue } from "@/components/LocationCascad
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
-  head: () => ({ meta: [{ title: "Minha Loja — Live Market" }] }),
+  head: () => ({ meta: [{ title: "Minha Loja — Live Teká" }] }),
   component: LojistaIndex,
 });
 
@@ -119,7 +119,7 @@ function LojistaIndex() {
 function PartnersFooter() {
   return (
     <footer className="mx-5 mb-8 mt-4 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
-      <p className="font-bold tracking-wide">LIVE MARKET — Parceiros & Lojistas</p>
+      <p className="font-bold tracking-wide">LIVE TEKÁ — Parceiros & Lojistas</p>
       <p className="mt-1 text-[11px] opacity-80">Vendas em direto para milhares de compradores em toda a África. Configure sua loja em minutos.</p>
       <div className="mt-3 space-y-1 text-[11px]">
         <p>🌐 <a href="https://www.livemarketplece.live" className="font-semibold underline">www.livemarketplece.live</a></p>

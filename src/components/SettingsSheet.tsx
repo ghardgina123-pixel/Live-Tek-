@@ -103,7 +103,7 @@ export function SettingsSheet({ trigger }: Props) {
               Entrar
             </Link>
           )}
-          <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Market v1.0 · Feito com 💚</p>
+          <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Teká v1.0 · Feito com 💚</p>
         </div>
       </SheetContent>
     </Sheet>

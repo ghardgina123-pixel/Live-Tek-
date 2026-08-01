@@ -5,10 +5,10 @@ import { AppShell } from "@/components/AppShell";
 export const Route = createFileRoute("/ajuda")({
   head: () => ({
     meta: [
-      { title: "Ajuda e suporte — Live Market" },
-      { name: "description", content: "Fale com a equipa da Live Market por email, WhatsApp ou telefone e veja respostas para as perguntas mais frequentes." },
-      { property: "og:title", content: "Ajuda e suporte — Live Market" },
-      { property: "og:description", content: "Fale com a equipa da Live Market por email, WhatsApp ou telefone." },
+      { title: "Ajuda e suporte — Live Teká" },
+      { name: "description", content: "Fale com a equipa da Live Teká por email, WhatsApp ou telefone e veja respostas para as perguntas mais frequentes." },
+      { property: "og:title", content: "Ajuda e suporte — Live Teká" },
+      { property: "og:description", content: "Fale com a equipa da Live Teká por email, WhatsApp ou telefone." },
       { property: "og:url", content: "https://www.livemarketplece.live/ajuda" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/ajuda" }],
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/ajuda")({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         mainEntity: [
-          { "@type": "Question", name: "Como faço para vender?", acceptedAnswer: { "@type": "Answer", text: "Acesse Configurações → Quero vender / Registrar loja para abrir a sua loja na Live Market." } },
+          { "@type": "Question", name: "Como faço para vender?", acceptedAnswer: { "@type": "Answer", text: "Acesse Configurações → Quero vender / Registrar loja para abrir a sua loja na Live Teká." } },
           { "@type": "Question", name: "Como pago?", acceptedAnswer: { "@type": "Answer", text: "No checkout pode escolher Express, e-Kwanza, Unitel Money, Afrimoney, Kwik ou Multicaixa Referência." } },
           { "@type": "Question", name: "Como acompanho o meu pedido?", acceptedAnswer: { "@type": "Answer", text: "Acompanhe o estado das suas compras em Perfil → Minhas compras." } },
         ],
