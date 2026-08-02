@@ -52,7 +52,8 @@ function Checkout() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [methodsLoading, setMethodsLoading] = useState(true);
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
-  const [countryCode, setCountryCode] = useState<string>("AO");
+  const region = useRegion();
+  const countryCode = region.code;
 
   useEffect(() => {
     if (!user) { setAddrLoading(false); return; }
@@ -68,7 +69,9 @@ function Checkout() {
       });
     supabase.from("profiles").select("country_code").eq("id", user.id).maybeSingle()
       .then(({ data }) => {
-        if (data?.country_code) setCountryCode(data.country_code);
+        if (data?.country_code && data.country_code !== region.code) {
+          void regionStore.setCountry(data.country_code);
+        }
       });
   }, [user?.id]);
 
