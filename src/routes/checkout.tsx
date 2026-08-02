@@ -3,6 +3,7 @@ import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-rea
 import { useEffect, useState } from "react";
 import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
 import { formatPrice, useCurrency } from "@/lib/currency";
+import { regionStore, useRegion } from "@/lib/region";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
