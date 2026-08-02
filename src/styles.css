@@ -86,7 +86,8 @@
   --input: oklch(0.94 0.01 250);
   --ring: oklch(0.62 0.18 152);
   --live: oklch(0.62 0.24 22);
-  --gradient-brand: linear-gradient(135deg, oklch(0.62 0.18 152), oklch(0.42 0.12 200), oklch(0.22 0.06 255));
+  --gradient-brand: linear-gradient(110deg, oklch(0.58 0.19 145) 0%, oklch(0.68 0.20 145) 45%, oklch(0.88 0.10 140) 100%);
+  --gradient-brand-soft: linear-gradient(110deg, oklch(0.72 0.17 145) 0%, oklch(0.92 0.07 140) 70%, oklch(0.99 0.01 140) 100%);
   --gradient-live: linear-gradient(135deg, oklch(0.62 0.24 22), oklch(0.55 0.22 350));
   --shadow-soft: 0 4px 20px -8px oklch(0.22 0.06 255 / 0.18);
   --shadow-glow: 0 10px 40px -12px oklch(0.62 0.18 152 / 0.5);
