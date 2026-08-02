@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MapPin, Package, Truck, CheckCircle2, Clock } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { loadGoogleMaps } from "@/lib/google-maps";
+import { useMapDefaults } from "@/lib/region";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/rastreio/$orderId")({
