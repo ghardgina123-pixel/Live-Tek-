@@ -228,28 +228,46 @@ export type Database = {
       countries: {
         Row: {
           active: boolean
+          center_lat: number | null
+          center_lng: number | null
           code: string
           created_at: string
           currency_code: string | null
+          currency_symbol: string | null
+          default_zoom: number
           id: string
+          language_code: string
+          locale: string
           name: string
           phone_prefix: string | null
         }
         Insert: {
           active?: boolean
+          center_lat?: number | null
+          center_lng?: number | null
           code: string
           created_at?: string
           currency_code?: string | null
+          currency_symbol?: string | null
+          default_zoom?: number
           id?: string
+          language_code?: string
+          locale?: string
           name: string
           phone_prefix?: string | null
         }
         Update: {
           active?: boolean
+          center_lat?: number | null
+          center_lng?: number | null
           code?: string
           created_at?: string
           currency_code?: string | null
+          currency_symbol?: string | null
+          default_zoom?: number
           id?: string
+          language_code?: string
+          locale?: string
           name?: string
           phone_prefix?: string | null
         }

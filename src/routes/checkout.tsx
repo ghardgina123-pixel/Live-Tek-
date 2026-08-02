@@ -3,6 +3,7 @@ import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-rea
 import { useEffect, useState } from "react";
 import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
 import { formatPrice, useCurrency } from "@/lib/currency";
+import { regionStore, useRegion } from "@/lib/region";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,8 @@ function Checkout() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [methodsLoading, setMethodsLoading] = useState(true);
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
-  const [countryCode, setCountryCode] = useState<string>("AO");
+  const region = useRegion();
+  const countryCode = region.code;
 
   useEffect(() => {
     if (!user) { setAddrLoading(false); return; }
@@ -68,7 +70,9 @@ function Checkout() {
       });
     supabase.from("profiles").select("country_code").eq("id", user.id).maybeSingle()
       .then(({ data }) => {
-        if (data?.country_code) setCountryCode(data.country_code);
+        if (data?.country_code && data.country_code !== region.code) {
+          void regionStore.setCountry(data.country_code);
+        }
       });
   }, [user?.id]);
 

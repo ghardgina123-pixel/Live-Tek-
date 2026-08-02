@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MapPin, Package, Truck, CheckCircle2, Clock } from 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { loadGoogleMaps } from "@/lib/google-maps";
+import { useMapDefaults } from "@/lib/region";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/rastreio/$orderId")({
@@ -41,6 +42,7 @@ function RastreioPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<any>(null);
   const mapObjRef = useRef<any>(null);
+  const mapDefaults = useMapDefaults();
 
   // Load delivery
   useEffect(() => {
@@ -100,11 +102,12 @@ function RastreioPage() {
           ? { lat: Number(point.lat), lng: Number(point.lng) }
           : delivery?.dropoff_lat
             ? { lat: Number(delivery.dropoff_lat), lng: Number(delivery.dropoff_lng) }
-            : { lat: -8.839, lng: 13.2894 }; // Luanda
+            : mapDefaults.center; // centro do país seleccionado
+        const zoom = point || delivery?.dropoff_lat ? 14 : mapDefaults.zoom;
         if (!mapObjRef.current) {
           mapObjRef.current = new maps.Map(mapRef.current, {
             center,
-            zoom: 14,
+            zoom,
             disableDefaultUI: true,
             zoomControl: true,
           });
