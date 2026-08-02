@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { regionStore, useRegion } from "@/lib/region";
+import { useT } from "@/lib/i18n";
 
 export type LocationValue = {
   country_id: string;
@@ -28,11 +30,21 @@ export function LocationCascade({ value, onChange, required, showDistrict = true
   const [provinces, setProvinces] = useState<Row[]>([]);
   const [munis, setMunis] = useState<Row[]>([]);
   const [districts, setDistricts] = useState<Row[]>([]);
+  const region = useRegion();
+  const { t } = useT();
 
   useEffect(() => {
     supabase.from("countries").select("id,name").eq("active", true).order("name")
       .then(({ data }) => setCountries((data as Row[]) ?? []));
   }, []);
+
+  // Pré-selecciona o país activo da app quando o formulário está vazio.
+  useEffect(() => {
+    if (!value.country_id && region.id) {
+      onChange({ country_id: region.id, province_id: "", municipality_id: "", district_id: "" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [region.id]);
 
   useEffect(() => {
     if (!value.country_id) { setProvinces([]); return; }
@@ -58,50 +70,53 @@ export function LocationCascade({ value, onChange, required, showDistrict = true
   return (
     <div className={compact ? "grid grid-cols-2 gap-3" : "space-y-3"}>
       <div className="space-y-1.5">
-        <Label className="text-xs">País{req}</Label>
+        <Label className="text-xs">{t("country")}{req}</Label>
         <select
           className={selectCls}
           value={value.country_id}
-          onChange={(e) => onChange({ country_id: e.target.value, province_id: "", municipality_id: "", district_id: "" })}
+          onChange={(e) => {
+            onChange({ country_id: e.target.value, province_id: "", municipality_id: "", district_id: "" });
+            void regionStore.setCountry(e.target.value);
+          }}
         >
-          <option value="">Selecione…</option>
+          <option value="">{t("select")}</option>
           {countries.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">Província{req}</Label>
+        <Label className="text-xs">{t("province")}{req}</Label>
         <select
           className={selectCls}
           value={value.province_id}
           disabled={!value.country_id}
           onChange={(e) => onChange({ ...value, province_id: e.target.value, municipality_id: "", district_id: "" })}
         >
-          <option value="">Selecione…</option>
+          <option value="">{t("select")}</option>
           {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">Município{req}</Label>
+        <Label className="text-xs">{t("municipality")}{req}</Label>
         <select
           className={selectCls}
           value={value.municipality_id}
           disabled={!value.province_id}
           onChange={(e) => onChange({ ...value, municipality_id: e.target.value, district_id: "" })}
         >
-          <option value="">Selecione…</option>
+          <option value="">{t("select")}</option>
           {munis.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
       </div>
       {showDistrict && (
         <div className="space-y-1.5">
-          <Label className="text-xs">Distrito / Bairro</Label>
+          <Label className="text-xs">{t("district")}</Label>
           <select
             className={selectCls}
             value={value.district_id}
             disabled={!value.municipality_id || districts.length === 0}
             onChange={(e) => onChange({ ...value, district_id: e.target.value })}
           >
-            <option value="">{districts.length === 0 ? "Sem distritos cadastrados" : "Selecione…"}</option>
+            <option value="">{districts.length === 0 ? "—" : t("select")}</option>
             {districts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
         </div>
@@ -128,7 +143,7 @@ export function CountrySelect({ value, onChange, className }: {
     <select
       className={className ?? "h-10 w-full rounded-md border border-input bg-background px-3 text-sm"}
       value={value ?? ""}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => { onChange(e.target.value); void regionStore.setCountry(e.target.value); }}
     >
       <option value="">Selecione o país…</option>
       {countries.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
