@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, Store as StoreIcon } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
-import logoAsset from "@/assets/live-market-logo.png.asset.json";
+import bannerAsset from "@/assets/live-teka-banner.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: `${SITE_URL}/` },
-      { rel: "preload", as: "image", href: logoAsset.url, fetchPriority: "high" },
+      { rel: "preload", as: "image", href: bannerAsset.url, fetchPriority: "high" },
     ],
   }),
   component: Splash,
@@ -22,20 +22,23 @@ export const Route = createFileRoute("/")({
 
 function Splash() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col items-center justify-between bg-white px-6 py-12 text-foreground">
-      <div className="flex flex-1 flex-col items-center justify-center gap-6">
+    <main
+      className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col items-center justify-between px-6 py-10 text-foreground"
+      style={{ background: "var(--gradient-brand-soft)" }}
+    >
+      <div className="flex flex-1 flex-col items-center justify-center gap-5">
         <img
-          src={logoAsset.url}
-          alt="Live Teká — Compre, Converse e Receba"
-          width={512}
-          height={512}
-          className="mx-auto block h-auto max-h-[40vh] w-auto max-w-[80%] object-contain"
+          src={bannerAsset.url}
+          alt="Live Teká — A plataforma de vendas em tempo real"
+          width={1329}
+          height={784}
+          className="mx-auto block h-auto w-full rounded-2xl object-contain shadow-[var(--shadow-soft)]"
           loading="eager"
           decoding="async"
           fetchPriority="high"
         />
         <h1 className="sr-only">Live Teká — Compre · Converse · Receba.</h1>
-        <p className="text-center text-sm font-bold tracking-[0.18em] text-foreground/95">
+        <p className="text-center text-sm font-bold tracking-[0.18em] text-primary">
           COMPRE <span className="text-primary-glow">•</span> CONVERSE{" "}
           <span className="text-primary-glow">•</span> RECEBA
         </p>
@@ -50,7 +53,7 @@ function Splash() {
         </Link>
         <Link
           to="/cadastro"
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-primary bg-primary/5 text-sm font-bold text-primary transition hover:bg-primary/10 active:scale-[0.98]"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card text-sm font-bold text-primary transition hover:bg-primary/10 active:scale-[0.98]"
         >
           <StoreIcon size={18} /> Lojista, registrar-me
         </Link>
