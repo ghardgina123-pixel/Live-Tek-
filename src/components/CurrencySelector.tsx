@@ -1,10 +1,42 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
-import { CURRENCIES, currencyStore, useCurrency, type CurrencyCode } from "@/lib/currency";
+import { supabase } from "@/integrations/supabase/client";
+import { currencyStore, getCurrency, registerCurrency, useCurrency } from "@/lib/currency";
 
 export function CurrencySelector({ variant = "pill" }: { variant?: "pill" | "row" }) {
   const current = useCurrency();
   const [open, setOpen] = useState(false);
+  const [codes, setCodes] = useState<string[]>([current.code]);
+  const [q, setQ] = useState("");
+
+  // Cobertura total: as moedas disponíveis vêm da tabela de câmbio,
+  // com símbolo/locale/nome vindos da tabela de países.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const [{ data: rates }, { data: countries }] = await Promise.all([
+        supabase.from("exchange_rates").select("to_currency").eq("from_currency", "AOA"),
+        supabase.from("countries").select("name, currency_code, currency_symbol, locale").not("currency_code", "is", null),
+      ]);
+      for (const c of countries ?? []) {
+        if (!c.currency_code) continue;
+        registerCurrency({
+          code: c.currency_code,
+          symbol: c.currency_symbol,
+          name: c.currency_code,
+          locale: c.locale,
+        });
+      }
+      const list = Array.from(new Set((rates ?? []).map((r) => r.to_currency.toUpperCase()))).sort();
+      if (alive && list.length) setCodes(list);
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toUpperCase();
+    return term ? codes.filter((c) => c.includes(term)) : codes;
+  }, [codes, q]);
 
   const trigger =
     variant === "pill" ? (
@@ -49,9 +81,16 @@ export function CurrencySelector({ variant = "pill" }: { variant?: "pill" | "row
             <p className="mt-1 text-xs text-muted-foreground">
               Os preços serão convertidos automaticamente.
             </p>
-            <ul className="mt-4 space-y-2">
-              {(Object.keys(CURRENCIES) as CurrencyCode[]).map((code) => {
-                const c = CURRENCIES[code];
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Procurar moeda (ex.: EUR)"
+              aria-label="Procurar moeda"
+              className="mt-3 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            />
+            <ul className="mt-3 max-h-[55vh] space-y-2 overflow-y-auto pr-1">
+              {filtered.map((code) => {
+                const c = getCurrency(code);
                 const active = code === current.code;
                 return (
                   <li key={code}>
