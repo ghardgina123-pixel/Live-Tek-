@@ -1,6 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { currencyStore, CURRENCIES, type CurrencyCode } from "@/lib/currency";
+import { currencyStore, registerCurrency } from "@/lib/currency";
 
 export type Region = {
   id: string | null;
@@ -56,9 +56,15 @@ function normalize(row: Record<string, unknown>): Region {
 
 function emit(next: Region) {
   current = next;
-  // Moeda acompanha automaticamente o país (quando suportada pela tabela de câmbio).
-  if ((CURRENCIES as Record<string, unknown>)[next.currency_code]) {
-    currencyStore.set(next.currency_code as CurrencyCode);
+  // Moeda acompanha automaticamente o país (cobertura total de moedas).
+  if (next.currency_code) {
+    registerCurrency({
+      code: next.currency_code,
+      symbol: next.currency_symbol,
+      name: next.currency_code,
+      locale: next.locale,
+    });
+    currencyStore.set(next.currency_code);
   }
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* noop */ }
   listeners.forEach((l) => l());
