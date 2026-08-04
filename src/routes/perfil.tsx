@@ -8,6 +8,7 @@ import { CountrySelect } from "@/components/LocationCascade";
 import { SettingsSheet } from "@/components/SettingsSheet";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -28,6 +29,7 @@ const menu = [
 
 function Perfil() {
   const { user, signOut } = useAuth();
+  const { t } = useT();
   const nav = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -204,7 +206,7 @@ function Perfil() {
 
       {user && (
         <div className="px-5 pt-4">
-          <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">País</h3>
+          <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">{t("country")}</h3>
           <CountrySelect value={countryId} onChange={persistCountry} />
           <p className="mt-1 text-[11px] text-muted-foreground">
             Define o país padrão para entregas, lojas e imóveis.
