@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Wallet, TrendingUp, Loader2 } from "lucide-react";
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
+import { PartnerSettlementCard } from "@/components/PartnerSettlementCard";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/lojista/dashboard")({
@@ -81,6 +82,8 @@ function DashboardContent() {
         <StatCard icon={ShoppingBag} label="Pedidos" value={String(stats.orders)} />
         <StatCard icon={Wallet} label="A receber" value={`${stats.payoutsPending.toLocaleString("pt-AO", { maximumFractionDigits: 0 })} AOA`} />
       </div>
+
+      {store && <PartnerSettlementCard storeId={store.id} />}
 
       <div className="rounded-2xl border border-border p-4">
         <div className="mb-3 flex items-center gap-2">
