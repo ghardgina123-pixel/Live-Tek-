@@ -178,6 +178,7 @@ export function CountrySelect({ value, onChange, className }: {
   className?: string;
 }) {
   const [countries, setCountries] = useState<Row[]>([]);
+  const { t } = useT();
   useEffect(() => {
     supabase.from("countries").select("id,name").eq("active", true).order("name")
       .then(({ data }) => setCountries((data as Row[]) ?? []));
@@ -188,7 +189,7 @@ export function CountrySelect({ value, onChange, className }: {
       value={value ?? ""}
       onChange={(e) => { onChange(e.target.value); void regionStore.setCountry(e.target.value); }}
     >
-      <option value="">Selecione o país…</option>
+      <option value="">{t("select")}</option>
       {countries.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
     </select>
   );
