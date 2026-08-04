@@ -1102,10 +1102,13 @@ export type Database = {
         Row: {
           commission_pct: number
           created_at: string
+          gross_aoa: number
           gross_brl: number
           id: string
+          net_aoa: number
           net_brl: number
           order_id: string
+          platform_fee_aoa: number
           release_at: string
           released_at: string | null
           status: Database["public"]["Enums"]["payout_status"]
@@ -1114,10 +1117,13 @@ export type Database = {
         Insert: {
           commission_pct?: number
           created_at?: string
+          gross_aoa?: number
           gross_brl: number
           id?: string
+          net_aoa?: number
           net_brl: number
           order_id: string
+          platform_fee_aoa?: number
           release_at: string
           released_at?: string | null
           status?: Database["public"]["Enums"]["payout_status"]
@@ -1126,10 +1132,13 @@ export type Database = {
         Update: {
           commission_pct?: number
           created_at?: string
+          gross_aoa?: number
           gross_brl?: number
           id?: string
+          net_aoa?: number
           net_brl?: number
           order_id?: string
+          platform_fee_aoa?: number
           release_at?: string
           released_at?: string | null
           status?: Database["public"]["Enums"]["payout_status"]
@@ -1263,6 +1272,7 @@ export type Database = {
           id: string
           is_online: boolean
           last_seen_at: string | null
+          partner_type: Database["public"]["Enums"]["partner_type"] | null
           phone: string | null
           updated_at: string
         }
@@ -1275,6 +1285,7 @@ export type Database = {
           id: string
           is_online?: boolean
           last_seen_at?: string | null
+          partner_type?: Database["public"]["Enums"]["partner_type"] | null
           phone?: string | null
           updated_at?: string
         }
@@ -1287,6 +1298,7 @@ export type Database = {
           id?: string
           is_online?: boolean
           last_seen_at?: string | null
+          partner_type?: Database["public"]["Enums"]["partner_type"] | null
           phone?: string | null
           updated_at?: string
         }
@@ -1831,6 +1843,7 @@ export type Database = {
           municipality_id: string | null
           name: string
           owner_id: string
+          partner_type: Database["public"]["Enums"]["partner_type"]
           phone: string | null
           province_id: string | null
           rating: number | null
@@ -1856,6 +1869,7 @@ export type Database = {
           municipality_id?: string | null
           name: string
           owner_id: string
+          partner_type?: Database["public"]["Enums"]["partner_type"]
           phone?: string | null
           province_id?: string | null
           rating?: number | null
@@ -1881,6 +1895,7 @@ export type Database = {
           municipality_id?: string | null
           name?: string
           owner_id?: string
+          partner_type?: Database["public"]["Enums"]["partner_type"]
           phone?: string | null
           province_id?: string | null
           rating?: number | null
@@ -2112,6 +2127,10 @@ export type Database = {
         Returns: undefined
       }
       approved_stores_count: { Args: never; Returns: number }
+      calc_transaction_split: {
+        Args: { _amount_aoa: number; _store_id: string }
+        Returns: Json
+      }
       create_order_with_items: {
         Args: {
           p_address_id: string
@@ -2169,6 +2188,15 @@ export type Database = {
       }
       seller_create_delivery: { Args: { _order_id: string }; Returns: string }
       seller_signup_status: { Args: never; Returns: Json }
+      set_store_partner_type: {
+        Args: {
+          _store_id: string
+          _type: Database["public"]["Enums"]["partner_type"]
+        }
+        Returns: undefined
+      }
+      store_balance: { Args: { _store_id: string }; Returns: Json }
+      store_commission_pct: { Args: { _store_id: string }; Returns: number }
     }
     Enums: {
       agency_live_fee_status: "pending" | "paid" | "approved" | "rejected"
@@ -2185,6 +2213,7 @@ export type Database = {
         | "shipped"
         | "delivered"
         | "cancelled"
+      partner_type: "retail" | "service"
       payout_status: "pending" | "released" | "failed"
       product_status: "pending" | "approved" | "rejected"
       property_status: "pending" | "approved" | "rejected" | "sold" | "rented"
@@ -2338,6 +2367,7 @@ export const Constants = {
         "delivered",
         "cancelled",
       ],
+      partner_type: ["retail", "service"],
       payout_status: ["pending", "released", "failed"],
       product_status: ["pending", "approved", "rejected"],
       property_status: ["pending", "approved", "rejected", "sold", "rented"],
