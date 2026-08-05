@@ -1777,11 +1777,15 @@ export type Database = {
         Row: {
           created_at: string
           expires_at: string | null
+          external_id: string | null
           id: string
           payment_method: string | null
           plan: string
           price_aoa: number
           proof_url: string | null
+          provider: string | null
+          raw_payload: Json | null
+          reference: string | null
           rejection_reason: string | null
           started_at: string | null
           status: string
@@ -1791,11 +1795,15 @@ export type Database = {
         Insert: {
           created_at?: string
           expires_at?: string | null
+          external_id?: string | null
           id?: string
           payment_method?: string | null
           plan?: string
           price_aoa?: number
           proof_url?: string | null
+          provider?: string | null
+          raw_payload?: Json | null
+          reference?: string | null
           rejection_reason?: string | null
           started_at?: string | null
           status?: string
@@ -1805,11 +1813,15 @@ export type Database = {
         Update: {
           created_at?: string
           expires_at?: string | null
+          external_id?: string | null
           id?: string
           payment_method?: string | null
           plan?: string
           price_aoa?: number
           proof_url?: string | null
+          provider?: string | null
+          raw_payload?: Json | null
+          reference?: string | null
           rejection_reason?: string | null
           started_at?: string | null
           status?: string
@@ -1935,6 +1947,126 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_invoices: {
+        Row: {
+          amount_aoa: number
+          created_at: string
+          currency_code: string
+          customer_snapshot: Json
+          id: string
+          issued_at: string
+          number: string
+          payment_method: string | null
+          period_end: string | null
+          period_start: string
+          plan_code: string
+          plan_name: string
+          reference: string | null
+          status: string
+          store_id: string
+          subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_aoa: number
+          created_at?: string
+          currency_code?: string
+          customer_snapshot?: Json
+          id?: string
+          issued_at?: string
+          number: string
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string
+          plan_code: string
+          plan_name: string
+          reference?: string | null
+          status?: string
+          store_id: string
+          subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_aoa?: number
+          created_at?: string
+          currency_code?: string
+          customer_snapshot?: Json
+          id?: string
+          issued_at?: string
+          number?: string
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string
+          plan_code?: string
+          plan_name?: string
+          reference?: string | null
+          status?: string
+          store_id?: string
+          subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_invoices_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          code: string
+          created_at: string
+          currency_code: string
+          features: Json
+          id: string
+          is_active: boolean
+          max_lives_per_month: number | null
+          name: string
+          period_days: number
+          price_aoa: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency_code?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_lives_per_month?: number | null
+          name: string
+          period_days?: number
+          price_aoa: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency_code?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_lives_per_month?: number | null
+          name?: string
+          period_days?: number
+          price_aoa?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       suppressed_emails: {
         Row: {
@@ -2131,6 +2263,7 @@ export type Database = {
         Args: { _amount_aoa: number; _store_id: string }
         Returns: Json
       }
+      can_store_go_live: { Args: { _store_id: string }; Returns: boolean }
       create_order_with_items: {
         Args: {
           p_address_id: string
@@ -2139,6 +2272,14 @@ export type Database = {
           p_store_id: string
         }
         Returns: string
+      }
+      create_subscription_intent: {
+        Args: {
+          _payment_method?: string
+          _plan_code: string
+          _store_id: string
+        }
+        Returns: Json
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -2197,6 +2338,7 @@ export type Database = {
       }
       store_balance: { Args: { _store_id: string }; Returns: Json }
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
+      store_subscription_status: { Args: { _store_id: string }; Returns: Json }
     }
     Enums: {
       agency_live_fee_status: "pending" | "paid" | "approved" | "rejected"

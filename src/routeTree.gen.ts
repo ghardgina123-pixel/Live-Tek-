@@ -47,9 +47,11 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
 import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
+import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
 import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
 import { Route as ApiPublicExchangeRouteImport } from './routes/api/public/exchange'
 import { Route as AuthenticatedLojistaVideosRouteImport } from './routes/_authenticated/lojista.videos'
+import { Route as AuthenticatedLojistaSubscricaoRouteImport } from './routes/_authenticated/lojista.subscricao'
 import { Route as AuthenticatedLojistaProdutosRouteImport } from './routes/_authenticated/lojista.produtos'
 import { Route as AuthenticatedLojistaPedidosRouteImport } from './routes/_authenticated/lojista.pedidos'
 import { Route as AuthenticatedLojistaLivesRouteImport } from './routes/_authenticated/lojista.lives'
@@ -255,6 +257,12 @@ const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
   path: '/api/public/push-dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMulticaixaSubscriptionCallbackRoute =
+  ApiPublicMulticaixaSubscriptionCallbackRouteImport.update({
+    id: '/api/public/multicaixa-subscription-callback',
+    path: '/api/public/multicaixa-subscription-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMulticaixaCallbackRoute =
   ApiPublicMulticaixaCallbackRouteImport.update({
     id: '/api/public/multicaixa-callback',
@@ -270,6 +278,12 @@ const AuthenticatedLojistaVideosRoute =
   AuthenticatedLojistaVideosRouteImport.update({
     id: '/videos',
     path: '/videos',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaSubscricaoRoute =
+  AuthenticatedLojistaSubscricaoRouteImport.update({
+    id: '/subscricao',
+    path: '/subscricao',
     getParentRoute: () => AuthenticatedLojistaRoute,
   } as any)
 const AuthenticatedLojistaProdutosRoute =
@@ -373,9 +387,11 @@ export interface FileRoutesByFullPath {
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -424,9 +440,11 @@ export interface FileRoutesByTo {
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/lojista': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -478,9 +496,11 @@ export interface FileRoutesById {
   '/_authenticated/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/_authenticated/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/_authenticated/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/_authenticated/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/_authenticated/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/_authenticated/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -532,9 +552,11 @@ export interface FileRouteTypes {
     | '/lojista/lives'
     | '/lojista/pedidos'
     | '/lojista/produtos'
+    | '/lojista/subscricao'
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/lojista/'
     | '/lovable/email/auth/preview'
@@ -583,9 +605,11 @@ export interface FileRouteTypes {
     | '/lojista/lives'
     | '/lojista/pedidos'
     | '/lojista/produtos'
+    | '/lojista/subscricao'
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/lojista'
     | '/lovable/email/auth/preview'
@@ -636,9 +660,11 @@ export interface FileRouteTypes {
     | '/_authenticated/lojista/lives'
     | '/_authenticated/lojista/pedidos'
     | '/_authenticated/lojista/produtos'
+    | '/_authenticated/lojista/subscricao'
     | '/_authenticated/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/_authenticated/lojista/'
     | '/lovable/email/auth/preview'
@@ -670,6 +696,7 @@ export interface RootRouteChildren {
   RastreioOrderIdRoute: typeof RastreioOrderIdRoute
   ApiPublicExchangeRoute: typeof ApiPublicExchangeRoute
   ApiPublicMulticaixaCallbackRoute: typeof ApiPublicMulticaixaCallbackRoute
+  ApiPublicMulticaixaSubscriptionCallbackRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -944,6 +971,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/multicaixa-subscription-callback': {
+      id: '/api/public/multicaixa-subscription-callback'
+      path: '/api/public/multicaixa-subscription-callback'
+      fullPath: '/api/public/multicaixa-subscription-callback'
+      preLoaderRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/multicaixa-callback': {
       id: '/api/public/multicaixa-callback'
       path: '/api/public/multicaixa-callback'
@@ -963,6 +997,13 @@ declare module '@tanstack/react-router' {
       path: '/videos'
       fullPath: '/lojista/videos'
       preLoaderRoute: typeof AuthenticatedLojistaVideosRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/subscricao': {
+      id: '/_authenticated/lojista/subscricao'
+      path: '/subscricao'
+      fullPath: '/lojista/subscricao'
+      preLoaderRoute: typeof AuthenticatedLojistaSubscricaoRouteImport
       parentRoute: typeof AuthenticatedLojistaRoute
     }
     '/_authenticated/lojista/produtos': {
@@ -1043,6 +1084,7 @@ interface AuthenticatedLojistaRouteChildren {
   AuthenticatedLojistaLivesRoute: typeof AuthenticatedLojistaLivesRoute
   AuthenticatedLojistaPedidosRoute: typeof AuthenticatedLojistaPedidosRoute
   AuthenticatedLojistaProdutosRoute: typeof AuthenticatedLojistaProdutosRoute
+  AuthenticatedLojistaSubscricaoRoute: typeof AuthenticatedLojistaSubscricaoRoute
   AuthenticatedLojistaVideosRoute: typeof AuthenticatedLojistaVideosRoute
   AuthenticatedLojistaIndexRoute: typeof AuthenticatedLojistaIndexRoute
 }
@@ -1052,6 +1094,7 @@ const AuthenticatedLojistaRouteChildren: AuthenticatedLojistaRouteChildren = {
   AuthenticatedLojistaLivesRoute: AuthenticatedLojistaLivesRoute,
   AuthenticatedLojistaPedidosRoute: AuthenticatedLojistaPedidosRoute,
   AuthenticatedLojistaProdutosRoute: AuthenticatedLojistaProdutosRoute,
+  AuthenticatedLojistaSubscricaoRoute: AuthenticatedLojistaSubscricaoRoute,
   AuthenticatedLojistaVideosRoute: AuthenticatedLojistaVideosRoute,
   AuthenticatedLojistaIndexRoute: AuthenticatedLojistaIndexRoute,
 }
@@ -1138,6 +1181,8 @@ const rootRouteChildren: RootRouteChildren = {
   RastreioOrderIdRoute: RastreioOrderIdRoute,
   ApiPublicExchangeRoute: ApiPublicExchangeRoute,
   ApiPublicMulticaixaCallbackRoute: ApiPublicMulticaixaCallbackRoute,
+  ApiPublicMulticaixaSubscriptionCallbackRoute:
+    ApiPublicMulticaixaSubscriptionCallbackRoute,
   ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { toast } from "sonner";
 
 const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
@@ -49,6 +50,9 @@ function LivesManager() {
   const [deleting, setDeleting] = useState(false);
 
   const storeId = store?.id;
+  const { status: subStatus } = useSubscriptionStatus(storeId);
+  const canGoLive = subStatus ? subStatus.can_go_live : true;
+  const blocked = subStatus ? !subStatus.can_go_live : false;
 
   const load = async (sid: string) => {
     const { data } = await supabase
@@ -75,6 +79,7 @@ function LivesManager() {
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!storeId || !title.trim()) return;
+    if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
     setCreating(true);
     const { data, error } = await supabase
       .from("lives")
@@ -93,6 +98,7 @@ function LivesManager() {
 
   const quickCreate = async () => {
     if (!storeId) return;
+    if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
     setCreating(true);
     const defaultTitle = `Live de ${store?.name ?? "loja"}`;
     const { data, error } = await supabase
@@ -160,9 +166,15 @@ function LivesManager() {
           <Plus size={18} className="text-primary" />
           <h2 className="text-sm font-semibold">Nova transmissão</h2>
         </div>
+        {blocked && (
+          <div className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
+            A sua subscrição está inativa. Ative um plano para iniciar lives.{" "}
+            <Link to="/lojista/subscricao" className="font-semibold text-primary underline">Ver planos</Link>
+          </div>
+        )}
         <Button
           onClick={quickCreate}
-          disabled={creating}
+          disabled={creating || blocked}
           className="w-full"
           size="lg"
         >
@@ -180,7 +192,7 @@ function LivesManager() {
               className="mt-1"
             />
           </div>
-          <Button type="submit" disabled={!title.trim() || creating} variant="outline" className="w-full">
+          <Button type="submit" disabled={!title.trim() || creating || blocked} variant="outline" className="w-full">
             {creating ? <Loader2 className="animate-spin" size={16} /> : "Criar live com título"}
           </Button>
         </form>
