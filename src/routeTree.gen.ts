@@ -47,6 +47,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
 import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
+import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
 import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
 import { Route as ApiPublicExchangeRouteImport } from './routes/api/public/exchange'
 import { Route as AuthenticatedLojistaVideosRouteImport } from './routes/_authenticated/lojista.videos'
@@ -255,6 +256,12 @@ const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
   path: '/api/public/push-dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMulticaixaSubscriptionCallbackRoute =
+  ApiPublicMulticaixaSubscriptionCallbackRouteImport.update({
+    id: '/api/public/multicaixa-subscription-callback',
+    path: '/api/public/multicaixa-subscription-callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicMulticaixaCallbackRoute =
   ApiPublicMulticaixaCallbackRouteImport.update({
     id: '/api/public/multicaixa-callback',
@@ -376,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -427,6 +435,7 @@ export interface FileRoutesByTo {
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/lojista': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -481,6 +490,7 @@ export interface FileRoutesById {
   '/_authenticated/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
+  '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/_authenticated/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -535,6 +545,7 @@ export interface FileRouteTypes {
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/lojista/'
     | '/lovable/email/auth/preview'
@@ -586,6 +597,7 @@ export interface FileRouteTypes {
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/lojista'
     | '/lovable/email/auth/preview'
@@ -639,6 +651,7 @@ export interface FileRouteTypes {
     | '/_authenticated/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
+    | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
     | '/_authenticated/lojista/'
     | '/lovable/email/auth/preview'
@@ -670,6 +683,7 @@ export interface RootRouteChildren {
   RastreioOrderIdRoute: typeof RastreioOrderIdRoute
   ApiPublicExchangeRoute: typeof ApiPublicExchangeRoute
   ApiPublicMulticaixaCallbackRoute: typeof ApiPublicMulticaixaCallbackRoute
+  ApiPublicMulticaixaSubscriptionCallbackRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -944,6 +958,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/multicaixa-subscription-callback': {
+      id: '/api/public/multicaixa-subscription-callback'
+      path: '/api/public/multicaixa-subscription-callback'
+      fullPath: '/api/public/multicaixa-subscription-callback'
+      preLoaderRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/multicaixa-callback': {
       id: '/api/public/multicaixa-callback'
       path: '/api/public/multicaixa-callback'
@@ -1138,6 +1159,8 @@ const rootRouteChildren: RootRouteChildren = {
   RastreioOrderIdRoute: RastreioOrderIdRoute,
   ApiPublicExchangeRoute: ApiPublicExchangeRoute,
   ApiPublicMulticaixaCallbackRoute: ApiPublicMulticaixaCallbackRoute,
+  ApiPublicMulticaixaSubscriptionCallbackRoute:
+    ApiPublicMulticaixaSubscriptionCallbackRoute,
   ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
