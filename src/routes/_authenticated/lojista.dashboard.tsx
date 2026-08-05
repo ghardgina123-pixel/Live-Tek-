@@ -4,21 +4,14 @@ import { Package, ShoppingBag, Wallet, TrendingUp, Loader2 } from "lucide-react"
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { PartnerSettlementCard } from "@/components/PartnerSettlementCard";
 import { supabase } from "@/integrations/supabase/client";
+import { computeDashboardStats } from "@/lib/settlement";
 
 export const Route = createFileRoute("/_authenticated/lojista/dashboard")({
   head: () => ({ meta: [{ title: "Visão Geral — Lojista" }] }),
   component: Dashboard,
 });
 
-type Stats = {
-  products: number;
-  orders: number;
-  ordersPaid: number;
-  revenue: number;
-  payoutsPending: number;
-  payoutsReleased: number;
-  daily: { day: string; total: number }[];
-};
+type Stats = { products: number } & ReturnType<typeof computeDashboardStats>;
 
 function Dashboard() {
   return (
@@ -41,27 +34,8 @@ function DashboardContent() {
         supabase.from("payouts").select("net_aoa, status").eq("store_id", store.id),
       ]);
       const orders = (ordersRes.data ?? []) as { id: string; total_aoa: number; status: string; created_at: string }[];
-      const paid = orders.filter((o) => ["paid", "preparing", "shipped", "delivered"].includes(o.status));
-      const revenue = paid.reduce((s, o) => s + Number(o.total_aoa), 0);
       const payouts = (payoutsRes.data ?? []) as { net_aoa: number; status: string }[];
-      const daily: Record<string, number> = {};
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
-        daily[d.toISOString().slice(0, 10)] = 0;
-      }
-      paid.forEach((o) => {
-        const k = new Date(o.created_at).toISOString().slice(0, 10);
-        if (k in daily) daily[k] += Number(o.total_aoa);
-      });
-      setStats({
-        products: prodRes.count ?? 0,
-        orders: orders.length,
-        ordersPaid: paid.length,
-        revenue,
-        payoutsPending: payouts.filter((p) => p.status === "pending").reduce((s, p) => s + Number(p.net_aoa), 0),
-        payoutsReleased: payouts.filter((p) => p.status === "released").reduce((s, p) => s + Number(p.net_aoa), 0),
-        daily: Object.entries(daily).map(([day, total]) => ({ day, total })),
-      });
+      setStats({ products: prodRes.count ?? 0, ...computeDashboardStats(orders, payouts) });
     })();
   }, [store?.id]);
 
