@@ -51,6 +51,7 @@ import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './r
 import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
 import { Route as ApiPublicExchangeRouteImport } from './routes/api/public/exchange'
 import { Route as AuthenticatedLojistaVideosRouteImport } from './routes/_authenticated/lojista.videos'
+import { Route as AuthenticatedLojistaSubscricaoRouteImport } from './routes/_authenticated/lojista.subscricao'
 import { Route as AuthenticatedLojistaProdutosRouteImport } from './routes/_authenticated/lojista.produtos'
 import { Route as AuthenticatedLojistaPedidosRouteImport } from './routes/_authenticated/lojista.pedidos'
 import { Route as AuthenticatedLojistaLivesRouteImport } from './routes/_authenticated/lojista.lives'
@@ -279,6 +280,12 @@ const AuthenticatedLojistaVideosRoute =
     path: '/videos',
     getParentRoute: () => AuthenticatedLojistaRoute,
   } as any)
+const AuthenticatedLojistaSubscricaoRoute =
+  AuthenticatedLojistaSubscricaoRouteImport.update({
+    id: '/subscricao',
+    path: '/subscricao',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
 const AuthenticatedLojistaProdutosRoute =
   AuthenticatedLojistaProdutosRouteImport.update({
     id: '/produtos',
@@ -380,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
@@ -432,6 +440,7 @@ export interface FileRoutesByTo {
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
@@ -487,6 +496,7 @@ export interface FileRoutesById {
   '/_authenticated/lojista/lives': typeof AuthenticatedLojistaLivesRoute
   '/_authenticated/lojista/pedidos': typeof AuthenticatedLojistaPedidosRoute
   '/_authenticated/lojista/produtos': typeof AuthenticatedLojistaProdutosRoute
+  '/_authenticated/lojista/subscricao': typeof AuthenticatedLojistaSubscricaoRoute
   '/_authenticated/lojista/videos': typeof AuthenticatedLojistaVideosRoute
   '/api/public/exchange': typeof ApiPublicExchangeRoute
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/lojista/lives'
     | '/lojista/pedidos'
     | '/lojista/produtos'
+    | '/lojista/subscricao'
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/lojista/lives'
     | '/lojista/pedidos'
     | '/lojista/produtos'
+    | '/lojista/subscricao'
     | '/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
@@ -648,6 +660,7 @@ export interface FileRouteTypes {
     | '/_authenticated/lojista/lives'
     | '/_authenticated/lojista/pedidos'
     | '/_authenticated/lojista/produtos'
+    | '/_authenticated/lojista/subscricao'
     | '/_authenticated/lojista/videos'
     | '/api/public/exchange'
     | '/api/public/multicaixa-callback'
@@ -986,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLojistaVideosRouteImport
       parentRoute: typeof AuthenticatedLojistaRoute
     }
+    '/_authenticated/lojista/subscricao': {
+      id: '/_authenticated/lojista/subscricao'
+      path: '/subscricao'
+      fullPath: '/lojista/subscricao'
+      preLoaderRoute: typeof AuthenticatedLojistaSubscricaoRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
     '/_authenticated/lojista/produtos': {
       id: '/_authenticated/lojista/produtos'
       path: '/produtos'
@@ -1064,6 +1084,7 @@ interface AuthenticatedLojistaRouteChildren {
   AuthenticatedLojistaLivesRoute: typeof AuthenticatedLojistaLivesRoute
   AuthenticatedLojistaPedidosRoute: typeof AuthenticatedLojistaPedidosRoute
   AuthenticatedLojistaProdutosRoute: typeof AuthenticatedLojistaProdutosRoute
+  AuthenticatedLojistaSubscricaoRoute: typeof AuthenticatedLojistaSubscricaoRoute
   AuthenticatedLojistaVideosRoute: typeof AuthenticatedLojistaVideosRoute
   AuthenticatedLojistaIndexRoute: typeof AuthenticatedLojistaIndexRoute
 }
@@ -1073,6 +1094,7 @@ const AuthenticatedLojistaRouteChildren: AuthenticatedLojistaRouteChildren = {
   AuthenticatedLojistaLivesRoute: AuthenticatedLojistaLivesRoute,
   AuthenticatedLojistaPedidosRoute: AuthenticatedLojistaPedidosRoute,
   AuthenticatedLojistaProdutosRoute: AuthenticatedLojistaProdutosRoute,
+  AuthenticatedLojistaSubscricaoRoute: AuthenticatedLojistaSubscricaoRoute,
   AuthenticatedLojistaVideosRoute: AuthenticatedLojistaVideosRoute,
   AuthenticatedLojistaIndexRoute: AuthenticatedLojistaIndexRoute,
 }
