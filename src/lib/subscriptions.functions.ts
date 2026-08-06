@@ -35,6 +35,33 @@ export const createSubscriptionCheckout = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const intent = intentRaw as unknown as SubscriptionIntent;
 
+    // E-mail de upgrade pedido (idempotente por referência).
+    try {
+      const { sendInternalEmail } = await import("@/lib/email/dispatch.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: store } = await supabaseAdmin
+        .from("stores")
+        .select("name")
+        .eq("id", data.storeId)
+        .maybeSingle();
+      const email = (context.claims as { email?: string } | null)?.email;
+      if (email) {
+        await sendInternalEmail({
+          templateName: "subscription-upgrade",
+          recipientEmail: email,
+          idempotencyKey: `sub-upgrade-${intent.reference}`,
+          templateData: {
+            storeName: store?.name,
+            planName: intent.plan_name,
+            amountAoa: intent.amount_aoa,
+            reference: intent.reference,
+          },
+        });
+      }
+    } catch (e) {
+      console.error("subscription upgrade email failed", e);
+    }
+
     const merchant = process.env["MULTICAIXA_EXPRESS_MERCHANT_ID"];
     const token = process.env["MULTICAIXA_EXPRESS_TOKEN"];
     const endpoint = process.env["MULTICAIXA_EXPRESS_ENDPOINT"];
@@ -79,4 +106,20 @@ export const createSubscriptionCheckout = createServerFn({ method: "POST" })
       gatewayConfigured: true,
       message: "Checkout Multicaixa Express criado.",
     };
+  });
+
+/** Cancela a subscrição ativa/pendente da loja preservando todas as faturas. */
+export const cancelSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { storeId: string; reason?: string }) => {
+    if (!input?.storeId) throw new Error("invalid_input");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: res, error } = await context.supabase.rpc("cancel_store_subscription", {
+      _store_id: data.storeId,
+      _reason: data.reason ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return res as { ok: boolean; reason?: string; status?: string };
   });
