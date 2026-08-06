@@ -1,5 +1,9 @@
 import type { ComponentType } from 'react'
 
+import { template as subscriptionUpgrade } from './subscription-upgrade'
+import { template as subscriptionPaid } from './subscription-paid'
+import { template as subscriptionExpired } from './subscription-expired'
+
 export interface TemplateEntry {
   component: ComponentType<any>
   subject: string | ((data: Record<string, any>) => string)
@@ -18,6 +22,7 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  // Add templates here as they are created, e.g.:
-  // 'welcome': welcomeTemplate,
+  'subscription-upgrade': subscriptionUpgrade,
+  'subscription-paid': subscriptionPaid,
+  'subscription-expired': subscriptionExpired,
 }

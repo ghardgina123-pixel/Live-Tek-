@@ -6,8 +6,9 @@ import { createHmac, timingSafeEqual } from "crypto";
  * Payload: { reference, external_id?, status: "approved" | "declined" | "pending" }
  * Cabeçalho: `x-mcx-signature: HMAC-SHA256(body, MULTICAIXA_EXPRESS_WEBHOOK_SECRET)`
  *
- * Em `approved` ativa a subscrição (o trigger `create_invoice_on_subscription_active`
- * emite a fatura real e notifica o lojista).
+ * Totalmente idempotente: a ativação passa por `activate_subscription_by_reference`,
+ * que não repete faturas nem estende o período quando o mesmo evento chega
+ * várias vezes. O e-mail de confirmação usa chave de idempotência.
  */
 export const Route = createFileRoute("/api/public/multicaixa-subscription-callback")({
   server: {
@@ -35,45 +36,73 @@ export const Route = createFileRoute("/api/public/multicaixa-subscription-callba
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { data: sub, error } = await supabaseAdmin
-          .from("store_subscriptions")
-          .select("id, plan, status, store_id")
-          .eq("reference", payload.reference)
-          .maybeSingle();
-        if (error) return new Response(error.message, { status: 500 });
-        if (!sub) return new Response("not_found", { status: 404 });
-
         if (payload.status !== "approved") {
-          await supabaseAdmin
-            .from("store_subscriptions")
-            .update({ status: payload.status === "declined" ? "rejected" : "pending", raw_payload: payload })
-            .eq("id", sub.id);
+          const { data, error } = await supabaseAdmin.rpc("reject_subscription_by_reference", {
+            _reference: payload.reference,
+            _status: payload.status === "declined" ? "rejected" : "pending",
+            _payload: payload as never,
+          });
+          if (error) return new Response(error.message, { status: 500 });
+          const res = data as { ok?: boolean; reason?: string } | null;
+          if (!res?.ok) return new Response(res?.reason ?? "not_found", { status: 404 });
           return Response.json({ ok: true, status: payload.status });
         }
 
-        const { data: plan } = await supabaseAdmin
-          .from("subscription_plans")
-          .select("period_days")
-          .eq("code", sub.plan)
-          .maybeSingle();
+        const { data, error } = await supabaseAdmin.rpc("activate_subscription_by_reference", {
+          _reference: payload.reference,
+          _external_id: payload.external_id ?? null,
+          _payload: payload as never,
+        });
+        if (error) return new Response(error.message, { status: 500 });
+        const result = data as { ok?: boolean; reason?: string; subscription_id?: string; idempotent?: boolean } | null;
+        if (!result?.ok) return new Response(result?.reason ?? "not_found", { status: 404 });
 
-        const now = new Date();
-        const expires = new Date(now.getTime() + (plan?.period_days ?? 30) * 86400000);
+        // E-mail de pagamento confirmado — só no primeiro processamento real.
+        if (!result.idempotent && result.subscription_id) {
+          try {
+            const { sendInternalEmail } = await import("@/lib/email/dispatch.server");
+            const { data: sub } = await supabaseAdmin
+              .from("store_subscriptions")
+              .select("id, plan, price_aoa, expires_at, store_id, stores:store_id(name, owner_id)")
+              .eq("id", result.subscription_id)
+              .maybeSingle();
+            const store = (sub as { stores?: { name?: string; owner_id?: string } } | null)?.stores;
+            const { data: plan } = await supabaseAdmin
+              .from("subscription_plans")
+              .select("name")
+              .eq("code", (sub as { plan?: string } | null)?.plan ?? "")
+              .maybeSingle();
+            const { data: invoice } = await supabaseAdmin
+              .from("subscription_invoices")
+              .select("number")
+              .eq("subscription_id", result.subscription_id)
+              .order("issued_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (store?.owner_id) {
+              const { data: userRes } = await supabaseAdmin.auth.admin.getUserById(store.owner_id);
+              const email = userRes?.user?.email;
+              if (email) {
+                await sendInternalEmail({
+                  templateName: "subscription-paid",
+                  recipientEmail: email,
+                  idempotencyKey: `sub-paid-${result.subscription_id}-${(sub as { expires_at?: string } | null)?.expires_at ?? ""}`,
+                  templateData: {
+                    storeName: store.name,
+                    planName: plan?.name ?? (sub as { plan?: string } | null)?.plan,
+                    amountAoa: (sub as { price_aoa?: number } | null)?.price_aoa,
+                    expiresAt: (sub as { expires_at?: string } | null)?.expires_at,
+                    invoiceNumber: invoice?.number ?? null,
+                  },
+                });
+              }
+            }
+          } catch (e) {
+            console.error("subscription paid email failed", e);
+          }
+        }
 
-        const { error: upErr } = await supabaseAdmin
-          .from("store_subscriptions")
-          .update({
-            status: "active",
-            started_at: now.toISOString(),
-            expires_at: expires.toISOString(),
-            external_id: payload.external_id ?? null,
-            raw_payload: payload,
-            rejection_reason: null,
-          })
-          .eq("id", sub.id);
-        if (upErr) return new Response(upErr.message, { status: 500 });
-
-        return Response.json({ ok: true, status: "active" });
+        return Response.json({ ok: true, status: "active", idempotent: result.idempotent ?? false });
       },
     },
   },
