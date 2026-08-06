@@ -20,6 +20,12 @@ import { toast } from "sonner";
 const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
 const LojistaLivePanel = lazy(() => import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })));
 
+function liveErrorMessage(msg: string) {
+  if (msg.includes("live_limit_reached")) return "Atingiu o limite de lives do seu plano este mês. Faça upgrade para continuar.";
+  if (msg.includes("subscription_inactive")) return "Subscrição inativa. Ative um plano para transmitir em direto.";
+  return msg;
+}
+
 export const Route = createFileRoute("/_authenticated/lojista/lives")({
   head: () => ({ meta: [{ title: "Lives — Lojista" }] }),
   component: () => (
