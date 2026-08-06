@@ -31,6 +31,7 @@ import { Route as LojaIdRouteImport } from './routes/loja.$id'
 import { Route as LiveIdRouteImport } from './routes/live.$id'
 import { Route as LiveDemoIdRouteImport } from './routes/live-demo.$id'
 import { Route as ImoveisIdRouteImport } from './routes/imoveis.$id'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthenticatedTransportadorRouteImport } from './routes/_authenticated/transportador'
 import { Route as AuthenticatedSegurancaRouteImport } from './routes/_authenticated/seguranca'
 import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
@@ -46,6 +47,7 @@ import { Route as AuthenticatedAfiliadosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
 import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
 import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
 import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
@@ -59,6 +61,8 @@ import { Route as AuthenticatedLojistaDashboardRouteImport } from './routes/_aut
 import { Route as AuthenticatedEntregadorDeliveryIdRouteImport } from './routes/_authenticated/entregador.$deliveryId'
 import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
 import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -172,6 +176,11 @@ const ImoveisIdRoute = ImoveisIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ImoveisRoute,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTransportadorRoute =
   AuthenticatedTransportadorRouteImport.update({
     id: '/transportador',
@@ -252,6 +261,11 @@ const AuthenticatedLojistaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedLojistaRoute,
   } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
   id: '/api/public/push-dispatch',
   path: '/api/public/push-dispatch',
@@ -327,6 +341,18 @@ const AuthenticatedAdminImobiliariasRoute =
     path: '/admin/imobiliarias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -374,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/pagamentos': typeof AuthenticatedPagamentosRoute
   '/seguranca': typeof AuthenticatedSegurancaRoute
   '/transportador': typeof AuthenticatedTransportadorRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
   '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
@@ -393,10 +420,13 @@ export interface FileRoutesByFullPath {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -427,6 +457,7 @@ export interface FileRoutesByTo {
   '/pagamentos': typeof AuthenticatedPagamentosRoute
   '/seguranca': typeof AuthenticatedSegurancaRoute
   '/transportador': typeof AuthenticatedTransportadorRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
   '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
@@ -446,10 +477,13 @@ export interface FileRoutesByTo {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lojista': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -483,6 +517,7 @@ export interface FileRoutesById {
   '/_authenticated/pagamentos': typeof AuthenticatedPagamentosRoute
   '/_authenticated/seguranca': typeof AuthenticatedSegurancaRoute
   '/_authenticated/transportador': typeof AuthenticatedTransportadorRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
   '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
@@ -502,10 +537,13 @@ export interface FileRoutesById {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -539,6 +577,7 @@ export interface FileRouteTypes {
     | '/pagamentos'
     | '/seguranca'
     | '/transportador'
+    | '/email/unsubscribe'
     | '/imoveis/$id'
     | '/live-demo/$id'
     | '/live/$id'
@@ -558,10 +597,13 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/lovable/email/suppression'
     | '/lojista/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -592,6 +634,7 @@ export interface FileRouteTypes {
     | '/pagamentos'
     | '/seguranca'
     | '/transportador'
+    | '/email/unsubscribe'
     | '/imoveis/$id'
     | '/live-demo/$id'
     | '/live/$id'
@@ -611,10 +654,13 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/lovable/email/suppression'
     | '/lojista'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -647,6 +693,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pagamentos'
     | '/_authenticated/seguranca'
     | '/_authenticated/transportador'
+    | '/email/unsubscribe'
     | '/imoveis/$id'
     | '/live-demo/$id'
     | '/live/$id'
@@ -666,10 +713,13 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/lovable/email/suppression'
     | '/_authenticated/lojista/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -689,6 +739,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LiveDemoIdRoute: typeof LiveDemoIdRoute
   LiveIdRoute: typeof LiveIdRoute
   LojaIdRoute: typeof LojaIdRoute
@@ -698,9 +749,12 @@ export interface RootRouteChildren {
   ApiPublicMulticaixaCallbackRoute: typeof ApiPublicMulticaixaCallbackRoute
   ApiPublicMulticaixaSubscriptionCallbackRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -859,6 +913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisIdRouteImport
       parentRoute: typeof ImoveisRoute
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/transportador': {
       id: '/_authenticated/transportador'
       path: '/transportador'
@@ -964,6 +1025,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLojistaIndexRouteImport
       parentRoute: typeof AuthenticatedLojistaRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-dispatch': {
       id: '/api/public/push-dispatch'
       path: '/api/public/push-dispatch'
@@ -1054,6 +1122,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/imobiliarias'
       preLoaderRoute: typeof AuthenticatedAdminImobiliariasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -1174,6 +1256,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LiveDemoIdRoute: LiveDemoIdRoute,
   LiveIdRoute: LiveIdRoute,
   LojaIdRoute: LojaIdRoute,
@@ -1184,9 +1267,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicMulticaixaSubscriptionCallbackRoute:
     ApiPublicMulticaixaSubscriptionCallbackRoute,
   ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
