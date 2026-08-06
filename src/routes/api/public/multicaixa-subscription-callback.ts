@@ -50,7 +50,7 @@ export const Route = createFileRoute("/api/public/multicaixa-subscription-callba
 
         const { data, error } = await supabaseAdmin.rpc("activate_subscription_by_reference", {
           _reference: payload.reference,
-          _external_id: payload.external_id ?? null,
+          _external_id: payload.external_id ?? undefined,
           _payload: payload as never,
         });
         if (error) return new Response(error.message, { status: 500 });

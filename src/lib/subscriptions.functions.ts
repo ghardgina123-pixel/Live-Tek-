@@ -118,7 +118,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: res, error } = await context.supabase.rpc("cancel_store_subscription", {
       _store_id: data.storeId,
-      _reason: data.reason ?? null,
+      _reason: data.reason ?? undefined,
     });
     if (error) throw new Error(error.message);
     return res as { ok: boolean; reason?: string; status?: string };

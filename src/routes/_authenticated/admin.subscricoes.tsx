@@ -69,7 +69,7 @@ function AdminSubscriptions() {
   const load = useCallback(async () => {
     setRows(null);
     const { data, error } = await supabase.rpc("admin_list_subscriptions", {
-      _status: filter === "all" ? null : filter,
+      _status: filter === "all" ? undefined : filter,
     });
     if (error) {
       toast.error(error.message);
