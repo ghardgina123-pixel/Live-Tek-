@@ -16,13 +16,18 @@ export type SubscriptionStatus = {
 /** Estado real da subscrição da loja (usado para bloquear lives). */
 export function useSubscriptionStatus(storeId?: string) {
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
+  const [usage, setUsage] = useState<LiveUsage | null>(null);
   const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
     if (!storeId) return;
     setLoading(true);
-    const { data, error } = await supabase.rpc("store_subscription_status", { _store_id: storeId });
+    const [{ data, error }, { data: usageData }] = await Promise.all([
+      supabase.rpc("store_subscription_status", { _store_id: storeId }),
+      supabase.rpc("store_live_usage", { _store_id: storeId }),
+    ]);
     setLoading(false);
+    setUsage((usageData as unknown as LiveUsage) ?? null);
     if (error) return;
     setStatus(data as unknown as SubscriptionStatus);
   }, [storeId]);
@@ -40,11 +45,16 @@ export function useSubscriptionStatus(storeId?: string) {
         { event: "*", schema: "public", table: "store_subscriptions", filter: `store_id=eq.${storeId}` },
         () => reload(),
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lives", filter: `store_id=eq.${storeId}` },
+        () => reload(),
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
   }, [storeId, reload]);
 
-  return { status, loading, reload };
+  return { status, usage, loading, reload };
 }
