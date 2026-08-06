@@ -48,6 +48,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
 import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicSubscriptionCronRouteImport } from './routes/api/public/subscription-cron'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
 import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
 import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
@@ -266,6 +267,12 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSubscriptionCronRoute =
+  ApiPublicSubscriptionCronRouteImport.update({
+    id: '/api/public/subscription-cron',
+    path: '/api/public/subscription-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
   id: '/api/public/push-dispatch',
   path: '/api/public/push-dispatch',
@@ -420,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -477,6 +485,7 @@ export interface FileRoutesByTo {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lojista': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -537,6 +546,7 @@ export interface FileRoutesById {
   '/api/public/multicaixa-callback': typeof ApiPublicMulticaixaCallbackRoute
   '/api/public/multicaixa-subscription-callback': typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
+  '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
     | '/lojista/'
     | '/lovable/email/auth/preview'
@@ -654,6 +665,7 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
     | '/lojista'
     | '/lovable/email/auth/preview'
@@ -713,6 +725,7 @@ export interface FileRouteTypes {
     | '/api/public/multicaixa-callback'
     | '/api/public/multicaixa-subscription-callback'
     | '/api/public/push-dispatch'
+    | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
     | '/_authenticated/lojista/'
     | '/lovable/email/auth/preview'
@@ -749,6 +762,7 @@ export interface RootRouteChildren {
   ApiPublicMulticaixaCallbackRoute: typeof ApiPublicMulticaixaCallbackRoute
   ApiPublicMulticaixaSubscriptionCallbackRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRoute
   ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
+  ApiPublicSubscriptionCronRoute: typeof ApiPublicSubscriptionCronRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1032,6 +1046,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/subscription-cron': {
+      id: '/api/public/subscription-cron'
+      path: '/api/public/subscription-cron'
+      fullPath: '/api/public/subscription-cron'
+      preLoaderRoute: typeof ApiPublicSubscriptionCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-dispatch': {
       id: '/api/public/push-dispatch'
       path: '/api/public/push-dispatch'
@@ -1267,6 +1288,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicMulticaixaSubscriptionCallbackRoute:
     ApiPublicMulticaixaSubscriptionCallbackRoute,
   ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
+  ApiPublicSubscriptionCronRoute: ApiPublicSubscriptionCronRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
