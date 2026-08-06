@@ -50,8 +50,9 @@ function LivesManager() {
   const [deleting, setDeleting] = useState(false);
 
   const storeId = store?.id;
-  const { status: subStatus } = useSubscriptionStatus(storeId);
-  const canGoLive = subStatus ? subStatus.can_go_live : true;
+  const { status: subStatus, usage, reload: reloadSub } = useSubscriptionStatus(storeId);
+  const limitReached = !!usage && !usage.unlimited && usage.limit !== null && usage.used >= usage.limit;
+  const canGoLive = (subStatus ? subStatus.can_go_live : true) && !limitReached;
   const blocked = subStatus ? !subStatus.can_go_live : false;
 
   const load = async (sid: string) => {
@@ -80,6 +81,7 @@ function LivesManager() {
     e.preventDefault();
     if (!storeId || !title.trim()) return;
     if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
+    if (limitReached) return toast.error("Atingiu o limite de lives do seu plano este mês.");
     setCreating(true);
     const { data, error } = await supabase
       .from("lives")
@@ -87,7 +89,10 @@ function LivesManager() {
       .select("id")
       .single();
     setCreating(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      await reloadSub();
+      return toast.error(liveErrorMessage(error.message));
+    }
     setTitle("");
     toast.success("Live criada. A preparar câmara…");
     if (data?.id) {
@@ -99,6 +104,7 @@ function LivesManager() {
   const quickCreate = async () => {
     if (!storeId) return;
     if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
+    if (limitReached) return toast.error("Atingiu o limite de lives do seu plano este mês.");
     setCreating(true);
     const defaultTitle = `Live de ${store?.name ?? "loja"}`;
     const { data, error } = await supabase
@@ -107,7 +113,10 @@ function LivesManager() {
       .select("id")
       .single();
     setCreating(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      await reloadSub();
+      return toast.error(liveErrorMessage(error.message));
+    }
     toast.success("Live criada. A preparar câmara…");
     if (data?.id) {
       if (storeId) await load(storeId);
@@ -170,6 +179,24 @@ function LivesManager() {
           <div className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
             A sua subscrição está inativa. Ative um plano para iniciar lives.{" "}
             <Link to="/lojista/subscricao" className="font-semibold text-primary underline">Ver planos</Link>
+          </div>
+        )}
+        {usage && !blocked && (
+          <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3 text-xs">
+            <p className="font-medium">
+              Lives usadas este mês: {usage.used}
+              {usage.unlimited ? " (plano sem limite)" : ` de ${usage.limit ?? 0}`}
+            </p>
+            {!usage.unlimited && (
+              <p className="mt-0.5 text-muted-foreground">
+                Restantes: {usage.remaining ?? 0}.{" "}
+                {limitReached && (
+                  <Link to="/lojista/subscricao" className="font-semibold text-primary underline">
+                    Faça upgrade para criar mais lives
+                  </Link>
+                )}
+              </p>
+            )}
           </div>
         )}
         <Button
