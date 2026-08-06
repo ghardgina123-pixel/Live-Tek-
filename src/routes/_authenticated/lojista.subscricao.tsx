@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, Check, Crown, Download, ShieldCheck, AlertTriangle, Copy } from "lucide-react";
+import { Loader2, Check, Crown, Download, ShieldCheck, AlertTriangle, Copy, Radio, Ban } from "lucide-react";
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
-import { createSubscriptionCheckout } from "@/lib/subscriptions.functions";
+import { createSubscriptionCheckout, cancelSubscription } from "@/lib/subscriptions.functions";
 import { generateInvoicePdf, type InvoiceData } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
 
@@ -54,11 +54,12 @@ const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { maximum
 function SubscriptionManager() {
   const { store } = useLojistaStore();
   const storeId = store?.id;
-  const { status, reload } = useSubscriptionStatus(storeId);
+  const { status, usage, reload } = useSubscriptionStatus(storeId);
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [subs, setSubs] = useState<Sub[]>([]);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   const load = useCallback(async () => {
     if (!storeId) return;
@@ -106,6 +107,22 @@ function SubscriptionManager() {
   const active = status?.subscription_status === "active";
   const pending = subs.find((s) => s.status === "pending");
 
+  const cancel = async () => {
+    if (!storeId) return;
+    if (!window.confirm("Cancelar a subscrição? As lives ficam bloqueadas, mas todas as faturas são preservadas.")) return;
+    setCancelling(true);
+    try {
+      const res = await cancelSubscription({ data: { storeId } });
+      if (!res.ok) throw new Error(res.reason === "no_subscription" ? "Não existe subscrição para cancelar" : "Falha ao cancelar");
+      toast.success("Subscrição cancelada. O histórico de faturação foi preservado.");
+      await Promise.all([load(), reload()]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao cancelar");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Estado atual */}
@@ -144,8 +161,46 @@ function SubscriptionManager() {
                 <p className="mt-1 text-[11px] text-muted-foreground">Valor: {kz(pending.price_aoa)}</p>
               </div>
             )}
+            {active && (
+              <Button size="sm" variant="outline" className="mt-3" disabled={cancelling} onClick={cancel}>
+                {cancelling ? <Loader2 className="animate-spin" size={14} /> : <><Ban size={14} className="mr-1" /> Cancelar subscrição</>}
+              </Button>
+            )}
           </div>
         </div>
+      </section>
+
+      {/* Consumo de lives do plano */}
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Radio size={16} className="text-primary" />
+          <h2 className="text-sm font-semibold">Lives deste mês</h2>
+        </div>
+        {usage ? (
+          <>
+            <p className="mt-2 text-2xl font-extrabold">
+              {usage.used}
+              <span className="text-sm font-medium text-muted-foreground">
+                {usage.unlimited ? " / ilimitadas" : ` / ${usage.limit ?? 0}`}
+              </span>
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {usage.unlimited
+                ? "O seu plano não tem limite mensal de lives."
+                : `${usage.remaining ?? 0} live(s) disponível(is) até ao fim do mês.`}
+            </p>
+            {!usage.unlimited && usage.limit ? (
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${Math.min(100, Math.round((usage.used / usage.limit) * 100))}%` }}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p className="mt-2 text-xs text-muted-foreground">Sem plano ativo — nenhuma live disponível.</p>
+        )}
       </section>
 
       {/* Planos */}
