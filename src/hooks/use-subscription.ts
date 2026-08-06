@@ -13,6 +13,14 @@ export type SubscriptionStatus = {
   can_go_live: boolean;
 };
 
+export type LiveUsage = {
+  plan_code: string | null;
+  used: number;
+  limit: number | null;
+  unlimited: boolean;
+  remaining: number | null;
+};
+
 /** Estado real da subscrição da loja (usado para bloquear lives). */
 export function useSubscriptionStatus(storeId?: string) {
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
