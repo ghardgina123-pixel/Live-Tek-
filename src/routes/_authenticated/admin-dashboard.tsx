@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PanelErrorBoundary } from "@/components/PanelErrorBoundary";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Store as StoreIcon, Home as HomeIcon, Building2, CheckCircle2, XCircle, Loader2, UserPlus, Sparkles } from "lucide-react";
+import { ArrowLeft, Store as StoreIcon, Home as HomeIcon, Building2, CheckCircle2, XCircle, Loader2, UserPlus, Sparkles, Crown } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +55,13 @@ function AdminHub() {
           <div className="flex-1">
             <p className="font-semibold">CRM · Assinaturas</p>
             <p className="text-xs text-muted-foreground">Aprovar planos CRM e comprovativos</p>
+          </div>
+        </Link>
+        <Link to="/admin/subscricoes" className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+          <Crown className="text-primary" />
+          <div className="flex-1">
+            <p className="font-semibold">Subscrições de parceiros</p>
+            <p className="text-xs text-muted-foreground">Estados, referências Multicaixa e reprocessamento</p>
           </div>
         </Link>
       </div>
