@@ -1775,6 +1775,8 @@ export type Database = {
       }
       store_subscriptions: {
         Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
           created_at: string
           expires_at: string | null
           external_id: string | null
@@ -1793,6 +1795,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           expires_at?: string | null
           external_id?: string | null
@@ -1811,6 +1815,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           expires_at?: string | null
           external_id?: string | null
@@ -2222,6 +2228,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_subscription_by_reference: {
+        Args: { _external_id?: string; _payload?: Json; _reference: string }
+        Returns: Json
+      }
       admin_approve_agency: { Args: { _agency_id: string }; Returns: undefined }
       admin_approve_agency_live_fee: {
         Args: { _fee_id: string }
@@ -2242,6 +2252,27 @@ export type Database = {
         }
         Returns: string
       }
+      admin_list_subscriptions: {
+        Args: { _status?: string }
+        Returns: {
+          cancelled_at: string
+          created_at: string
+          expires_at: string
+          external_id: string
+          id: string
+          invoice_count: number
+          owner_email: string
+          payment_method: string
+          plan: string
+          plan_name: string
+          price_aoa: number
+          reference: string
+          started_at: string
+          status: string
+          store_id: string
+          store_name: string
+        }[]
+      }
       admin_reject_agency: {
         Args: { _agency_id: string; _reason: string }
         Returns: undefined
@@ -2258,12 +2289,20 @@ export type Database = {
         Args: { _reason: string; _store_id: string }
         Returns: undefined
       }
+      admin_reprocess_subscription: {
+        Args: { _approve?: boolean; _reference: string }
+        Returns: Json
+      }
       approved_stores_count: { Args: never; Returns: number }
       calc_transaction_split: {
         Args: { _amount_aoa: number; _store_id: string }
         Returns: Json
       }
       can_store_go_live: { Args: { _store_id: string }; Returns: boolean }
+      cancel_store_subscription: {
+        Args: { _reason?: string; _store_id: string }
+        Returns: Json
+      }
       create_order_with_items: {
         Args: {
           p_address_id: string
@@ -2294,6 +2333,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      expire_due_subscriptions: { Args: never; Returns: number }
       get_own_phone: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -2327,6 +2367,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reject_subscription_by_reference: {
+        Args: { _payload?: Json; _reference: string; _status: string }
+        Returns: Json
+      }
       seller_create_delivery: { Args: { _order_id: string }; Returns: string }
       seller_signup_status: { Args: never; Returns: Json }
       set_store_partner_type: {
@@ -2338,6 +2382,7 @@ export type Database = {
       }
       store_balance: { Args: { _store_id: string }; Returns: Json }
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
+      store_live_usage: { Args: { _store_id: string }; Returns: Json }
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
     }
     Enums: {
