@@ -163,6 +163,25 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 
             {cam.lastError && <p className="mt-1 text-[11px] text-destructive">{cam.lastError}</p>}
 
+            {cam.stats && (cam.stats.bitrateKbps != null || cam.stats.fps != null) && (
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                {cam.stats.bitrateKbps != null && <span>{cam.stats.bitrateKbps} kbps</span>}
+                {cam.stats.fps != null && <span>{cam.stats.fps} fps</span>}
+                {cam.stats.width && cam.stats.height && (
+                  <span>
+                    {cam.stats.width}×{cam.stats.height}
+                  </span>
+                )}
+                {cam.stats.latencyMs != null && <span>latência {cam.stats.latencyMs} ms</span>}
+                {cam.stats.lossPct != null && <span>perda {cam.stats.lossPct}%</span>}
+                {cam.lastSeenAt && (
+                  <span className="ml-auto">
+                    {new Date(cam.lastSeenAt).toLocaleTimeString("pt-PT")}
+                  </span>
+                )}
+              </div>
+            )}
+
             {(cam.ingressUrl || cam.streamKey) && cam.sourceType !== "rtsp" && (
               <div className="mt-2 space-y-1 rounded-lg bg-muted/50 p-2 text-[11px]">
                 {cam.ingressUrl && <CopyRow label="URL" value={cam.ingressUrl} />}
