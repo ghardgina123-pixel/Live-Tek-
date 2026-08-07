@@ -30,5 +30,5 @@ export const af: Dict = {
   chat_placeholder: "Skryf 'n boodskap…", send: "Stuur", live_ended: "Die uitsending het geëindig",
   stores: "Winkels", products: "Produkte", price: "Prys", stock: "Voorraad", description: "Beskrywing", store: "Winkel",
   notifications_title: "Kennisgewings", mark_all_read: "Merk alles as gelees", no_notifications: "Geen kennisgewings",
-  province: "Provinsie / Staat", municipality: "Stad / Munisipaliteit", district: "Distrik / Buurt", select_country_first: "Kies eers "n land", select_province_first: "Kies eers "n provinsie", select_municipality_first: "Kies eers "n stad",
+  province: "Provinsie / Staat", municipality: "Stad / Munisipaliteit", district: "Distrik / Buurt", select_country_first: "Kies eers 'n land", select_province_first: "Kies eers 'n provinsie", select_municipality_first: "Kies eers 'n stad",
 };

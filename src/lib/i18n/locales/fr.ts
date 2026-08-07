@@ -30,5 +30,5 @@ export const fr: Dict = {
   chat_placeholder: "Écrivez un message…", send: "Envoyer", live_ended: "La diffusion est terminée",
   stores: "Boutiques", products: "Produits", price: "Prix", stock: "Stock", description: "Description", store: "Boutique",
   notifications_title: "Notifications", mark_all_read: "Tout marquer comme lu", no_notifications: "Aucune notification",
-  province: "Province / Région", municipality: "Ville / Commune", district: "Quartier", select_country_first: "Sélectionnez d"abord le pays", select_province_first: "Sélectionnez d"abord la province", select_municipality_first: "Sélectionnez d"abord la ville",
+  province: "Province / Région", municipality: "Ville / Commune", district: "Quartier", select_country_first: "Sélectionnez d'abord le pays", select_province_first: "Sélectionnez d'abord la province", select_municipality_first: "Sélectionnez d'abord la ville",
 };
