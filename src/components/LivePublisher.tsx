@@ -441,6 +441,14 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         roomRef.current = null;
         if (disconnectedByUserRef.current) return;
         setState("idle");
+        void logLiveAuditEvent({
+          data: {
+            liveId,
+            kind: "publish_disconnect",
+            level: "error",
+            message: "Ligação à sala perdida (desligado pelo servidor ou rede)",
+          },
+        }).catch(() => {});
         onDisconnected?.();
       });
 
