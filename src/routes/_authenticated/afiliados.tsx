@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AFFILIATE_RULES, affiliateLink } from "@/lib/affiliate";
+import { PayoutWallet } from "@/components/PayoutWallet";
 import { toast } from "sonner";
 
 type Commission = {
@@ -146,6 +147,8 @@ function Afiliados() {
               <Stat icon={<Wallet size={16} />} label="Disponível" value={kz(data?.released_aoa ?? 0)} />
               <Stat icon={<BadgePercent size={16} />} label="Pendente" value={kz(data?.pending_aoa ?? 0)} />
             </section>
+
+            <PayoutWallet kind="affiliate" subtitle="Comissões libertadas, prontas para levantamento." />
 
             <section className="mt-6">
               <h3 className="text-sm font-semibold">Regras do programa</h3>
