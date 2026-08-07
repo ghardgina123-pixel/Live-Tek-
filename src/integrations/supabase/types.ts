@@ -961,6 +961,30 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          attempts: number
+          blocked_until: string | null
+          first_attempt_at: string
+          key: string
+          last_attempt_at: string
+        }
+        Insert: {
+          attempts?: number
+          blocked_until?: string | null
+          first_attempt_at?: string
+          key: string
+          last_attempt_at?: string
+        }
+        Update: {
+          attempts?: number
+          blocked_until?: string | null
+          first_attempt_at?: string
+          key?: string
+          last_attempt_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           conversation_id: string
@@ -2481,6 +2505,8 @@ export type Database = {
         Args: { _reason?: string; _store_id: string }
         Returns: Json
       }
+      check_login_throttle: { Args: { _keys: string[] }; Returns: Json }
+      clear_login_attempts: { Args: { _keys: string[] }; Returns: undefined }
       create_order_with_items: {
         Args: {
           p_address_id: string
@@ -2554,6 +2580,15 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      register_login_failure: {
+        Args: {
+          _block_minutes?: number
+          _keys: string[]
+          _max_attempts?: number
+          _window_minutes?: number
+        }
+        Returns: Json
       }
       reject_subscription_by_reference: {
         Args: { _payload?: Json; _reference: string; _status: string }
