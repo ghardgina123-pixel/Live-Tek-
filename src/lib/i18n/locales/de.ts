@@ -309,7 +309,7 @@ export const de: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Es gibt kein Abonnement zum Kündigen",
   s_falha_ao_cancelar: "Fehler beim Abbrechen",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Als Dienstleistungspartner benötigen Sie einen aktiven Plan, um live zu streamen.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Als Einzelhandelspartner zahlen Sie nur 10% Provision pro Verkauf. Ein Plan fügt Live-Streams und Premium-Tools hinzu.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Als Einzelhandelspartner zahlen Sie nur 5% Provision pro Verkauf. Ein Plan fügt Live-Streams und Premium-Tools hinzu.",
   s_plano_atual: "Aktueller Plan",
   s_fazer_upgrade: "Upgrade durchführen",
   s_cliente: "Kunde",

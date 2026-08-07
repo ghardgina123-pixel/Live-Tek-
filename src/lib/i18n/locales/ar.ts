@@ -309,7 +309,7 @@ export const ar: Dict = {
   s_nao_existe_subscricao_para_cancelar: "لا يوجد اشتراك لإلغائه",
   s_falha_ao_cancelar: "فشل في الإلغاء",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "بصفتك شريك خدمات، تحتاج إلى خطة نشطة للبث المباشر.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "بصفتك شريك تجزئة، تدفع 10% فقط عمولة على كل عملية بيع. الخطة تضيف بثوثًا وأدوات مميزة.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "بصفتك شريك تجزئة، تدفع 5% فقط عمولة على كل عملية بيع. الخطة تضيف بثوثًا وأدوات مميزة.",
   s_plano_atual: "الخطة الحالية",
   s_fazer_upgrade: "ترقية",
   s_cliente: "العميل",

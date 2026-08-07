@@ -309,7 +309,7 @@ export const nl: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Er is geen abonnement om te annuleren",
   s_falha_ao_cancelar: "Fout bij annuleren",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Als servicepartner heeft u een actief abonnement nodig om live uit te zenden.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Als retailpartner betaalt u slechts 10% commissie per verkoop. Een abonnement voegt livestreams en premium tools toe.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Als retailpartner betaalt u slechts 5% commissie per verkoop. Een abonnement voegt livestreams en premium tools toe.",
   s_plano_atual: "Huidig abonnement",
   s_fazer_upgrade: "Upgraden",
   s_cliente: "Klant",

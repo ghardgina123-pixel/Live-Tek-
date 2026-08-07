@@ -309,7 +309,7 @@ export const af: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Geen intekening om te kanselleer nie",
   s_falha_ao_cancelar: "Kon nie kanselleer nie",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "As 'n diensvennoot benodig jy 'n aktiewe plan om regstreeks uit te saai.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "As 'n kleinhandelvennoot betaal jy slegs 10% kommissie per verkoop. 'n Plan voeg regstreekse uitsendings en premium gereedskap by.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "As 'n kleinhandelvennoot betaal jy slegs 5% kommissie per verkoop. 'n Plan voeg regstreekse uitsendings en premium gereedskap by.",
   s_plano_atual: "Huidige plan",
   s_fazer_upgrade: "Opgradeer",
   s_cliente: "Kliënt",

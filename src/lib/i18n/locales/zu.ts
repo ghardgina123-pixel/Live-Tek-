@@ -309,7 +309,7 @@ export const zu: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Ayikho okubhaliselwe okumele kukhanselwe",
   s_falha_ao_cancelar: "Ukwehluleka ukukhansela",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Njengomlingani wezinsizakalo udinga uhlelo olusebenzayo ukuze usakaze bukhoma.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Njengomlingani wezitolo ukhokha kuphela u-10% wekhomishini ngokuthengisa. Uhlelo lungeza izimpilo namathuluzi e-premium.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Njengomlingani wezitolo ukhokha kuphela u-5% wekhomishini ngokuthengisa. Uhlelo lungeza izimpilo namathuluzi e-premium.",
   s_plano_atual: "Uhlelo lwamanje",
   s_fazer_upgrade: "Thuthukisa",
   s_cliente: "Iklayenti",

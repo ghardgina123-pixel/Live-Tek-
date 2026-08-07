@@ -309,7 +309,7 @@ export const ja: Dict = {
   s_nao_existe_subscricao_para_cancelar: "キャンセルするサブスクリプションはありません",
   s_falha_ao_cancelar: "キャンセルに失敗しました",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "サービスパートナーとして、ライブ配信を行うにはアクティブなプランが必要です。",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "小売パートナーとして、販売ごとに10%の手数料のみを支払います。プランを追加すると、ライブ配信とプレミアムツールが利用できます。",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "小売パートナーとして、販売ごとに5%の手数料のみを支払います。プランを追加すると、ライブ配信とプレミアムツールが利用できます。",
   s_plano_atual: "現在のプラン",
   s_fazer_upgrade: "アップグレードする",
   s_cliente: "顧客",

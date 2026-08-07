@@ -309,7 +309,7 @@ export const zhHant: Dict = {
   s_nao_existe_subscricao_para_cancelar: "沒有可取消的訂閱",
   s_falha_ao_cancelar: "取消失敗",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "作為服務合作夥伴，您需要一個有效的方案才能進行直播。",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "作為零售合作夥伴，您只需支付 10% 的銷售佣金。方案可增加直播和高級工具。",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "作為零售合作夥伴，您只需支付 5% 的銷售佣金。方案可增加直播和高級工具。",
   s_plano_atual: "目前方案",
   s_fazer_upgrade: "升級",
   s_cliente: "客戶",

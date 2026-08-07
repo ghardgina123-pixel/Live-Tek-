@@ -309,7 +309,7 @@ export const fr: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Il n'y a pas d'abonnement à annuler",
   s_falha_ao_cancelar: "Échec de l'annulation",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "En tant que partenaire de services, vous avez besoin d'un plan actif pour diffuser en direct.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "En tant que partenaire de vente au détail, vous ne payez que 10% de commission par vente. Un plan ajoute des lives et des outils premium.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "En tant que partenaire de vente au détail, vous ne payez que 5% de commission par vente. Un plan ajoute des lives et des outils premium.",
   s_plano_atual: "Plan actuel",
   s_fazer_upgrade: "Mettre à niveau",
   s_cliente: "Client",
