@@ -49,13 +49,15 @@ type Row = {
   invoice_count: number;
 };
 
-const FILTERS = ["all", "pending", "active", "expired", "cancelled", "rejected"] as const;
+const FILTERS = ["all", "pending", "active", "grace", "suspended", "expired", "cancelled", "rejected"] as const;
 const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { maximumFractionDigits: 0 })}`;
 const dt = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-AO") : "—");
 
 const badgeFor = (status: string) => {
   if (status === "active") return "bg-primary/10 text-primary";
   if (status === "pending") return "bg-amber-500/10 text-amber-600";
+  if (status === "grace") return "bg-amber-500/10 text-amber-600";
+  if (status === "suspended") return "bg-destructive/10 text-destructive";
   if (status === "expired") return "bg-muted text-muted-foreground";
   return "bg-destructive/10 text-destructive";
 };
