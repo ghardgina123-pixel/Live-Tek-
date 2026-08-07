@@ -68,9 +68,19 @@ Documento de referência para auditorias. Descreve as camadas de defesa
 2. Consultar `security_audit_log` filtrando por `event` e `occurred_at`.
 3. Revogar papéis em `user_roles` se houver conta comprometida.
 
-## 9. Ponto em aberto
+## 9. Anti-força-bruta (rate limiting ad-hoc)
 
-- **Rate limiting / anti-força-bruta**: o backend não dispõe de primitiva
-  padrão de limitação de pedidos. Requer decisão explícita antes de se
-  implementar uma solução ad-hoc (contadores por IP em tabela + bloqueio
-  temporário), com o custo de escrita extra por tentativa de login.
+O backend não tem primitiva padrão de limitação de pedidos, pelo que foi
+implementada uma solução própria para o login:
+
+- Tabela `public.login_attempts` (sem acesso a `anon`/`authenticated`),
+  contadores por `email:` e por `ip:`.
+- Funções `check_login_throttle`, `register_login_failure` e
+  `clear_login_attempts` — `SECURITY DEFINER`, `EXECUTE` apenas para o
+  service role, invocadas por `src/lib/auth-throttle.functions.ts`.
+- Política: **5 falhas em 15 minutos → bloqueio de 15 minutos**; login com
+  sucesso limpa os contadores.
+- Mensagem de erro genérica ("E-mail ou senha incorretos") para não revelar
+  se a conta existe; cada falha gera evento `auth.login_failed` e o bloqueio
+  gera `auth.login_blocked` no `security_audit_log`.
+- Custo: uma escrita adicional por tentativa falhada de login.
