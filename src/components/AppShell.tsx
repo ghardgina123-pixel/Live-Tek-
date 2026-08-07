@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 const tabs = [
   { to: "/home", icon: Home, key: "nav_home" },
   { to: "/lojas", icon: Store, key: "nav_stores" },
-  { to: "/servicos", icon: Sparkles, key: "nav_services", label: "Serviços" },
+  { to: "/servicos", icon: Sparkles, key: "nav_stores", label: "Serviços" },
   { to: "/shorts", icon: Play, key: "nav_shorts" },
   { to: "/carrinho", icon: ShoppingCart, key: "nav_cart" },
   { to: "/perfil", icon: User, key: "nav_profile" },
