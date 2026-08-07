@@ -20,9 +20,9 @@ type FeedProduct = { id: string; name: string; price: number; oldPrice?: number;
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
-      { title: "Live Teká — Mercado ao Vivo em Angola" },
-      { name: "description", content: "Descubra lojas ao vivo em Angola, compre direto da live, converse com vendedores e receba em casa." },
-      { property: "og:title", content: "Live Teká — Mercado ao Vivo em Angola" },
+      { title: "Live Teká — Mercado ao Vivo" },
+      { name: "description", content: "Descubra lojas ao vivo, compre direto da live, converse com vendedores e receba em casa." },
+      { property: "og:title", content: "Live Teká — Mercado ao Vivo" },
       { property: "og:description", content: "Descubra lojas ao vivo em Angola, compre direto da live e receba em casa." },
       { property: "og:url", content: "https://www.livemarketplece.live/home" },
     ],
@@ -185,8 +185,8 @@ function Home() {
             />
             <div className="min-w-0">
               <p className="text-xs text-white/70">Olá, bem-vindo 👋</p>
-              <h1 className="text-base font-bold leading-tight">Live Teká — Mercado ao Vivo em Angola</h1>
-              <p className="text-[10px] uppercase tracking-wider text-white/70">O mercado ao vivo no seu ecrã.</p>
+              <h1 className="text-base font-bold leading-tight">Live Teká — Mercado ao Vivo</h1>
+              <p className="text-[10px] uppercase tracking-wider text-white/70">A plataforma de venda em tempo real</p>
             </div>
           </div>
           {hasStore && (
@@ -348,7 +348,7 @@ function Home() {
 
       <footer className="mx-5 mb-8 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
         <p className="font-bold tracking-wide">LIVE TEKÁ — Mercado Ao Vivo</p>
-        <p className="mt-1 text-[11px] opacity-80">O seu marketplace completo em Angola.</p>
+        <p className="mt-1 text-[11px] opacity-80">O seu marketplace completo.</p>
         <div className="mt-3 space-y-1 text-[11px]">
           <p>
             🌐 <a href="https://www.livemarketplece.live" className="font-semibold underline">www.livemarketplece.live</a>
