@@ -109,6 +109,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
   const disconnectedByUserRef = useRef(false);
   const voiceChainRef = useRef<AudioChain | null>(null);
   const adaptiveStopRef = useRef<(() => void) | null>(null);
+  const rawMicRef = useRef<LocalAudioTrack | null>(null);
   const [state, setState] = useState<State>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -173,6 +174,11 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     return () => navigator.mediaDevices.removeEventListener?.("devicechange", refresh);
   }, []);
 
+  // O noise gate pode ser alternado em direto, sem interromper a transmissão.
+  useEffect(() => {
+    voiceChainRef.current?.setEnabled(noiseGate);
+  }, [noiseGate]);
+
   const cleanupHardware = async () => {
     if (audioMeterRef.current) {
       cancelAnimationFrame(audioMeterRef.current);
@@ -185,6 +191,14 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     if (voiceChainRef.current) {
       await voiceChainRef.current.close();
       voiceChainRef.current = null;
+    }
+    if (rawMicRef.current) {
+      try {
+        rawMicRef.current.stop();
+      } catch {
+        // noop
+      }
+      rawMicRef.current = null;
     }
     if (audioCtxRef.current) {
       try {
