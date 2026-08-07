@@ -139,9 +139,7 @@ function SubscriptionManager() {
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {active
-                ? `Válido até ${status?.expires_at ? new Date(status.expires_at).toLocaleDateString("pt-AO") : "—"} · ${
-                    status?.max_lives_per_month ? `${status.max_lives_per_month} lives/mês` : "lives ilimitadas"
-                  }`
+                ? `Válido até ${status?.expires_at ? new Date(status.expires_at).toLocaleDateString("pt-AO") : "—"} · lives ilimitadas`
                 : status?.subscription_required
                   ? t("s_como_parceiro_de_servicos_precisa_de_um_plano_at") : t("s_como_parceiro_de_retalho_paga_apenas_10_de_comis")}
             </p>
@@ -183,26 +181,14 @@ function SubscriptionManager() {
           <>
             <p className="mt-2 text-2xl font-extrabold">
               {usage.used}
-              <span className="text-sm font-medium text-muted-foreground">
-                {usage.unlimited ? " / ilimitadas" : ` / ${usage.limit ?? 0}`}
-              </span>
+              <span className="text-sm font-medium text-muted-foreground"> / ilimitadas</span>
             </p>
             <p className="text-[11px] text-muted-foreground">
-              {usage.unlimited
-                ? "O seu plano não tem limite mensal de lives."
-                : `${usage.remaining ?? 0} live(s) disponível(is) até ao fim do mês.`}
+              Todos os planos incluem lives ilimitadas — sem limite mensal.
             </p>
-            {!usage.unlimited && usage.limit ? (
-              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${Math.min(100, Math.round((usage.used / usage.limit) * 100))}%` }}
-                />
-              </div>
-            ) : null}
           </>
         ) : (
-          <p className="mt-2 text-xs text-muted-foreground">{t("s_sem_plano_ativo_nenhuma_live_disponivel")}</p>
+          <p className="mt-2 text-xs text-muted-foreground">Ative um plano para transmitir — todos incluem lives ilimitadas.</p>
         )}
       </section>
 
@@ -223,8 +209,11 @@ function SubscriptionManager() {
                   </div>
                   <p className="mt-2 text-xl font-extrabold">{kz(p.price_aoa)}</p>
                   <p className="text-[11px] text-muted-foreground">por {p.period_days} dias</p>
+                  <p className="mt-2 inline-flex w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    Lives ilimitadas
+                  </p>
                   <ul className="mt-3 flex-1 space-y-1.5">
-                    {(p.features ?? []).map((f) => (
+                    {(p.features ?? []).filter((f) => !/lives? (por m[êe]s|\/m[êe]s)|at[ée] \d+ lives/i.test(f)).map((f) => (
                       <li key={f} className="flex gap-2 text-[11px] text-muted-foreground">
                         <Check size={13} className="mt-0.5 shrink-0 text-primary" /> {f}
                       </li>
