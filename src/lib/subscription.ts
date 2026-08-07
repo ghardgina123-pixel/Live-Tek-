@@ -146,13 +146,14 @@ export function liveUsage(state: SubscriptionState, storeId: string, livesThisMo
     (s) => s.store_id === storeId && s.status === "active" && (!s.expires_at || new Date(s.expires_at) > now),
   );
   const plan = sub ? (state.plans.find((p) => p.code === sub.plan) ?? null) : null;
-  const limit = plan?.max_lives_per_month ?? null;
+  // Lives ilimitadas em todos os planos.
+  const limit = null;
   return {
     plan_code: plan?.code ?? null,
     used: livesThisMonth,
     limit,
-    unlimited: limit === null,
-    remaining: limit === null ? null : Math.max(0, limit - livesThisMonth),
+    unlimited: true,
+    remaining: null,
   };
 }
 
