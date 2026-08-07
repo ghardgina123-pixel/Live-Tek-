@@ -1,25 +1,27 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { Home, Store, Play, ShoppingCart, User } from "lucide-react";
 import { useCartCount } from "@/lib/cart-store";
+import { useT } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
 const tabs = [
-  { to: "/home", icon: Home, label: "Início" },
-  { to: "/lojas", icon: Store, label: "Lojas" },
-  { to: "/shorts", icon: Play, label: "Shorts" },
-  { to: "/carrinho", icon: ShoppingCart, label: "Carrinho" },
-  { to: "/perfil", icon: User, label: "Perfil" },
+  { to: "/home", icon: Home, key: "nav_home" },
+  { to: "/lojas", icon: Store, key: "nav_stores" },
+  { to: "/shorts", icon: Play, key: "nav_shorts" },
+  { to: "/carrinho", icon: ShoppingCart, key: "nav_cart" },
+  { to: "/perfil", icon: User, key: "nav_profile" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const count = useCartCount();
+  const { t } = useT();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background pb-20">
       <main>{children}</main>
-      <nav aria-label="Navegação principal" className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background">
+      <nav aria-label={t("nav_home")} className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background">
         <ul className="grid grid-cols-5">
-          {tabs.map(({ to, icon: Icon, label }) => {
+          {tabs.map(({ to, icon: Icon, key }) => {
             const active = pathname === to || (to !== "/home" && pathname.startsWith(to));
             return (
               <li key={to}>
@@ -32,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </span>
                     )}
                   </div>
-                  <span className={active ? "font-semibold text-primary" : "text-muted-foreground"}>{label}</span>
+                  <span className={active ? "font-semibold text-primary" : "text-muted-foreground"}>{t(key)}</span>
                 </Link>
               </li>
             );
