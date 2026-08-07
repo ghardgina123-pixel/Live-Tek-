@@ -669,6 +669,8 @@ export type Database = {
           ingress_url: string | null
           label: string
           last_error: string | null
+          last_seen_at: string | null
+          last_stats: Json
           live_id: string | null
           participant_identity: string
           source_type: string
@@ -685,6 +687,8 @@ export type Database = {
           ingress_url?: string | null
           label: string
           last_error?: string | null
+          last_seen_at?: string | null
+          last_stats?: Json
           live_id?: string | null
           participant_identity: string
           source_type: string
@@ -701,6 +705,8 @@ export type Database = {
           ingress_url?: string | null
           label?: string
           last_error?: string | null
+          last_seen_at?: string | null
+          last_stats?: Json
           live_id?: string | null
           participant_identity?: string
           source_type?: string
@@ -720,6 +726,60 @@ export type Database = {
           },
           {
             foreignKeyName: "live_cameras_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_events: {
+        Row: {
+          actor_id: string | null
+          camera_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          level: string
+          live_id: string | null
+          message: string
+          metadata: Json
+          store_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          camera_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          level?: string
+          live_id?: string | null
+          message: string
+          metadata?: Json
+          store_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          camera_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: string
+          live_id?: string | null
+          message?: string
+          metadata?: Json
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_events_live_id_fkey"
+            columns: ["live_id"]
+            isOneToOne: false
+            referencedRelation: "lives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_events_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"

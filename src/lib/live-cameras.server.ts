@@ -53,6 +53,44 @@ export function inputTypeFor(sourceType: string): IngressInput {
   return IngressInput.URL_INPUT; // RTSP / HLS / HTTP pull (gstreamer uridecodebin)
 }
 
+export type CameraTelemetry = {
+  online: boolean;
+  ingestActive: boolean;
+  bitrateKbps: number | null;
+  audioBitrateKbps: number | null;
+  fps: number | null;
+  width: number | null;
+  height: number | null;
+  codec: string | null;
+  uptimeSec: number | null;
+  latencyMs: number | null;
+  updatedAt: string;
+};
+
+/** Extrai telemetria real do estado do Ingress LiveKit (sem valores fictícios). */
+export function ingressTelemetry(info: IngressInfo | undefined | null): CameraTelemetry {
+  const st = info?.state;
+  const video = st?.video;
+  const audio = st?.audio as { averageBitrate?: number } | undefined;
+  const startedAt = st?.startedAt ? Number(st.startedAt) : 0;
+  const updatedAt = st?.updatedAt ? Number(st.updatedAt) : 0;
+  const nowNs = Date.now() * 1e6;
+  return {
+    online: st?.status === 2 || st?.status === 1,
+    ingestActive: st?.status === 2,
+    bitrateKbps: video?.averageBitrate ? Math.round(video.averageBitrate / 1000) : null,
+    audioBitrateKbps: audio?.averageBitrate ? Math.round(audio.averageBitrate / 1000) : null,
+    fps: video?.framerate ? Math.round(video.framerate) : null,
+    width: video?.width || null,
+    height: video?.height || null,
+    codec: video?.mimeType || null,
+    uptimeSec: startedAt ? Math.max(0, Math.round((nowNs - startedAt) / 1e9)) : null,
+    // Atraso entre a última actualização de estado reportada pelo servidor e agora.
+    latencyMs: updatedAt ? Math.max(0, Math.round((nowNs - updatedAt) / 1e6)) : null,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 /**
  * Perfis de encoding conservadores: a prioridade da plataforma é a voz do
  * locutor, por isso o áudio fica em estéreo 96k e o vídeo em 720p 30fps
