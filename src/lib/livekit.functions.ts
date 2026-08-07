@@ -59,7 +59,7 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
     const at = new AccessToken(apiKey, apiSecret, {
       identity,
       name: displayName,
-      ttl: 60 * 60, // 1h
+      ttl: TOKEN_TTL_SECONDS,
     });
     at.addGrant({
       room,
