@@ -8,7 +8,7 @@ import { CountrySelect } from "@/components/LocationCascade";
 import { SettingsSheet } from "@/components/SettingsSheet";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useT } from "@/lib/i18n";
+import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -21,11 +21,11 @@ export const Route = createFileRoute("/perfil")({
   component: Perfil,
 });
 
-const menu = [
-  { icon: Package, key: "my_orders", badge: "3", to: "/compras" as const },
-  { icon: Heart, key: "favorites", to: "/favoritos" as const },
-  { icon: HelpCircle, key: "help_support", to: "/ajuda" as const },
-] as const;
+const menu: { icon: typeof Package; key: TKey; badge?: string; to: "/compras" | "/favoritos" | "/ajuda" }[] = [
+  { icon: Package, key: "my_orders", badge: "3", to: "/compras" },
+  { icon: Heart, key: "favorites", to: "/favoritos" },
+  { icon: HelpCircle, key: "help_support", to: "/ajuda" },
+];
 
 function Perfil() {
   const { user, signOut } = useAuth();
