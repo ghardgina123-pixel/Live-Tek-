@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
+import { recommendedPlanCode, serviceCategoryLabel } from "@/lib/services";
 import { createSubscriptionCheckout, cancelSubscription } from "@/lib/subscriptions.functions";
 import type { InvoiceData } from "@/lib/invoice-pdf";
 
@@ -245,14 +246,21 @@ function SubscriptionManager() {
           <div className="grid gap-3 sm:grid-cols-3">
             {plans.map((p) => {
               const isCurrent = active && status?.plan_code === p.code;
+              const isRecommended = !isCurrent && recommended === p.code;
               return (
-                <div key={p.id} className={`flex flex-col rounded-2xl border p-4 ${isCurrent ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+                <div key={p.id} className={`flex flex-col rounded-2xl border p-4 ${isCurrent ? "border-primary bg-primary/5" : isRecommended ? "border-primary/50 bg-card" : "border-border bg-card"}`}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold">{p.name}</h3>
-                    {p.code === "elite" && <Crown size={16} className="text-amber-500" />}
+                    {p.code === "empresarial" && <Crown size={16} className="text-amber-500" />}
                   </div>
+                  {isRecommended && (
+                    <span className="mt-1 w-fit rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                      Recomendado para {serviceCategoryLabel(status?.service_category)}
+                    </span>
+                  )}
                   <p className="mt-2 text-xl font-extrabold">{kz(p.price_aoa)}</p>
                   <p className="text-[11px] text-muted-foreground">por {p.period_days} dias</p>
+                  {p.description && <p className="mt-1 text-[11px] text-muted-foreground">{p.description}</p>}
                   <p className="mt-2 inline-flex w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                     Lives ilimitadas
                   </p>
@@ -277,6 +285,21 @@ function SubscriptionManager() {
           </div>
         )}
       </section>
+
+      {/* Histórico de subscrição */}
+      {history.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold">Histórico da subscrição</h2>
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li key={h.id} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 text-xs">
+                <span>{h.from_status ? `${h.from_status} → ${h.to_status}` : h.to_status}</span>
+                <span className="text-muted-foreground">{new Date(h.created_at).toLocaleString("pt-AO")}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Faturas */}
       <section>
