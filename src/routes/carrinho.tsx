@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { BackButton } from "@/components/BackButton";
 import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
 import { formatPrice, useCurrency } from "@/lib/currency";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/carrinho")({
   head: () => ({
@@ -20,6 +21,7 @@ function Cart() {
   const items = useCart();
   const total = useCartTotal();
   const currency = useCurrency();
+  const { t } = useT();
 
   if (items.length === 0) {
     return (
@@ -28,10 +30,10 @@ function Cart() {
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent">
             <ShoppingBag size={36} className="text-primary" />
           </div>
-          <h2 className="mt-4 text-lg font-bold">Seu carrinho está vazio</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Explore lojas ao vivo e encontre ofertas incríveis</p>
+          <h2 className="mt-4 text-lg font-bold">{t("cart_empty")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("search_placeholder")}</p>
           <Link to="/home" className="mt-6 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">
-            Explorar agora
+            {t("continue")}
           </Link>
         </div>
       </AppShell>
@@ -44,7 +46,7 @@ function Cart() {
         <div className="flex items-center gap-3">
           <BackButton fallback="/home" className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-foreground" />
           <div>
-            <h1 className="text-2xl font-bold">Carrinho</h1>
+            <h1 className="text-2xl font-bold">{t("cart_title")}</h1>
             <p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "item" : "itens"}</p>
           </div>
         </div>
@@ -71,9 +73,9 @@ function Cart() {
       </ul>
 
       <div className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatPrice(total, currency)}</span></div>
-        <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span className="font-semibold text-primary">Grátis</span></div>
-        <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold"><span>Total</span><span>{formatPrice(total, currency)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">{t("subtotal")}</span><span>{formatPrice(total, currency)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">{t("delivery_fee")}</span><span className="font-semibold text-primary">Grátis</span></div>
+        <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold"><span>{t("total")}</span><span>{formatPrice(total, currency)}</span></div>
       </div>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
