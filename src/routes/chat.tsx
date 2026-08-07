@@ -40,6 +40,7 @@ type Message = {
 
 function ChatPage() {
   const { user, loading } = useAuth();
+  const { t } = useT();
   const navigate = useNavigate();
   const { c: openId } = Route.useSearch();
 
@@ -61,6 +62,7 @@ function ChatPage() {
 }
 
 function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: string) => void }) {
+  const { t } = useT();
   const [items, setItems] = useState<Conversation[] | null>(null);
   const [q, setQ] = useState("");
 
@@ -138,6 +140,7 @@ function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: str
 }
 
 function ConversationView({ conversationId, userId, onBack }: { conversationId: string; userId: string; onBack: () => void }) {
+  const { t } = useT();
   const [conv, setConv] = useState<Conversation | null>(null);
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [input, setInput] = useState("");

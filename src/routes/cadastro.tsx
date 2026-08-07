@@ -25,6 +25,7 @@ function Signup() {
   const [accountType, setAccountType] = useState<"customer" | "seller">("customer");
   const [f, setF] = useState({ name: "", email: "", phone: "", pwd: "" });
   const [busy, setBusy] = useState(false);
+  const { t } = useT();
   const [sellerStatus, setSellerStatus] = useState<{ approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number } | null>(null);
 
   useEffect(() => {
