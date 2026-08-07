@@ -2,19 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import {
   AudioPresets,
   ConnectionState,
+  LocalAudioTrack,
   Room,
   RoomEvent,
   Track,
   VideoPresets,
   createLocalTracks,
   type LocalTrack,
-  type LocalAudioTrack,
   type LocalVideoTrack,
   type LocalTrackPublication,
 } from "livekit-client";
-import { Loader2, Video, VideoOff, Radio, AlertTriangle, Mic, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Loader2, Video, VideoOff, Radio, AlertTriangle, Mic, CheckCircle2, ShieldCheck, Activity, Bluetooth } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
+import { createVoiceChain, micConstraints, type AudioChain } from "@/lib/live-audio";
+import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
 
 type Props = {
   liveId: string;
@@ -28,13 +30,7 @@ type State = "idle" | "requesting" | "preflight" | "connecting" | "publishing" |
 const PREVIEW_TIMEOUT_MS = 3_000;
 const PUBLISH_TIMEOUT_MS = 8_000;
 
-const audioConstraints = {
-  // Otimização para hardware fraco (ex: Unisoc T606): desativar processamento
-  // extra de áudio reduz carga no DSP e evita timeouts do pipeline de media.
-  echoCancellation: false,
-  noiseSuppression: false,
-  autoGainControl: false,
-} as const;
+const MIC_PREF_KEY = "liveteka.micDeviceId";
 
 // Resolução baixa forçada (640x480 @ 15fps) para dispositivos entry-level
 // Android. VideoPresets.h480 = 640x480. Reduz drasticamente o consumo do
