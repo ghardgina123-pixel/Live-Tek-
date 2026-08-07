@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type SubscriptionStatus = {
   partner_type: "retail" | "service";
+  service_category: string | null;
   subscription_required: boolean;
   subscription_status: "active" | "grace" | "suspended" | "inactive";
   plan_code: string | null;
