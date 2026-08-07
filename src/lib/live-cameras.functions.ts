@@ -122,9 +122,8 @@ export const reportCameraTelemetry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ ok: boolean }> => {
-    const { requireLiveOwner, saveCameraTelemetry } = await import(
-      "@/lib/live-cameras.repo.server"
-    );
+    const { requireLiveOwner, saveCameraTelemetry } =
+      await import("@/lib/live-cameras.repo.server");
     await requireLiveOwner(data.liveId, context.userId);
     const { liveId, ...stats } = data;
     const res = await saveCameraTelemetry(liveId, context.userId, stats);

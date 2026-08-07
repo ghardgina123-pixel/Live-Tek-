@@ -57,7 +57,8 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "live_events", filter: `live_id=eq.${liveId}` },
-        (payload) => setRows((prev) => [payload.new as LiveEventRow, ...(prev ?? [])].slice(0, 100)),
+        (payload) =>
+          setRows((prev) => [payload.new as LiveEventRow, ...(prev ?? [])].slice(0, 100)),
       )
       .subscribe();
     return () => {
@@ -82,7 +83,12 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
           <ScrollText size={15} className="text-primary" /> Auditoria da live
         </h3>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" aria-label="Atualizar registo" onClick={() => void load()}>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label="Atualizar registo"
+            onClick={() => void load()}
+          >
             <RefreshCw size={14} />
           </Button>
           <Button size="sm" variant="outline" onClick={exportCsv} disabled={!rows?.length}>
