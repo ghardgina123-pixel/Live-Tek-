@@ -211,7 +211,7 @@ function ReviewSheet({ sub, onClose, onDone }: { sub: Row; onClose: () => void; 
             <div className="mt-1 flex h-32 items-center justify-center rounded-xl bg-muted"><Loader2 className="animate-spin" /></div>
           ) : sub.proof_url.match(/\.(png|jpg|jpeg|webp|gif)$/i) ? (
             <a href={proofUrl} target="_blank" rel="noreferrer" className="block">
-              <img src={proofUrl} alt="comprovativo" className="mt-1 max-h-72 w-full rounded-xl object-contain bg-muted" />
+              <img loading="lazy" decoding="async" src={proofUrl} alt="comprovativo" className="mt-1 max-h-72 w-full rounded-xl object-contain bg-muted" />
             </a>
           ) : (
             <a href={proofUrl} target="_blank" rel="noreferrer" className="mt-1 flex items-center gap-2 rounded-xl border border-border p-3 text-sm">

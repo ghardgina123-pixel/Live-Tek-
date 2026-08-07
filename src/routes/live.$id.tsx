@@ -255,7 +255,7 @@ function LivePage() {
           <Radio size={11} /> {live.status}
         </div>
         <div className="absolute left-3 bottom-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">
-          {live.store?.logo_url && <img src={live.store.logo_url} className="h-5 w-5 rounded-full object-cover" alt="" />}
+          {live.store?.logo_url && <img loading="lazy" decoding="async" src={live.store.logo_url} className="h-5 w-5 rounded-full object-cover" alt="" />}
           <span className="font-semibold">{live.store?.name}</span>
         </div>
         <div className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">

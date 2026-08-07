@@ -118,7 +118,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
           <h1 className="truncate text-lg font-semibold">{title}</h1>
         </div>
         {store.logo_url && (
-          <img src={store.logo_url} alt={t("s_logo")} className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
+          <img loading="lazy" decoding="async" src={store.logo_url} alt={t("s_logo")} className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
         )}
       </header>
       <div className="px-5 py-5">{children}</div>

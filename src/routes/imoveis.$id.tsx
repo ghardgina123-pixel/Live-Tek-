@@ -121,7 +121,7 @@ function ImovelDetailPage() {
 
       <div className="relative h-64 w-full bg-accent">
         {p.cover_url ? (
-          <img src={p.cover_url} alt={p.title} className="h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" src={p.cover_url} alt={p.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-7xl">🏠</div>
         )}

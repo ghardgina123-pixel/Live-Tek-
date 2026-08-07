@@ -176,7 +176,7 @@ function AdminLojas() {
             <article key={s.id} className="rounded-2xl border bg-card p-4 shadow-sm">
               <div className="flex items-start gap-3">
                 {s.logo_url ? (
-                  <img src={s.logo_url} alt={s.name} className="h-12 w-12 rounded-xl object-cover" />
+                  <img loading="lazy" decoding="async" src={s.logo_url} alt={s.name} className="h-12 w-12 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent">
                     <StoreIcon size={20} />

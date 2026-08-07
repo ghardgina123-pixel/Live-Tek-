@@ -82,7 +82,7 @@ function ServiceDetailPage() {
     <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-background pb-24">
       <div className="relative h-52 w-full overflow-hidden">
         {row.cover_url ? (
-          <img src={row.cover_url} alt={`Imagem de ${row.name}`} className="h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" src={row.cover_url} alt={`Imagem de ${row.name}`} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-accent text-7xl">
             {serviceCategoryEmoji(row.service_category)}

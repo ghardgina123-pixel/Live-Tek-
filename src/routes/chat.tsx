@@ -120,7 +120,7 @@ function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: str
               <li key={c.id}>
                 <button onClick={() => onOpen(c.id)} className="flex w-full items-center gap-3 px-5 py-3 text-left">
                   <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-accent text-xl">
-                    {avatar ? <img src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
+                    {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -246,7 +246,7 @@ function ConversationView({ conversationId, userId, onBack }: { conversationId: 
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-4 py-3">
         <button onClick={onBack} aria-label="Voltar"><ArrowLeft size={20} /></button>
         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-accent text-xl">
-          {avatar ? <img src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
+          {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
         </div>
         <div className="flex-1 min-w-0">
           <p className="truncate text-sm font-semibold">{name}</p>

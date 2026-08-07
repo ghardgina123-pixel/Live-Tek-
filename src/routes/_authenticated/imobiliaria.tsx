@@ -236,7 +236,7 @@ function PropertiesTab({ agencyId }: { agencyId: string }) {
           {items.map((p) => (
             <div key={p.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
               <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-accent">
-                {p.cover_url ? <img src={p.cover_url} alt={p.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-2xl">🏠</div>}
+                {p.cover_url ? <img loading="lazy" decoding="async" src={p.cover_url} alt={p.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-2xl">🏠</div>}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-semibold">{p.title}</p>

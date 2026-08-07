@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Heart, MessageCircle, Share2, ShoppingBag, Loader2, ArrowLeft, Play } from "lucide-react";
+import { Heart, MessageCircle, Share2, ShoppingBag, Loader2, ArrowLeft, Play, Volume2, VolumeX } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { cartStore } from "@/lib/cart-store";
@@ -37,6 +37,19 @@ type Short = {
 
 function ShortsFeed() {
   const [items, setItems] = useState<Short[] | null>(null);
+  // Som ligado por omissão: o browser só permite autoplay com som após um
+  // gesto do utilizador, por isso arrancamos em mudo e desmutamos ao 1.º toque.
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const unmute = () => setMuted(false);
+    window.addEventListener("pointerdown", unmute, { once: true });
+    window.addEventListener("keydown", unmute, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unmute);
+      window.removeEventListener("keydown", unmute);
+    };
+  }, []);
 
   useEffect(() => {
     supabase
@@ -67,12 +80,30 @@ function ShortsFeed() {
       <Link to="/home" className="fixed left-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur" aria-label="Voltar">
         <ArrowLeft size={18} />
       </Link>
-      {items.map((s) => <ShortCard key={s.id} short={s} />)}
+      {items.map((s, i) => (
+        <ShortCard
+          key={s.id}
+          short={s}
+          index={i}
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+        />
+      ))}
     </div>
   );
 }
 
-function ShortCard({ short }: { short: Short }) {
+function ShortCard({
+  short,
+  index,
+  muted,
+  onToggleMute,
+}: {
+  short: Short;
+  index: number;
+  muted: boolean;
+  onToggleMute: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const { user } = useAuth();
@@ -83,6 +114,15 @@ function ShortCard({ short }: { short: Short }) {
   const [commentText, setCommentText] = useState("");
   const [commentsLoaded, setCommentsLoaded] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
+
+  // Mantém o elemento sincronizado com o estado global de som.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = muted;
+    v.volume = 1;
+    if (!v.paused) v.play().catch(() => {});
+  }, [muted]);
 
   // Carrega totais (likes + comments) e se o utilizador atual já curtiu.
   useEffect(() => {
@@ -198,9 +238,10 @@ function ShortCard({ short }: { short: Short }) {
         src={short.video_url}
         poster={short.thumbnail_url ?? undefined}
         loop
-        muted
+        muted={muted}
+        preload={index < 2 ? "auto" : "metadata"}
         playsInline
-        onClick={() => { const v = videoRef.current; if (!v) return; if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); } }}
+        onClick={() => { const v = videoRef.current; if (!v) return; if (v.paused) { v.play().catch(() => {}); setPlaying(true); } else { v.pause(); setPlaying(false); } }}
         className="h-full w-full object-cover"
       />
       {!playing && (
@@ -211,7 +252,7 @@ function ShortCard({ short }: { short: Short }) {
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pb-8 text-white">
         <div className="flex items-center gap-2">
           {short.product?.stores?.logo_url ? (
-            <img src={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
+            <img loading="lazy" decoding="async" src={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-white/20" />
           )}
@@ -235,6 +276,11 @@ function ShortCard({ short }: { short: Short }) {
         )}
       </div>
       <div className="absolute right-3 bottom-32 flex flex-col gap-4 text-white">
+        <SideAction
+          icon={muted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+          label={muted ? "Som off" : "Som on"}
+          onClick={onToggleMute}
+        />
         <SideAction
           icon={<Heart size={24} className={liked ? "fill-red-500 text-red-500" : ""} />}
           label={likes ? likes.toString() : "Curtir"}
