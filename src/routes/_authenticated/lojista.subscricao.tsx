@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { createSubscriptionCheckout, cancelSubscription } from "@/lib/subscriptions.functions";
-import { generateInvoicePdf, type InvoiceData } from "@/lib/invoice-pdf";
+import type { InvoiceData } from "@/lib/invoice-pdf";
+
+// jsPDF só é descarregado quando o lojista pede efetivamente a fatura.
+const downloadInvoice = async (inv: InvoiceData) => {
+  const { generateInvoicePdf } = await import("@/lib/invoice-pdf");
+  generateInvoicePdf(inv);
+};
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
@@ -257,7 +263,7 @@ function SubscriptionManager() {
                   </p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">{inv.status === "paid" ? "Paga" : inv.status}</Badge>
-                <Button size="sm" variant="outline" onClick={() => generateInvoicePdf(inv)}>
+                <Button size="sm" variant="outline" onClick={() => void downloadInvoice(inv)}>
                   <Download size={14} className="mr-1" /> {t("s_pdf")}
                 </Button>
               </li>
