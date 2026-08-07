@@ -40,6 +40,9 @@ type Plan = {
   max_lives_per_month: number | null;
   features: string[];
   sort_order: number;
+  description: string | null;
+  categories: string[] | null;
+  audience: string;
 };
 
 type Sub = {
@@ -53,6 +56,16 @@ type Sub = {
 };
 
 const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { maximumFractionDigits: 0 })}`;
+const dt = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-AO") : "—");
+
+type HistoryRow = { id: string; from_status: string | null; to_status: string; created_at: string };
+
+const STATE_UI: Record<string, { title: string; tone: string; icon: typeof ShieldCheck }> = {
+  active: { title: "Plano ativo", tone: "border-primary/40 bg-primary/5", icon: ShieldCheck },
+  grace: { title: "Subscrição em carência", tone: "border-amber-500/40 bg-amber-500/5", icon: AlertTriangle },
+  suspended: { title: "Subscrição suspensa", tone: "border-destructive/40 bg-destructive/5", icon: Ban },
+  inactive: { title: "Sem subscrição ativa", tone: "border-amber-500/40 bg-amber-500/5", icon: AlertTriangle },
+};
 
 function SubscriptionManager() {
   const { t } = useT();
@@ -62,12 +75,13 @@ function SubscriptionManager() {
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [subs, setSubs] = useState<Sub[]>([]);
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
+  const [history, setHistory] = useState<HistoryRow[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
 
   const load = useCallback(async () => {
     if (!storeId) return;
-    const [{ data: p }, { data: s }, { data: inv }] = await Promise.all([
+    const [{ data: p }, { data: s }, { data: inv }, { data: hist }] = await Promise.all([
       supabase.from("subscription_plans").select("*").eq("is_active", true).order("sort_order"),
       supabase
         .from("store_subscriptions")
@@ -80,10 +94,17 @@ function SubscriptionManager() {
         .select("*")
         .eq("store_id", storeId)
         .order("issued_at", { ascending: false }),
+      supabase
+        .from("subscription_history")
+        .select("id, from_status, to_status, created_at")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(15),
     ]);
     setPlans((p as unknown as Plan[]) ?? []);
     setSubs((s as Sub[]) ?? []);
     setInvoices((inv as unknown as InvoiceData[]) ?? []);
+    setHistory((hist as HistoryRow[]) ?? []);
   }, [storeId]);
 
   useEffect(() => {
@@ -108,7 +129,13 @@ function SubscriptionManager() {
     }
   };
 
-  const active = status?.subscription_status === "active";
+  const state = status?.subscription_status ?? "inactive";
+  const active = state === "active";
+  const grace = state === "grace";
+  const suspended = state === "suspended";
+  const ui = STATE_UI[state] ?? STATE_UI.inactive;
+  const StateIcon = ui.icon;
+  const recommended = recommendedPlanCode(plans ?? [], status?.service_category);
   const pending = subs.find((s) => s.status === "pending");
 
   const cancel = async () => {
@@ -130,19 +157,36 @@ function SubscriptionManager() {
   return (
     <div className="space-y-6">
       {/* Estado atual */}
-      <section className={`rounded-2xl border p-4 shadow-sm ${active ? "border-primary/40 bg-primary/5" : "border-amber-500/40 bg-amber-500/5"}`}>
+      <section className={`rounded-2xl border p-4 shadow-sm ${ui.tone}`}>
         <div className="flex items-start gap-3">
-          {active ? <ShieldCheck className="text-primary" size={20} /> : <AlertTriangle className="text-amber-600" size={20} />}
+          <StateIcon className={active ? "text-primary" : suspended ? "text-destructive" : "text-amber-600"} size={20} />
           <div className="min-w-0 flex-1">
             <h2 className="text-sm font-semibold">
-              {active ? `Plano ${status?.plan_name} ativo` : "Sem subscrição ativa"}
+              {active ? `Plano ${status?.plan_name} ativo` : ui.title}
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {active
-                ? `Válido até ${status?.expires_at ? new Date(status.expires_at).toLocaleDateString("pt-AO") : "—"} · lives ilimitadas`
+                ? `Válido até ${dt(status?.expires_at)} · ${status?.days_remaining ?? 0} dia(s) restantes · lives ilimitadas`
+                : grace
+                  ? `O plano ${status?.plan_name ?? ""} expirou em ${dt(status?.expires_at)}. Renove até ${dt(status?.grace_until)} para evitar a suspensão.`
+                  : suspended
+                    ? "O perfil está oculto nas pesquisas e as lives estão bloqueadas. Nenhum dado foi apagado — renove para reativar automaticamente."
                 : status?.subscription_required
                   ? t("s_como_parceiro_de_servicos_precisa_de_um_plano_at") : t("s_como_parceiro_de_retalho_paga_apenas_10_de_comis")}
             </p>
+            {(active || grace || suspended) && (
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
+                <div className="rounded-lg bg-card p-2"><p className="text-muted-foreground">Plano</p><p className="font-semibold">{status?.plan_name ?? "—"}</p></div>
+                <div className="rounded-lg bg-card p-2"><p className="text-muted-foreground">Valor</p><p className="font-semibold">{kz(Number(status?.price_aoa ?? 0))}</p></div>
+                <div className="rounded-lg bg-card p-2"><p className="text-muted-foreground">Vencimento</p><p className="font-semibold">{dt(status?.expires_at)}</p></div>
+                <div className="rounded-lg bg-card p-2"><p className="text-muted-foreground">Dias restantes</p><p className="font-semibold">{status?.days_remaining ?? 0}</p></div>
+              </div>
+            )}
+            {(grace || suspended) && status?.plan_code && (
+              <Button size="sm" className="mt-3" disabled={busy !== null} onClick={() => upgrade(status.plan_code!)}>
+                {busy ? <Loader2 className="animate-spin" size={14} /> : "Renovar agora"}
+              </Button>
+            )}
             {pending && (
               <div className="mt-3 rounded-xl border border-border bg-card p-3">
                 <p className="text-[11px] text-muted-foreground">{t("s_pagamento_pendente_referencia_multicaixa_express")}</p>
