@@ -2073,6 +2073,27 @@ export type Database = {
         }
         Relationships: []
       }
+      security_config_snapshots: {
+        Row: {
+          id: string
+          label: string
+          payload: Json
+          taken_at: string
+        }
+        Insert: {
+          id?: string
+          label: string
+          payload: Json
+          taken_at?: string
+        }
+        Update: {
+          id?: string
+          label?: string
+          payload?: Json
+          taken_at?: string
+        }
+        Relationships: []
+      }
       short_comments: {
         Row: {
           created_at: string
@@ -2909,6 +2930,7 @@ export type Database = {
         Args: { _note?: string; _payout_id: string; _status?: string }
         Returns: Json
       }
+      admin_user_phone: { Args: { _user_id: string }; Returns: string }
       affiliate_dashboard: { Args: never; Returns: Json }
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
