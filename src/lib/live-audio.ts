@@ -105,5 +105,5 @@ export function micConstraints(deviceId?: string) {
     noiseSuppression: true,
     autoGainControl: true,
     channelCount: 1,
-  } as MediaTrackConstraints;
+  };
 }
