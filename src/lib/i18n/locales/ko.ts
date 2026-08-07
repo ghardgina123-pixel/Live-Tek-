@@ -309,7 +309,7 @@ export const ko: Dict = {
   s_nao_existe_subscricao_para_cancelar: "취소할 구독이 없습니다",
   s_falha_ao_cancelar: "취소 실패",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "서비스 파트너로서 라이브 방송을 하려면 활성 플랜이 필요합니다.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "소매 파트너로서 판매당 10%의 수수료만 지불합니다. 플랜은 라이브 및 프리미엄 도구를 추가합니다.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "소매 파트너로서 판매당 5%의 수수료만 지불합니다. 플랜은 라이브 및 프리미엄 도구를 추가합니다.",
   s_plano_atual: "현재 플랜",
   s_fazer_upgrade: "업그레이드",
   s_cliente: "고객",

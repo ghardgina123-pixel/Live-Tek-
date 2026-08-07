@@ -49,6 +49,7 @@ function ServiceDetailPage() {
         .select("id, name, description, service_category, logo_url, cover_url, opening_hours, phone, whatsapp, service_tags, lat, lng")
         .eq("id", id)
         .eq("status", "active")
+        .eq("is_suspended", false)
         .maybeSingle();
       if (cancelled) return;
       setRow((data as ServiceDetail) ?? null);

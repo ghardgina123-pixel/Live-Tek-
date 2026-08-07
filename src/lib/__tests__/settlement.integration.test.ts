@@ -24,9 +24,9 @@ function runLifecycle(partnerType: PartnerType, totalAoa: number, path: OrderSta
 }
 
 describe("split de transação", () => {
-  it("retalho aplica 10% de comissão", () => {
+  it("retalho aplica 5% de comissão", () => {
     expect(calcTransactionSplit("retail", 10000)).toEqual({
-      gross_aoa: 10000, commission_pct: 10, platform_fee_aoa: 1000, net_aoa: 9000,
+      gross_aoa: 10000, commission_pct: 5, platform_fee_aoa: 500, net_aoa: 9500,
     });
   });
 
@@ -38,8 +38,8 @@ describe("split de transação", () => {
 
   it("arredonda a duas casas decimais", () => {
     const s = calcTransactionSplit("retail", 1234.567);
-    expect(s.platform_fee_aoa).toBe(123.46);
-    expect(s.net_aoa).toBe(1111.11);
+    expect(s.platform_fee_aoa).toBe(61.73);
+    expect(s.net_aoa).toBe(1172.84);
     expect(s.platform_fee_aoa + s.net_aoa).toBeCloseTo(s.gross_aoa, 1);
   });
 });
@@ -53,16 +53,16 @@ describe("ciclo de vida do pedido → saldo do lojista", () => {
 
   it("paid coloca o líquido em compensação", () => {
     const { payout } = runLifecycle("retail", 20000, ["paid"]);
-    expect(payout).toMatchObject({ status: "pending", net_aoa: 18000, platform_fee_aoa: 2000 });
+    expect(payout).toMatchObject({ status: "pending", net_aoa: 19000, platform_fee_aoa: 1000 });
     const b = summarizeStoreBalance("retail", [payout!]);
-    expect(b.pending_clearance_aoa).toBe(18000);
+    expect(b.pending_clearance_aoa).toBe(19000);
     expect(b.available_aoa).toBe(0);
   });
 
   it("preparing e shipped não alteram o repasse", () => {
     const { trail } = runLifecycle("retail", 20000, ["paid", "preparing", "shipped"]);
     expect(trail.map((t) => t.payout?.status)).toEqual(["pending", "pending", "pending"]);
-    expect(trail.at(-1)!.payout!.net_aoa).toBe(18000);
+    expect(trail.at(-1)!.payout!.net_aoa).toBe(19000);
   });
 
   it("delivered liberta o repasse: em compensação → disponível", () => {
@@ -70,8 +70,8 @@ describe("ciclo de vida do pedido → saldo do lojista", () => {
     expect(payout!.status).toBe("released");
     const b = summarizeStoreBalance("retail", [payout!]);
     expect(b.pending_clearance_aoa).toBe(0);
-    expect(b.available_aoa).toBe(18000);
-    expect(b.platform_fees_aoa).toBe(2000);
+    expect(b.available_aoa).toBe(19000);
+    expect(b.platform_fees_aoa).toBe(1000);
   });
 
   it("parceiro de serviços recebe 100% após entrega", () => {
@@ -105,7 +105,7 @@ describe("ciclo de vida do pedido → saldo do lojista", () => {
     const again = applyOrderTransition({
       orderId: "o1", partnerType: "retail", totalAoa: 20000, from: "delivered", to: "delivered", payout,
     });
-    expect(summarizeStoreBalance("retail", [again.payout!]).available_aoa).toBe(18000);
+    expect(summarizeStoreBalance("retail", [again.payout!]).available_aoa).toBe(19000);
   });
 });
 
@@ -138,9 +138,9 @@ describe("painel do lojista reflecte os pedidos", () => {
 
     expect(stats.payoutsPending).toBe(balance.pending_clearance_aoa);
     expect(stats.payoutsReleased).toBe(balance.available_aoa);
-    expect(balance.pending_clearance_aoa).toBe(18000);
-    expect(balance.available_aoa).toBe(27000);
-    expect(balance.platform_fees_aoa).toBe(5000);
+    expect(balance.pending_clearance_aoa).toBe(19000);
+    expect(balance.available_aoa).toBe(28500);
+    expect(balance.platform_fees_aoa).toBe(2500);
     expect(balance.pending_clearance_aoa + balance.available_aoa + balance.platform_fees_aoa).toBe(50000);
   });
 

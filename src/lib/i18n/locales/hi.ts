@@ -309,7 +309,7 @@ export const hi: Dict = {
   s_nao_existe_subscricao_para_cancelar: "रद्द करने के लिए कोई सदस्यता नहीं है",
   s_falha_ao_cancelar: "रद्द करने में विफल",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "एक सेवा भागीदार के रूप में, आपको लाइव स्ट्रीम करने के लिए एक सक्रिय योजना की आवश्यकता है।",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "एक खुदरा भागीदार के रूप में, आप प्रति बिक्री केवल 10% कमीशन का भुगतान करते हैं। एक योजना में लाइव और प्रीमियम टूल शामिल हैं।",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "एक खुदरा भागीदार के रूप में, आप प्रति बिक्री केवल 5% कमीशन का भुगतान करते हैं। एक योजना में लाइव और प्रीमियम टूल शामिल हैं।",
   s_plano_atual: "वर्तमान योजना",
   s_fazer_upgrade: "अपग्रेड करें",
   s_cliente: "ग्राहक",

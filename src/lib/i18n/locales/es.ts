@@ -309,7 +309,7 @@ export const es: Dict = {
   s_nao_existe_subscricao_para_cancelar: "No existe suscripción para cancelar",
   s_falha_ao_cancelar: "Error al cancelar",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Como socio de Servicios, necesitas un plan activo para transmitir en directo.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Como socio minorista, solo pagas el 10% de comisión por venta. Un plan añade transmisiones en vivo y herramientas premium.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Como socio minorista, solo pagas el 5% de comisión por venta. Un plan añade transmisiones en vivo y herramientas premium.",
   s_plano_atual: "Plan actual",
   s_fazer_upgrade: "Actualizar",
   s_cliente: "Cliente",

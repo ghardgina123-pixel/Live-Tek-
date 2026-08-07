@@ -57,6 +57,7 @@ function ServicosPage() {
         .select("id, name, description, service_category, logo_url, cover_url, opening_hours, phone, whatsapp, service_tags")
         .eq("status", "active")
         .eq("partner_type", "service")
+        .eq("is_suspended", false)
         .order("created_at", { ascending: false })
         .limit(200);
       if (!cancelled) setRows((data as ServiceRow[]) ?? []);

@@ -2,7 +2,7 @@
  * Modelo de liquidação do lojista.
  *
  * Espelha, em TypeScript puro, o contrato implementado na base de dados:
- *  - `store_commission_pct`  → retalho 10%, serviços 0%
+ *  - `store_commission_pct`  → retalho 5%, serviços 0%
  *  - `calc_transaction_split` → bruto / taxa da plataforma / líquido
  *  - `create_payout_on_paid`  → pedido `paid` cria repasse `pending`
  *  - `release_payout_on_delivered` → pedido `delivered` liberta o repasse
@@ -59,7 +59,7 @@ export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 export function storeCommissionPct(partnerType: PartnerType): number {
-  return partnerType === "service" ? 0 : 10;
+  return partnerType === "service" ? 0 : 5;
 }
 
 export function calcTransactionSplit(partnerType: PartnerType, amountAoa: number): TransactionSplit {

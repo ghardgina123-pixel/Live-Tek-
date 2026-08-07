@@ -2176,6 +2176,7 @@ export type Database = {
           created_at: string
           expires_at: string | null
           external_id: string | null
+          grace_until: string | null
           id: string
           payment_method: string | null
           plan: string
@@ -2196,6 +2197,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           external_id?: string | null
+          grace_until?: string | null
           id?: string
           payment_method?: string | null
           plan?: string
@@ -2216,6 +2218,7 @@ export type Database = {
           created_at?: string
           expires_at?: string | null
           external_id?: string | null
+          grace_until?: string | null
           id?: string
           payment_method?: string | null
           plan?: string
@@ -2250,6 +2253,7 @@ export type Database = {
           district_id: string | null
           id: string
           is_online: boolean
+          is_suspended: boolean
           last_seen_at: string | null
           lat: number | null
           lng: number | null
@@ -2280,6 +2284,7 @@ export type Database = {
           district_id?: string | null
           id?: string
           is_online?: boolean
+          is_suspended?: boolean
           last_seen_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -2310,6 +2315,7 @@ export type Database = {
           district_id?: string | null
           id?: string
           is_online?: boolean
+          is_suspended?: boolean
           last_seen_at?: string | null
           lat?: number | null
           lng?: number | null
@@ -2358,6 +2364,51 @@ export type Database = {
             columns: ["province_id"]
             isOneToOne: false
             referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_history: {
+        Row: {
+          created_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          store_id: string
+          subscription_id: string
+          to_status: string
+        }
+        Insert: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          store_id: string
+          subscription_id: string
+          to_status: string
+        }
+        Update: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          store_id?: string
+          subscription_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_history_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_history_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -2437,11 +2488,158 @@ export type Database = {
           },
         ]
       }
+      subscription_logs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event: string
+          id: string
+          metadata: Json
+          store_id: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event: string
+          id?: string
+          metadata?: Json
+          store_id?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          metadata?: Json
+          store_id?: string | null
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_logs_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_logs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_notifications: {
+        Row: {
+          created_at: string
+          cycle_expires_at: string | null
+          id: string
+          milestone: string
+          store_id: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_expires_at?: string | null
+          id?: string
+          milestone: string
+          store_id: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_expires_at?: string | null
+          id?: string
+          milestone?: string
+          store_id?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_notifications_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_notifications_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_payments: {
+        Row: {
+          amount_aoa: number
+          created_at: string
+          external_id: string | null
+          id: string
+          method: string | null
+          paid_at: string
+          raw_payload: Json | null
+          reference: string | null
+          status: string
+          store_id: string
+          subscription_id: string
+        }
+        Insert: {
+          amount_aoa: number
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          method?: string | null
+          paid_at?: string
+          raw_payload?: Json | null
+          reference?: string | null
+          status?: string
+          store_id: string
+          subscription_id: string
+        }
+        Update: {
+          amount_aoa?: number
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          method?: string | null
+          paid_at?: string
+          raw_payload?: Json | null
+          reference?: string | null
+          status?: string
+          store_id?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_payments_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
+          audience: string
+          categories: string[]
           code: string
           created_at: string
           currency_code: string
+          description: string | null
           features: Json
           id: string
           is_active: boolean
@@ -2453,9 +2651,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          audience?: string
+          categories?: string[]
           code: string
           created_at?: string
           currency_code?: string
+          description?: string | null
           features?: Json
           id?: string
           is_active?: boolean
@@ -2467,9 +2668,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          audience?: string
+          categories?: string[]
           code?: string
           created_at?: string
           currency_code?: string
+          description?: string | null
           features?: Json
           id?: string
           is_active?: boolean
@@ -2826,6 +3030,7 @@ export type Database = {
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
       store_live_usage: { Args: { _store_id: string }; Returns: Json }
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
+      subscription_renewal_notices: { Args: never; Returns: number }
     }
     Enums: {
       affiliate_commission_status: "pending" | "released" | "paid" | "cancelled"

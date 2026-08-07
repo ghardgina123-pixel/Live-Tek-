@@ -309,7 +309,7 @@ export const sw: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Hakuna usajili wa kughairi",
   s_falha_ao_cancelar: "Imeshindwa kughairi",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Kama mshirika wa Huduma unahitaji mpango amilifu ili kutangaza moja kwa moja.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Kama mshirika wa Rejareja unalipa tu 10% ya kamisheni kwa kila mauzo. Mpango huongeza matangazo ya moja kwa moja na zana za malipo.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Kama mshirika wa Rejareja unalipa tu 5% ya kamisheni kwa kila mauzo. Mpango huongeza matangazo ya moja kwa moja na zana za malipo.",
   s_plano_atual: "Mpango wa sasa",
   s_fazer_upgrade: "Panda daraja",
   s_cliente: "Mteja",

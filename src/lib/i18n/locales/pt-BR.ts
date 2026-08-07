@@ -291,7 +291,7 @@ export const ptBR: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Não existe assinatura para cancelar",
   s_falha_ao_cancelar: "Falha ao cancelar",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Como parceiro de Serviços precisa de um plano ativo para transmitir ao vivo.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Como parceiro de Varejo paga apenas 10% de comissão por venda. Um plano acrescenta lives e ferramentas premium.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Como parceiro de Varejo paga apenas 5% de comissão por venda. Um plano acrescenta lives e ferramentas premium.",
   s_plano_atual: "Plano atual",
   s_fazer_upgrade: "Fazer upgrade",
   s_cliente: "Cliente",

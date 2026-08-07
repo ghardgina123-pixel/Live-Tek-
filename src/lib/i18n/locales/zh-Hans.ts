@@ -309,7 +309,7 @@ export const zhHans: Dict = {
   s_nao_existe_subscricao_para_cancelar: "没有可取消的订阅",
   s_falha_ao_cancelar: "取消失败",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "作为服务合作伙伴，您需要一个活跃的计划才能进行直播。",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "作为零售合作伙伴，您只需支付10%的销售佣金。计划会增加直播和高级工具。",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "作为零售合作伙伴，您只需支付5%的销售佣金。计划会增加直播和高级工具。",
   s_plano_atual: "当前计划",
   s_fazer_upgrade: "升级",
   s_cliente: "客户",

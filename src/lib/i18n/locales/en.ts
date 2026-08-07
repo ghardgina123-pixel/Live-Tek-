@@ -308,7 +308,7 @@ export const en: Dict = {
   s_nao_existe_subscricao_para_cancelar: "No subscription to cancel",
   s_falha_ao_cancelar: "Failed to cancel",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "As a Services partner, you need an active plan to broadcast live.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "As a Retail partner, you only pay 10% commission per sale. A plan adds lives and premium tools.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "As a Retail partner, you only pay 5% commission per sale. A plan adds lives and premium tools.",
   s_plano_atual: "Current plan",
   s_fazer_upgrade: "Upgrade",
   s_cliente: "Client",

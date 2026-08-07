@@ -49,16 +49,142 @@ type Row = {
   invoice_count: number;
 };
 
-const FILTERS = ["all", "pending", "active", "expired", "cancelled", "rejected"] as const;
+const FILTERS = ["all", "pending", "active", "grace", "suspended", "expired", "cancelled", "rejected"] as const;
 const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { maximumFractionDigits: 0 })}`;
 const dt = (v?: string | null) => (v ? new Date(v).toLocaleDateString("pt-AO") : "—");
 
 const badgeFor = (status: string) => {
   if (status === "active") return "bg-primary/10 text-primary";
   if (status === "pending") return "bg-amber-500/10 text-amber-600";
+  if (status === "grace") return "bg-amber-500/10 text-amber-600";
+  if (status === "suspended") return "bg-destructive/10 text-destructive";
   if (status === "expired") return "bg-muted text-muted-foreground";
   return "bg-destructive/10 text-destructive";
 };
+
+type PlanRow = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  price_aoa: number;
+  period_days: number;
+  categories: string[] | null;
+  features: string[] | null;
+  sort_order: number;
+  is_active: boolean;
+};
+
+/** Gestão dinâmica de planos: preços, categorias e estado, sem nova versão da app. */
+function PlansAdmin() {
+  const [plans, setPlans] = useState<PlanRow[] | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, Partial<PlanRow>>>({});
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.from("subscription_plans").select("*").order("sort_order");
+    if (error) return toast.error(error.message);
+    setPlans((data as unknown as PlanRow[]) ?? []);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const save = async (p: PlanRow) => {
+    const d = draft[p.id] ?? {};
+    setSaving(p.id);
+    const { error } = await supabase
+      .from("subscription_plans")
+      .update({
+        name: (d.name ?? p.name).toString().trim(),
+        description: (d.description ?? p.description) || null,
+        price_aoa: Number(d.price_aoa ?? p.price_aoa),
+        period_days: Number(d.period_days ?? p.period_days),
+        categories: typeof d.categories === "string"
+          ? (d.categories as string).split(",").map((s) => s.trim()).filter(Boolean)
+          : (d.categories ?? p.categories ?? []),
+        is_active: d.is_active ?? p.is_active,
+        sort_order: Number(d.sort_order ?? p.sort_order),
+      })
+      .eq("id", p.id);
+    setSaving(null);
+    if (error) return toast.error(error.message);
+    toast.success(`Plano ${p.code} atualizado`);
+    setDraft((s) => ({ ...s, [p.id]: {} }));
+    load();
+  };
+
+  if (plans === null) {
+    return <div className="flex justify-center py-6"><Loader2 className="animate-spin text-primary" /></div>;
+  }
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold">Planos de serviços</h2>
+      {plans.map((p) => {
+        const d = draft[p.id] ?? {};
+        const set = (patch: Partial<PlanRow>) => setDraft((s) => ({ ...s, [p.id]: { ...s[p.id], ...patch } }));
+        return (
+          <div key={p.id} className="space-y-2 rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between">
+              <code className="rounded bg-muted px-2 py-0.5 text-[11px] font-semibold">{p.code}</code>
+              <label className="flex items-center gap-2 text-[11px]">
+                <input
+                  type="checkbox"
+                  checked={d.is_active ?? p.is_active}
+                  onChange={(e) => set({ is_active: e.target.checked })}
+                />
+                Ativo
+              </label>
+            </div>
+            <Input value={d.name ?? p.name} onChange={(e) => set({ name: e.target.value })} placeholder="Nome" />
+            <Input
+              value={d.description ?? p.description ?? ""}
+              onChange={(e) => set({ description: e.target.value })}
+              placeholder="Descrição"
+            />
+            <div className="grid grid-cols-3 gap-2">
+              <Input
+                type="number"
+                value={String(d.price_aoa ?? p.price_aoa)}
+                onChange={(e) => set({ price_aoa: Number(e.target.value) })}
+                placeholder="Valor (Kz)"
+              />
+              <Input
+                type="number"
+                value={String(d.period_days ?? p.period_days)}
+                onChange={(e) => set({ period_days: Number(e.target.value) })}
+                placeholder="Duração (dias)"
+              />
+              <Input
+                type="number"
+                value={String(d.sort_order ?? p.sort_order)}
+                onChange={(e) => set({ sort_order: Number(e.target.value) })}
+                placeholder="Prioridade"
+              />
+            </div>
+            <Input
+              value={
+                typeof d.categories === "string"
+                  ? (d.categories as string)
+                  : (d.categories ?? p.categories ?? []).join(", ")
+              }
+              onChange={(e) => set({ categories: e.target.value as unknown as string[] })}
+              placeholder="Categorias (separadas por vírgula)"
+            />
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] text-muted-foreground">{kz(p.price_aoa)} · {p.period_days} dias</p>
+              <Button size="sm" disabled={saving === p.id} onClick={() => save(p)}>
+                {saving === p.id ? <Loader2 size={14} className="animate-spin" /> : "Guardar"}
+              </Button>
+            </div>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
 
 function AdminSubscriptions() {
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -157,6 +283,8 @@ function AdminSubscriptions() {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar loja, e-mail ou referência" className="pl-9" />
         </div>
+
+        <PlansAdmin />
 
         {rows === null ? (
           <div className="flex justify-center py-10">

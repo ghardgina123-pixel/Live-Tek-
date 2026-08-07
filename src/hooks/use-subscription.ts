@@ -3,12 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type SubscriptionStatus = {
   partner_type: "retail" | "service";
+  service_category: string | null;
   subscription_required: boolean;
-  subscription_status: "active" | "inactive";
+  subscription_status: "active" | "grace" | "suspended" | "inactive";
   plan_code: string | null;
   plan_name: string | null;
   price_aoa: number | null;
+  started_at: string | null;
   expires_at: string | null;
+  grace_until: string | null;
+  days_remaining: number | null;
   max_lives_per_month: number | null;
   can_go_live: boolean;
 };

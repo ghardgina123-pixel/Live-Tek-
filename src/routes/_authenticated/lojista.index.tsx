@@ -162,6 +162,7 @@ async function uploadStoreAsset(userId: string, file: File, kind: "logo" | "cove
 function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () => void; feeRequired: boolean; feeAoa: number }) {
   const { t } = useT();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
@@ -276,6 +277,10 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
       await supabase.from("user_roles").insert({ user_id: user.id, role: "seller" });
       toast.success(feeRequired ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
       onCreated();
+      if (partnerType === "service") {
+        toast.info("Escolha o plano de serviços para concluir o registo.");
+        navigate({ to: "/lojista/subscricao" });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erro ao enviar";
       toast.error(msg);

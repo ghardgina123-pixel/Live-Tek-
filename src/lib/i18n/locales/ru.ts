@@ -309,7 +309,7 @@ export const ru: Dict = {
   s_nao_existe_subscricao_para_cancelar: "Нет подписки для отмены",
   s_falha_ao_cancelar: "Не удалось отменить",
   s_como_parceiro_de_servicos_precisa_de_um_plano_at: "Как партнер по услугам, вам нужен активный план для прямой трансляции.",
-  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Как розничный партнер, вы платите всего 10% комиссии с продажи. План добавляет прямые трансляции и премиум-инструменты.",
+  s_como_parceiro_de_retalho_paga_apenas_10_de_comis: "Как розничный партнер, вы платите всего 5% комиссии с продажи. План добавляет прямые трансляции и премиум-инструменты.",
   s_plano_atual: "Текущий план",
   s_fazer_upgrade: "Обновить",
   s_cliente: "Клиент",

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const COMMISSION_PCT = 10.0;
+const COMMISSION_PCT = 5.0;
 
 /**
  * Cria um Payment Intent (Multicaixa Express) para um pedido do cliente.
