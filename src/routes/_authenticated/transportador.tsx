@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
+import { PayoutWallet } from "@/components/PayoutWallet";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -180,6 +181,10 @@ function TransportadorPage() {
                 {existing.status === "suspended" && "Cadastro suspenso"}
               </span>
             </div>
+          )}
+
+          {existing && existing.status === "active" && (
+            <PayoutWallet kind="courier" subtitle="Ganhos das entregas concluídas." />
           )}
 
           <form onSubmit={submit} className="space-y-4">
