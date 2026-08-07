@@ -635,6 +635,14 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
           onChange={(e) => {
             setMicId(e.target.value);
             if (typeof window !== "undefined") localStorage.setItem(MIC_PREF_KEY, e.target.value);
+            void logLiveAuditEvent({
+              data: {
+                liveId,
+                kind: "mic_change",
+                message: `Microfone alterado para "${mics.find((d) => d.deviceId === e.target.value)?.label || "predefinido"}"`,
+                metadata: { deviceId: e.target.value || "default" },
+              },
+            }).catch(() => {});
           }}
           disabled={state === "publishing" || state === "connecting"}
           className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
