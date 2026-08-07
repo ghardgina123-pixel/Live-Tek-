@@ -133,6 +133,155 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      affiliate_commissions: {
+        Row: {
+          affiliate_id: string
+          amount_aoa: number
+          base_aoa: number
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string | null
+          rate_pct: number
+          referral_id: string | null
+          source: string
+          status: Database["public"]["Enums"]["affiliate_commission_status"]
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_aoa?: number
+          base_aoa?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          rate_pct?: number
+          referral_id?: string | null
+          source: string
+          status?: Database["public"]["Enums"]["affiliate_commission_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_aoa?: number
+          base_aoa?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          rate_pct?: number
+          referral_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["affiliate_commission_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commissions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commissions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commissions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_referrals: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["affiliate_referral_kind"]
+          referred_user_id: string
+          store_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["affiliate_referral_kind"]
+          referred_user_id: string
+          store_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["affiliate_referral_kind"]
+          referred_user_id?: string
+          store_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referrals_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_referrals_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_live_fees: {
         Row: {
           agency_id: string
@@ -2495,6 +2644,9 @@ export type Database = {
         Args: { _approve?: boolean; _reference: string }
         Returns: Json
       }
+      affiliate_dashboard: { Args: never; Returns: Json }
+      affiliate_get_or_create_code: { Args: never; Returns: Json }
+      affiliate_register_referral: { Args: { _code: string }; Returns: Json }
       approved_stores_count: { Args: never; Returns: number }
       calc_transaction_split: {
         Args: { _amount_aoa: number; _store_id: string }
@@ -2609,6 +2761,8 @@ export type Database = {
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
     }
     Enums: {
+      affiliate_commission_status: "pending" | "released" | "paid" | "cancelled"
+      affiliate_referral_kind: "user" | "store"
       agency_live_fee_status: "pending" | "paid" | "approved" | "rejected"
       agency_status: "pending" | "active" | "rejected" | "suspended"
       app_role: "customer" | "seller" | "admin"
@@ -2762,6 +2916,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      affiliate_commission_status: ["pending", "released", "paid", "cancelled"],
+      affiliate_referral_kind: ["user", "store"],
       agency_live_fee_status: ["pending", "paid", "approved", "rejected"],
       agency_status: ["pending", "active", "rejected", "suspended"],
       app_role: ["customer", "seller", "admin"],
