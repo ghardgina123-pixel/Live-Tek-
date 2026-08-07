@@ -59,6 +59,19 @@ export const KEYS = [
   "s_auditoria_da_live","s_csv","s_sem_eventos_registados","s_atualizar_registo","s_voltar_ao_perfil","s_configuracoes_da_loja",
   "s_menu_do_lojista","s_logo","s_configuracoes","s_sair_da_conta","s_live_teka_v1_0_feito_com","s_minha_conta",
   "s_como_cliente","s_como_lojista","s_suporte","s_administracao",
+  "s_confirmar_pedido","s_pagar","s_falha_ao_criar_pedido","s_remover_gosto","s_gostar","s_adicione_um_comentario",
+  "s_usuario","s_casa","s_nome_do_titular","s_telemovel","s_iban","s_numero_do_cartao",
+  "s_validade_mm_aa","s_apelido_opcional","s_adicionar_outra_conta","s_dados_de_pagamento","s_configurado","s_preencha_os_dados_de_pagamento",
+  "s_loja","s_a_receber","s_nome_da_loja","s_descricao","s_categoria","s_capa",
+  "s_nif","s_iban_conta","s_titular","s_comprovativo_de_pagamento","s_aprovacao_manual_feita_pela_administracao_apos_c","s_aprovacao_manual_feita_pela_administracao_gratui",
+  "s_loja_rejeitada","s_aguardando_aprovacao","s_loja_e_comprovativo_enviados_para_aprovacao","s_loja_enviada_para_aprovacao","s_atualizar","s_usar_minha_localizacao",
+  "s_sua_loja_foi_rejeitada_entre_em_contato_com_o_su","s_nao_foi_possivel_iniciar_a_transmissao","s_nenhum_pedido_ainda","s_nenhum_produto_adicione_o_primeiro","s_nome_2","s_preco_kz",
+  "s_estoque","s_imagem","s_editar_produto","s_novo_produto","s_cadastrar","s_dados_invalidos",
+  "s_nao_existe_subscricao_para_cancelar","s_falha_ao_cancelar","s_como_parceiro_de_servicos_precisa_de_um_plano_at","s_como_parceiro_de_retalho_paga_apenas_10_de_comis","s_plano_atual","s_fazer_upgrade",
+  "s_cliente","s_url","s_chave","s_no_ar","s_passar_ao_ar","s_microfone_ativo",
+  "s_fale_para_testar_o_microfone","s_idioma_regiao_e_moeda","s_afiliados","s_minha_loja","s_meus_produtos","s_pedidos_recebidos",
+  "s_financeiro_saques","s_crm_premium","s_quero_vender_registrar_loja","s_ajuda_e_suporte","s_termos_e_privacidade","s_aprovar_crm_premium",
+  "s_faca_login_para_acessar",
 ] as const;
 
 export type TKey = (typeof KEYS)[number];
