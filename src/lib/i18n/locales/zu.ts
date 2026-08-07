@@ -30,4 +30,5 @@ export const zu: Dict = {
   chat_placeholder: "Bhala umyalezo…", send: "Thumela", live_ended: "Ukusakaza kuphelile",
   stores: "Izitolo", products: "Imikhiqizo", price: "Intengo", stock: "Isitoko", description: "Incazelo", store: "Isitolo",
   notifications_title: "Izaziso", mark_all_read: "Maka konke njengokufundiwe", no_notifications: "Azikho izaziso",
+  province: "Isifundazwe", municipality: "Idolobha / Umasipala", district: "Isigceme", select_country_first: "Khetha izwe kuqala", select_province_first: "Khetha isifundazwe kuqala", select_municipality_first: "Khetha idolobha kuqala",
 };

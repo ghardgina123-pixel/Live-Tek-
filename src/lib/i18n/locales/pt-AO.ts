@@ -8,4 +8,5 @@ export const ptAO: Dict = {
   logout: "Sair", save: "Salvar", delete: "Apagar", my_orders: "Os meus pedidos", track_order: "Rastrear pedido",
   order_placed: "Pedido criado com sucesso", place_order: "Confirmar pedido", viewers: "Espectadores", likes: "Curtidas",
   settings: "Configurações", stock: "Estoque",
+  province: "Província", municipality: "Município", district: "Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro a província", select_municipality_first: "Selecione primeiro o município",
 };

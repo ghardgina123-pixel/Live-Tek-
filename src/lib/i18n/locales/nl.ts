@@ -30,4 +30,5 @@ export const nl: Dict = {
   chat_placeholder: "Schrijf een bericht…", send: "Verzenden", live_ended: "De uitzending is afgelopen",
   stores: "Winkels", products: "Producten", price: "Prijs", stock: "Voorraad", description: "Beschrijving", store: "Winkel",
   notifications_title: "Meldingen", mark_all_read: "Alles als gelezen markeren", no_notifications: "Geen meldingen",
+  province: "Provincie", municipality: "Stad / Gemeente", district: "Wijk", select_country_first: "Kies eerst een land", select_province_first: "Kies eerst een provincie", select_municipality_first: "Kies eerst een stad",
 };

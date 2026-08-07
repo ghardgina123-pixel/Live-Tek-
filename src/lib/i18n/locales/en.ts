@@ -29,4 +29,5 @@ export const en: Dict = {
   chat_placeholder: "Write a message…", send: "Send", live_ended: "The broadcast has ended",
   stores: "Stores", products: "Products", price: "Price", stock: "Stock", description: "Description", store: "Store",
   notifications_title: "Notifications", mark_all_read: "Mark all as read", no_notifications: "No notifications",
+  province: "State / Province", municipality: "City / Municipality", district: "District / Neighbourhood", select_country_first: "Select a country first", select_province_first: "Select a state/province first", select_municipality_first: "Select a city first",
 };

@@ -30,4 +30,5 @@ export const sw: Dict = {
   chat_placeholder: "Andika ujumbe…", send: "Tuma", live_ended: "Matangazo yamekwisha",
   stores: "Maduka", products: "Bidhaa", price: "Bei", stock: "Hisa", description: "Maelezo", store: "Duka",
   notifications_title: "Arifa", mark_all_read: "Weka zote kuwa zimesomwa", no_notifications: "Hakuna arifa",
+  province: "Mkoa / Jimbo", municipality: "Jiji / Manispaa", district: "Kata / Mtaa", select_country_first: "Chagua nchi kwanza", select_province_first: "Chagua mkoa kwanza", select_municipality_first: "Chagua jiji kwanza",
 };

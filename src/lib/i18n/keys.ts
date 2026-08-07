@@ -16,6 +16,7 @@ export const KEYS = [
   "country","region_settings","region_hint","edit_profile","guest","seller_panel",
   "live_now","viewers","likes","start_live","end_live","chat_placeholder","send","live_ended",
   "stores","products","price","stock","description","store",
+  "province","municipality","district","select_country_first","select_province_first","select_municipality_first",
   "notifications_title","mark_all_read","no_notifications",
 ] as const;
 

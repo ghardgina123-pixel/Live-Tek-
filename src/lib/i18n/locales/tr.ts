@@ -30,4 +30,5 @@ export const tr: Dict = {
   chat_placeholder: "Bir mesaj yazın…", send: "Gönder", live_ended: "Yayın sona erdi",
   stores: "Mağazalar", products: "Ürünler", price: "Fiyat", stock: "Stok", description: "Açıklama", store: "Mağaza",
   notifications_title: "Bildirimler", mark_all_read: "Tümünü okundu işaretle", no_notifications: "Bildirim yok",
+  province: "İl / Eyalet", municipality: "Şehir / İlçe", district: "Mahalle", select_country_first: "Önce ülkeyi seçin", select_province_first: "Önce ili seçin", select_municipality_first: "Önce şehri seçin",
 };

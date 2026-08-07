@@ -30,4 +30,5 @@ export const hi: Dict = {
   chat_placeholder: "संदेश लिखें…", send: "भेजें", live_ended: "प्रसारण समाप्त हो गया",
   stores: "दुकानें", products: "उत्पाद", price: "कीमत", stock: "स्टॉक", description: "विवरण", store: "दुकान",
   notifications_title: "सूचनाएँ", mark_all_read: "सभी को पढ़ा हुआ चिह्नित करें", no_notifications: "कोई सूचना नहीं",
+  province: "राज्य / प्रांत", municipality: "शहर / नगर", district: "ज़िला / मोहल्ला", select_country_first: "पहले देश चुनें", select_province_first: "पहले राज्य चुनें", select_municipality_first: "पहले शहर चुनें",
 };

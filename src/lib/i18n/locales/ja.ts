@@ -30,4 +30,5 @@ export const ja: Dict = {
   chat_placeholder: "メッセージを入力…", send: "送信", live_ended: "配信は終了しました",
   stores: "ショップ", products: "商品", price: "価格", stock: "在庫", description: "説明", store: "ショップ",
   notifications_title: "通知", mark_all_read: "すべて既読にする", no_notifications: "通知はありません",
+  province: "都道府県 / 州", municipality: "市区町村", district: "地区", select_country_first: "先に国を選択してください", select_province_first: "先に都道府県を選択してください", select_municipality_first: "先に市区町村を選択してください",
 };

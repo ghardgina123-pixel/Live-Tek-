@@ -12,4 +12,5 @@ export const ptBR: Dict = {
   region_hint: "Ao escolher o país, a moeda, as formas de pagamento e os mapas se ajustam automaticamente.",
   search_placeholder: "Buscar lojas, produtos…", search: "Buscar", seller_panel: "Painel do lojista",
   cart_empty: "Seu carrinho está vazio", nav_shorts: "Shorts",
+  province: "Estado", municipality: "Cidade / Município", district: "Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro o estado", select_municipality_first: "Selecione primeiro a cidade",
 };

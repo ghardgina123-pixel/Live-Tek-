@@ -29,4 +29,5 @@ export const ptPT: Dict = {
   chat_placeholder: "Escreva uma mensagem…", send: "Enviar", live_ended: "A transmissão terminou",
   stores: "Lojas", products: "Produtos", price: "Preço", stock: "Stock", description: "Descrição", store: "Loja",
   notifications_title: "Notificações", mark_all_read: "Marcar todas como lidas", no_notifications: "Sem notificações",
+  province: "Província / Região", municipality: "Município / Cidade", district: "Distrito / Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro a província", select_municipality_first: "Selecione primeiro o município",
 };

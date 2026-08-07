@@ -30,4 +30,5 @@ export const ru: Dict = {
   chat_placeholder: "Напишите сообщение…", send: "Отправить", live_ended: "Трансляция завершена",
   stores: "Магазины", products: "Товары", price: "Цена", stock: "Наличие", description: "Описание", store: "Магазин",
   notifications_title: "Уведомления", mark_all_read: "Отметить все как прочитанные", no_notifications: "Нет уведомлений",
+  province: "Область / Регион", municipality: "Город / Муниципалитет", district: "Район", select_country_first: "Сначала выберите страну", select_province_first: "Сначала выберите регион", select_municipality_first: "Сначала выберите город",
 };

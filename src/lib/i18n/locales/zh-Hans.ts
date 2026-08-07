@@ -30,4 +30,5 @@ export const zhHans: Dict = {
   chat_placeholder: "输入消息…", send: "发送", live_ended: "直播已结束",
   stores: "店铺", products: "商品", price: "价格", stock: "库存", description: "描述", store: "店铺",
   notifications_title: "通知", mark_all_read: "全部标记为已读", no_notifications: "暂无通知",
+  province: "省 / 州", municipality: "城市 / 区县", district: "街道 / 社区", select_country_first: "请先选择国家/地区", select_province_first: "请先选择省/州", select_municipality_first: "请先选择城市",
 };
