@@ -74,7 +74,7 @@ function LiveDemo() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-black text-white">
       <div className="relative aspect-[9/16] w-full overflow-hidden">
-        <img src={demo.image} alt={demo.name} className="h-full w-full object-cover opacity-80" />
+        <img loading="lazy" decoding="async" src={demo.image} alt={demo.name} className="h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
         <Link to="/home" className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur" aria-label="Voltar">
           <ArrowLeft size={18} />

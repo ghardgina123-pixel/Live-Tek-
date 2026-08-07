@@ -230,7 +230,7 @@ function ClientesPanel({ customers, loading }: { customers: CustomerRow[]; loadi
           {filtered.map((c) => (
             <li key={c.customer_id} className="flex items-center gap-3 rounded-xl border border-border p-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent text-xs font-bold uppercase text-accent-foreground">
-                {c.avatar_url ? <img src={c.avatar_url} alt="" className="h-full w-full object-cover" /> : (c.display_name ?? "?").slice(0, 2)}
+                {c.avatar_url ? <img loading="lazy" decoding="async" src={c.avatar_url} alt="" className="h-full w-full object-cover" /> : (c.display_name ?? "?").slice(0, 2)}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{c.display_name ?? "Cliente"}</p>

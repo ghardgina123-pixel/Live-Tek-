@@ -252,7 +252,7 @@ function ShortCard({
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pb-8 text-white">
         <div className="flex items-center gap-2">
           {short.product?.stores?.logo_url ? (
-            <img src={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
+            <img loading="lazy" decoding="async" src={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-white/20" />
           )}
