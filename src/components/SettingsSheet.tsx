@@ -10,10 +10,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 
 type Props = { trigger: React.ReactNode };
 
 export function SettingsSheet({ trigger }: Props) {
+  const { t } = useT();
   const { user, signOut } = useAuth();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
@@ -41,48 +43,48 @@ export function SettingsSheet({ trigger }: Props) {
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent side="right" className="w-[88vw] max-w-[400px] overflow-y-auto p-0">
         <SheetHeader className="px-5 pt-5 pb-3">
-          <SheetTitle>Configurações</SheetTitle>
+          <SheetTitle>{t("s_configuracoes")}</SheetTitle>
           <SheetDescription className="text-xs">
-            {user?.email ?? "Faça login para acessar"}
+            {user?.email ?? t("s_faca_login_para_acessar")}
           </SheetDescription>
         </SheetHeader>
 
-        <Section title="Minha conta">
-          <Row icon={UserIcon} label="Editar perfil" to="/editar-perfil" onClick={close} />
-          <Row icon={MapPin} label="Endereços para entrega" to="/enderecos" onClick={close} />
-          <Row icon={ShieldCheck} label="Segurança e privacidade" to="/seguranca" onClick={close} />
-          <Row icon={Languages} label="Idioma, região e moeda" to="/idioma" onClick={close} />
+        <Section title={t("s_minha_conta")}>
+          <Row icon={UserIcon} label={t("s_editar_perfil")} to="/editar-perfil" onClick={close} />
+          <Row icon={MapPin} label={t("s_enderecos_para_entrega")} to="/enderecos" onClick={close} />
+          <Row icon={ShieldCheck} label={t("s_seguranca_e_privacidade")} to="/seguranca" onClick={close} />
+          <Row icon={Languages} label={t("s_idioma_regiao_e_moeda")} to="/idioma" onClick={close} />
         </Section>
 
-        <Section title="Como cliente">
-          <Row icon={ShoppingBag} label="Minhas compras" to="/compras" onClick={close} badge="3" />
-          <Row icon={Heart} label="Favoritos" to="/favoritos" onClick={close} />
-          <Row icon={CreditCard} label="Métodos de pagamento" to="/pagamentos" onClick={close} />
-          <Row icon={Users} label="Afiliados" to="/afiliados" onClick={close} />
+        <Section title={t("s_como_cliente")}>
+          <Row icon={ShoppingBag} label={t("s_minhas_compras")} to="/compras" onClick={close} badge="3" />
+          <Row icon={Heart} label={t("s_favoritos")} to="/favoritos" onClick={close} />
+          <Row icon={CreditCard} label={t("s_metodos_de_pagamento")} to="/pagamentos" onClick={close} />
+          <Row icon={Users} label={t("s_afiliados")} to="/afiliados" onClick={close} />
         </Section>
 
-        <Section title="Como lojista">
+        <Section title={t("s_como_lojista")}>
           {hasStore ? (
             <>
-              <Row icon={StoreIcon} label="Minha loja" to="/lojista" onClick={close} />
-              <Row icon={Package} label="Meus produtos" to="/lojista" onClick={close} />
-              <Row icon={ClipboardList} label="Pedidos recebidos" to="/lojista" onClick={close} />
-              <Row icon={Wallet} label="Financeiro / Saques" to="/lojista" onClick={close} />
-              <Row icon={Sparkles} label="CRM Premium" to="/lojista-crm" onClick={close} badge="PRO" badgeTone="premium" />
+              <Row icon={StoreIcon} label={t("s_minha_loja")} to="/lojista" onClick={close} />
+              <Row icon={Package} label={t("s_meus_produtos")} to="/lojista" onClick={close} />
+              <Row icon={ClipboardList} label={t("s_pedidos_recebidos")} to="/lojista" onClick={close} />
+              <Row icon={Wallet} label={t("s_financeiro_saques")} to="/lojista" onClick={close} />
+              <Row icon={Sparkles} label={t("s_crm_premium")} to="/lojista-crm" onClick={close} badge="PRO" badgeTone="premium" />
             </>
           ) : (
-            <Row icon={StoreIcon} label="Quero vender / Registrar loja" to="/lojista" onClick={close} />
+            <Row icon={StoreIcon} label={t("s_quero_vender_registrar_loja")} to="/lojista" onClick={close} />
           )}
         </Section>
 
-        <Section title="Suporte">
-          <Row icon={HelpCircle} label="Ajuda e suporte" to="/ajuda" onClick={close} />
-          <Row icon={FileText} label="Termos e privacidade" to="/termos" onClick={close} />
+        <Section title={t("s_suporte")}>
+          <Row icon={HelpCircle} label={t("s_ajuda_e_suporte")} to="/ajuda" onClick={close} />
+          <Row icon={FileText} label={t("s_termos_e_privacidade")} to="/termos" onClick={close} />
         </Section>
 
         {isAdmin && (
-          <Section title="Administração">
-            <Row icon={ShieldAlert} label="Aprovar CRM Premium" to="/admin-crm" onClick={close} />
+          <Section title={t("s_administracao")}>
+            <Row icon={ShieldAlert} label={t("s_aprovar_crm_premium")} to="/admin-crm" onClick={close} />
           </Section>
         )}
 
@@ -92,7 +94,7 @@ export function SettingsSheet({ trigger }: Props) {
               onClick={handleLogout}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-semibold text-destructive"
             >
-              <LogOut size={16} /> Sair da conta
+              <LogOut size={16} /> {t("s_sair_da_conta")}
             </button>
           ) : (
             <Link
@@ -103,7 +105,7 @@ export function SettingsSheet({ trigger }: Props) {
               Entrar
             </Link>
           )}
-          <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Teká v1.0 · Feito com 💚</p>
+          <p className="mt-4 text-center text-[10px] text-muted-foreground">{t("s_live_teka_v1_0_feito_com")}</p>
         </div>
       </SheetContent>
     </Sheet>
@@ -139,8 +141,7 @@ function Row({
         <span
           className={
             badgeTone === "premium"
-              ? "rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[9px] font-bold text-white"
-              : "rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground"
+              ? "rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[9px] font-bold text-white" : "rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground"
           }
         >
           {badge}

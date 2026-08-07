@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -39,6 +40,7 @@ type PaymentMethod = {
 };
 
 function Checkout() {
+  const { t } = useT();
   const nav = useNavigate();
   const { user } = useAuth();
   const items = useCart();
@@ -105,8 +107,8 @@ function Checkout() {
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-glow)]">
           <Check size={40} strokeWidth={3} />
         </div>
-        <h1 className="mt-5 text-2xl font-bold">Pedido confirmado!</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Você receberá atualizações pelo chat e e-mail. Obrigado por comprar conosco 💚</p>
+        <h1 className="mt-5 text-2xl font-bold">{t("s_pedido_confirmado")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("s_voce_recebera_atualizacoes_pelo_chat_e_e_mail_ob")}</p>
         {orderId && <p className="mt-2 text-xs text-muted-foreground">Pedido nº <span className="font-mono">{orderId.slice(0, 8)}</span></p>}
         <button onClick={() => nav({ to: "/home" })} className="mt-8 h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">
           Voltar para o início
@@ -119,7 +121,7 @@ function Checkout() {
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-32">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-5 py-4">
         <button onClick={() => history.back()}><ArrowLeft size={20} /></button>
-        <h1 className="flex-1 text-lg font-bold">Finalizar compra</h1>
+        <h1 className="flex-1 text-lg font-bold">{t("s_finalizar_compra")}</h1>
         <div className="rounded-full bg-muted px-2 py-1 text-xs font-semibold">
           {currency.flag} {currency.code}
         </div>
@@ -127,14 +129,14 @@ function Checkout() {
 
       <section className="px-5 pt-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase text-muted-foreground">Entregar em</h2>
-          <Link to="/enderecos" className="text-xs font-semibold text-primary">Gerenciar</Link>
+          <h2 className="text-xs font-bold uppercase text-muted-foreground">{t("s_entregar_em")}</h2>
+          <Link to="/enderecos" className="text-xs font-semibold text-primary">{t("s_gerenciar")}</Link>
         </div>
         {addrLoading ? (
           <div className="mt-2 flex justify-center py-4"><Loader2 className="animate-spin text-primary" size={18} /></div>
         ) : addresses.length === 0 ? (
           <Link to="/enderecos" className="mt-2 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border p-4 text-sm font-semibold text-primary">
-            <Plus size={16} /> Adicionar endereço de entrega
+            <Plus size={16} /> {t("s_adicionar_endereco_de_entrega")}
           </Link>
         ) : (
           <div className="mt-2 space-y-2">
@@ -178,7 +180,7 @@ function Checkout() {
       </section>
 
       <section className="px-5 pt-5">
-        <h2 className="text-xs font-bold uppercase text-muted-foreground">Forma de pagamento</h2>
+        <h2 className="text-xs font-bold uppercase text-muted-foreground">{t("s_forma_de_pagamento")}</h2>
         <div className="mt-2">
           <CurrencySelector variant="row" />
         </div>
@@ -206,29 +208,29 @@ function Checkout() {
       </section>
 
       <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatPrice(subtotal, currency)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">{t("s_subtotal")}</span><span>{formatPrice(subtotal, currency)}</span></div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Frete</span>
-          <span>{selectedAddr ? formatPrice(shippingBrl, currency) : <span className="text-muted-foreground">Selecione um endereço</span>}</span>
+          <span className="text-muted-foreground">{t("s_frete")}</span>
+          <span>{selectedAddr ? formatPrice(shippingBrl, currency) : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}</span>
         </div>
-        {isInstant && <div className="flex justify-between"><span className="text-muted-foreground">Desconto à vista</span><span className="text-primary">- {formatPrice(totalBrl * 0.05, currency)}</span></div>}
+        {isInstant && <div className="flex justify-between"><span className="text-muted-foreground">{t("s_desconto_a_vista")}</span><span className="text-primary">- {formatPrice(totalBrl * 0.05, currency)}</span></div>}
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
-          <span>Total</span><span>{formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</span>
+          <span>{t("s_total")}</span><span>{formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</span>
         </div>
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
-        <ShieldCheck size={14} /> Garantia Live Teká: reembolso total se algo der errado
+        <ShieldCheck size={14} /> {t("s_garantia_live_teka_reembolso_total_se_algo_der_e")}
       </div>
 
       <div className="fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background p-3">
         <button
           onClick={async () => {
-            if (!user) return toast.error("Faça login para finalizar a compra");
-            if (!selectedAddr) return toast.error("Selecione um endereço de entrega");
-            if (!selectedMethod) return toast.error("Selecione um método de pagamento");
+            if (!user) return toast.error(t("s_faca_login_para_finalizar_a_compra"));
+            if (!selectedAddr) return toast.error(t("s_selecione_um_endereco_de_entrega"));
+            if (!selectedMethod) return toast.error(t("s_selecione_um_metodo_de_pagamento"));
             const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
-            if (storeIds.length !== 1) return toast.error("Carrinho com lojas diferentes não é suportado");
+            if (storeIds.length !== 1) return toast.error(t("s_carrinho_com_lojas_diferentes_nao_e_suportado"));
             setSubmitting(true);
             const { data, error } = await supabase.rpc("create_order_with_items", {
               p_store_id: storeIds[0],
@@ -237,16 +239,16 @@ function Checkout() {
               p_payment_method: selectedMethod.method_type,
             });
             setSubmitting(false);
-            if (error) return toast.error(error.message || "Falha ao criar pedido");
+            if (error) return toast.error(error.message || t("s_falha_ao_criar_pedido"));
             setOrderId(data as unknown as string);
             setDone(true);
             cartStore.clear();
-            toast.success("Pedido realizado!");
+            toast.success(t("s_pedido_realizado"));
           }}
           disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0}
           className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]"
         >
-          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? "Confirmar pedido" : "Pagar"} {formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</>}
+          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : t("s_pagar")} {formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</>}
         </button>
       </div>
     </div>

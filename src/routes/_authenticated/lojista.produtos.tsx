@@ -10,14 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { productSchema } from "@/lib/schemas";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/produtos")({
   head: () => ({ meta: [{ title: "Produtos — Lojista" }] }),
-  component: () => (
-    <LojistaShell title="Produtos">
-      <Produtos />
-    </LojistaShell>
-  ),
+  component: ShellPage,
 });
 
 type Product = {
@@ -32,6 +29,7 @@ type Product = {
 };
 
 function Produtos() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +48,7 @@ function Produtos() {
     if (!confirm("Excluir este produto?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Produto excluído");
+    toast.success(t("s_produto_excluido"));
     load();
   };
 
@@ -62,16 +60,16 @@ function Produtos() {
         <h2 className="text-sm font-bold">{items.length} produto(s)</h2>
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
-            <Button size="sm" onClick={() => setEditing(null)}><Plus size={16} /> Novo</Button>
+            <Button size="sm" onClick={() => setEditing(null)}><Plus size={16} /> {t("s_novo")}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-[420px]">
-            <DialogHeader><DialogTitle>{editing ? "Editar produto" : "Novo produto"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing ? t("s_editar_produto") : t("s_novo_produto")}</DialogTitle></DialogHeader>
             <ProductForm storeId={store.id} initial={editing} onDone={() => { setOpen(false); setEditing(null); load(); }} />
           </DialogContent>
         </Dialog>
       </div>
       {loading ? (
-        <ul className="space-y-2" aria-busy="true" aria-label="Carregando produtos">
+        <ul className="space-y-2" aria-busy="true" aria-label={t("s_carregando_produtos")}>
           {Array.from({ length: 4 }).map((_, i) => (
             <li key={i} className="flex items-center gap-3 rounded-xl border border-border p-3">
               <div className="h-12 w-12 animate-pulse rounded-lg bg-muted" />
@@ -83,7 +81,7 @@ function Produtos() {
           ))}
         </ul>
       ) : items.length === 0 ? (
-        <Empty label="Nenhum produto. Adicione o primeiro!" />
+        <Empty label={t("s_nenhum_produto_adicione_o_primeiro")} />
       ) : (
         <ul className="space-y-2">
           {items.map((p) => (
@@ -99,8 +97,8 @@ function Produtos() {
                   <p className="mt-1 text-[10px] text-destructive">Motivo: {p.rejection_reason}</p>
                 )}
               </div>
-              <button onClick={() => { setEditing(p); setOpen(true); }} className="text-muted-foreground p-1" aria-label="Editar"><Pencil size={16} /></button>
-              <button onClick={() => del(p.id)} className="text-destructive p-1" aria-label="Excluir"><Trash2 size={16} /></button>
+              <button onClick={() => { setEditing(p); setOpen(true); }} className="text-muted-foreground p-1" aria-label={t("s_editar")}><Pencil size={16} /></button>
+              <button onClick={() => del(p.id)} className="text-destructive p-1" aria-label={t("s_excluir")}><Trash2 size={16} /></button>
             </li>
           ))}
         </ul>
@@ -110,6 +108,7 @@ function Produtos() {
 }
 
 function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: Product | null; onDone: () => void }) {
+  const { t } = useT();
   const [form, setForm] = useState({
     name: initial?.name ?? "",
     description: initial?.description ?? "",
@@ -124,7 +123,7 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
     const priceAoa = Number(form.price_aoa);
     const stock = Number(form.stock);
     const parsed = productSchema.safeParse({ name: form.name, description: form.description, price_aoa: priceAoa, stock });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? t("s_dados_invalidos"));
     setBusy(true);
     try {
       let image_url = initial?.image_url ?? null;
@@ -150,11 +149,11 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
       if (initial) {
         const { error } = await supabase.from("products").update({ ...payload, status: "pending", rejection_reason: null }).eq("id", initial.id);
         if (error) throw error;
-        toast.success("Produto atualizado — reenviado para aprovação");
+        toast.success(t("s_produto_atualizado_reenviado_para_aprovacao"));
       } else {
         const { error } = await supabase.from("products").insert({ ...payload, store_id: storeId });
         if (error) throw error;
-        toast.success("Produto enviado para aprovação");
+        toast.success(t("s_produto_enviado_para_aprovacao"));
       }
       onDone();
     } catch (err: unknown) {
@@ -166,16 +165,16 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <Field label="Nome *"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-      <Field label="Descrição"><Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
+      <Field label={t("s_nome_2")}><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+      <Field label={t("s_descricao")}><Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Preço (Kz) *"><Input type="number" step="1" value={form.price_aoa} onChange={(e) => setForm({ ...form, price_aoa: e.target.value })} /></Field>
-        <Field label="Estoque"><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></Field>
+        <Field label={t("s_preco_kz")}><Input type="number" step="1" value={form.price_aoa} onChange={(e) => setForm({ ...form, price_aoa: e.target.value })} /></Field>
+        <Field label={t("s_estoque")}><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></Field>
       </div>
-      <Field label="Imagem">
+      <Field label={t("s_imagem")}>
         <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
       </Field>
-      <Button type="submit" disabled={busy} className="w-full">{busy ? <Loader2 className="animate-spin" /> : initial ? "Salvar alterações" : "Cadastrar"}</Button>
+      <Button type="submit" disabled={busy} className="w-full">{busy ? <Loader2 className="animate-spin" /> : initial ? t("s_salvar_alteracoes") : t("s_cadastrar")}</Button>
     </form>
   );
 }
@@ -197,4 +196,13 @@ function StatusBadge({ status }: { status: string }) {
 
 function Empty({ label }: { label: string }) {
   return <div className="rounded-xl border border-dashed border-border py-10 text-center text-xs text-muted-foreground">{label}</div>;
+}
+
+function ShellPage() {
+  const { t } = useT();
+  return (
+    <LojistaShell title={t("s_produtos")}>
+      <Produtos />
+    </LojistaShell>
+  );
 }

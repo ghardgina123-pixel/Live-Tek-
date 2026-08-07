@@ -22,6 +22,7 @@ import {
   switchLiveCamera,
   type LiveCameraDTO,
 } from "@/lib/live-cameras.functions";
+import { useT } from "@/lib/i18n";
 
 const statusLabel: Record<string, string> = {
   idle: "Parada",
@@ -45,6 +46,7 @@ const statusTone: Record<string, string> = {
  * alternar a fonte apresentada aos espetadores com um clique.
  */
 export function LiveCameraManager({ liveId }: { liveId: string }) {
+  const { t } = useT();
   const list = useServerFn(listLiveCameras);
   const create = useServerFn(createLiveCamera);
   const start = useServerFn(startLiveCamera);
@@ -78,15 +80,15 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
   }, [reload]);
 
   const add = async () => {
-    if (!label.trim()) return toast.error("Dê um nome à câmara");
+    if (!label.trim()) return toast.error(t("s_de_um_nome_a_camara"));
     if (sourceType === "rtsp" && !sourceUrl.trim())
-      return toast.error("Indique a URL RTSP da câmara");
+      return toast.error(t("s_indique_a_url_rtsp_da_camara"));
     setSaving(true);
     try {
       await create({
         data: { liveId, label: label.trim(), sourceType, sourceUrl: sourceUrl.trim() || undefined },
       });
-      toast.success("Câmara ligada à live");
+      toast.success(t("s_camara_ligada_a_live"));
       setOpen(false);
       setLabel("");
       setSourceUrl("");
@@ -115,19 +117,19 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
     <section className="mt-3 rounded-2xl border bg-card p-3">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-          <Cctv size={15} className="text-primary" /> Câmaras da live
+          <Cctv size={15} className="text-primary" /> {t("s_camaras_da_live")}
         </h3>
         <div className="flex items-center gap-1">
           <Button
             size="sm"
             variant="ghost"
             onClick={() => void reload()}
-            aria-label="Atualizar estado"
+            aria-label={t("s_atualizar_estado")}
           >
             <RefreshCw size={14} />
           </Button>
           <Button size="sm" onClick={() => setOpen(true)}>
-            <Plus size={14} className="mr-1" /> Câmara IP
+            <Plus size={14} className="mr-1" /> {t("s_camara_ip")}
           </Button>
         </div>
       </div>
@@ -184,8 +186,8 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 
             {(cam.ingressUrl || cam.streamKey) && cam.sourceType !== "rtsp" && (
               <div className="mt-2 space-y-1 rounded-lg bg-muted/50 p-2 text-[11px]">
-                {cam.ingressUrl && <CopyRow label="URL" value={cam.ingressUrl} />}
-                {cam.streamKey && <CopyRow label="Chave" value={cam.streamKey} />}
+                {cam.ingressUrl && <CopyRow label={t("s_url")} value={cam.ingressUrl} />}
+                {cam.streamKey && <CopyRow label={t("s_chave")} value={cam.streamKey} />}
               </div>
             )}
 
@@ -207,7 +209,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 ) : (
                   <Radio size={13} className="mr-1" />
                 )}
-                {cam.isActive ? "No ar" : "Passar ao ar"}
+                {cam.isActive ? t("s_no_ar") : t("s_passar_ao_ar")}
               </Button>
               {cam.sourceType !== "phone" && (
                 <>
@@ -224,7 +226,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                         )
                       }
                     >
-                      <Power size={13} className="mr-1" /> Parar
+                      <Power size={13} className="mr-1" /> {t("s_parar")}
                     </Button>
                   ) : (
                     <Button
@@ -239,7 +241,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                         )
                       }
                     >
-                      <Power size={13} className="mr-1" /> Ligar
+                      <Power size={13} className="mr-1" /> {t("s_ligar")}
                     </Button>
                   )}
                   <Button
@@ -265,43 +267,43 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       </ul>
 
       {cameras?.length === 0 && (
-        <p className="py-2 text-center text-xs text-muted-foreground">Nenhuma câmara registada.</p>
+        <p className="py-2 text-center text-xs text-muted-foreground">{t("s_nenhuma_camara_registada")}</p>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ligar câmara externa</DialogTitle>
+            <DialogTitle>{t("s_ligar_camara_externa")}</DialogTitle>
             <DialogDescription>
               Câmaras IP da loja (RTSP/ONVIF) na mesma rede, ou encoders RTMP/WHIP.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label htmlFor="cam-label">Nome</Label>
+              <Label htmlFor="cam-label">{t("s_nome")}</Label>
               <Input
                 id="cam-label"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="Câmara de segurança (plano geral)"
+                placeholder={t("s_camara_de_seguranca_plano_geral")}
               />
             </div>
             <div>
-              <Label htmlFor="cam-type">Tipo de fonte</Label>
+              <Label htmlFor="cam-type">{t("s_tipo_de_fonte")}</Label>
               <select
                 id="cam-type"
                 value={sourceType}
                 onChange={(e) => setSourceType(e.target.value as typeof sourceType)}
                 className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
               >
-                <option value="rtsp">Câmara IP / ONVIF (RTSP)</option>
-                <option value="rtmp">Encoder RTMP</option>
-                <option value="whip">Encoder WHIP (WebRTC)</option>
+                <option value="rtsp">{t("s_camara_ip_onvif_rtsp")}</option>
+                <option value="rtmp">{t("s_encoder_rtmp")}</option>
+                <option value="whip">{t("s_encoder_whip_webrtc")}</option>
               </select>
             </div>
             {sourceType === "rtsp" && (
               <div>
-                <Label htmlFor="cam-url">URL RTSP</Label>
+                <Label htmlFor="cam-url">{t("s_url_rtsp")}</Label>
                 <Input
                   id="cam-url"
                   value={sourceUrl}
@@ -331,6 +333,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 }
 
 function CopyRow({ label, value }: { label: string; value: string }) {
+  const { t } = useT();
   return (
     <div className="flex items-center gap-1">
       <span className="shrink-0 font-semibold">{label}:</span>
@@ -341,7 +344,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
         className="ml-auto shrink-0 text-primary"
         onClick={() => {
           void navigator.clipboard.writeText(value);
-          toast.success("Copiado");
+          toast.success(t("s_copiado"));
         }}
       >
         <Copy size={12} />

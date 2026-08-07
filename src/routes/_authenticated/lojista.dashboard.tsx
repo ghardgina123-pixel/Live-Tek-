@@ -5,6 +5,7 @@ import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { PartnerSettlementCard } from "@/components/PartnerSettlementCard";
 import { supabase } from "@/integrations/supabase/client";
 import { computeDashboardStats } from "@/lib/settlement";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/dashboard")({
   head: () => ({ meta: [{ title: "Visão Geral — Lojista" }] }),
@@ -14,14 +15,16 @@ export const Route = createFileRoute("/_authenticated/lojista/dashboard")({
 type Stats = { products: number } & ReturnType<typeof computeDashboardStats>;
 
 function Dashboard() {
+  const { t } = useT();
   return (
-    <LojistaShell title="Visão Geral">
+    <LojistaShell title={t("s_visao_geral")}>
       <DashboardContent />
     </LojistaShell>
   );
 }
 
 function DashboardContent() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const [stats, setStats] = useState<Stats | null>(null);
 
@@ -46,15 +49,15 @@ function DashboardContent() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl p-4 text-white" style={{ background: "var(--gradient-brand)" }}>
-        <p className="text-xs opacity-80">Receita total (pedidos pagos)</p>
+        <p className="text-xs opacity-80">{t("s_receita_total_pedidos_pagos")}</p>
         <p className="text-2xl font-bold">Kz {stats.revenue.toLocaleString("pt-AO")}</p>
         <p className="mt-1 text-[11px] opacity-80">{stats.ordersPaid} de {stats.orders} pedidos pagos</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <StatCard icon={Package} label="Produtos" value={String(stats.products)} />
-        <StatCard icon={ShoppingBag} label="Pedidos" value={String(stats.orders)} />
-        <StatCard icon={Wallet} label="A receber" value={`${stats.payoutsPending.toLocaleString("pt-AO", { maximumFractionDigits: 0 })} AOA`} />
+        <StatCard icon={Package} label={t("s_produtos")} value={String(stats.products)} />
+        <StatCard icon={ShoppingBag} label={t("s_pedidos")} value={String(stats.orders)} />
+        <StatCard icon={Wallet} label={t("s_a_receber")} value={`${stats.payoutsPending.toLocaleString("pt-AO", { maximumFractionDigits: 0 })} AOA`} />
       </div>
 
       {store && <PartnerSettlementCard storeId={store.id} />}
@@ -62,7 +65,7 @@ function DashboardContent() {
       <div className="rounded-2xl border border-border p-4">
         <div className="mb-3 flex items-center gap-2">
           <TrendingUp size={16} className="text-primary" />
-          <h3 className="text-sm font-bold">Vendas — últimos 7 dias</h3>
+          <h3 className="text-sm font-bold">{t("s_vendas_ultimos_7_dias")}</h3>
         </div>
         <div className="flex h-32 items-end gap-1.5">
           {stats.daily.map((d) => (
