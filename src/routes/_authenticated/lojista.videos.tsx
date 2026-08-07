@@ -227,9 +227,10 @@ function VideosManager() {
                     src={v.video_url}
                     poster={v.thumbnail_url ?? undefined}
                     className="h-full w-full object-cover"
-                    muted
                     playsInline
                     preload="metadata"
+                    controls
+                    controlsList="nodownload"
                   />
                   <span className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] text-white">
                     {v.views} views
