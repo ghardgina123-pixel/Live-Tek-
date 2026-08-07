@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Check, Globe, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { regionStore, useRegion } from "@/lib/region";
-import { LANGUAGE_NAMES, useT, type Lang } from "@/lib/i18n";
+import { useT } from "@/lib/i18n";
 
 type Row = {
   id: string;
@@ -57,7 +57,6 @@ export function RegionSelector({ onChanged }: { onChanged?: (countryId: string) 
           <div className="flex-1">
             <p className="text-sm font-semibold">{region.name}</p>
             <p className="text-xs text-muted-foreground">
-              {LANGUAGE_NAMES[(region.language_code as Lang)] ?? region.language_code} ·{" "}
               {region.currency_code} ({region.currency_symbol}) · {region.phone_prefix ?? "—"}
             </p>
           </div>
