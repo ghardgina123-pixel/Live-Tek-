@@ -2256,16 +2256,20 @@ export type Database = {
           logo_url: string | null
           municipality_id: string | null
           name: string
+          opening_hours: string | null
           owner_id: string
           partner_type: Database["public"]["Enums"]["partner_type"]
           phone: string | null
           province_id: string | null
           rating: number | null
           rejection_reason: string | null
+          service_category: string | null
+          service_tags: string[]
           signup_fee_required: boolean
           slug: string | null
           status: Database["public"]["Enums"]["store_status"]
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           category?: string | null
@@ -2282,16 +2286,20 @@ export type Database = {
           logo_url?: string | null
           municipality_id?: string | null
           name: string
+          opening_hours?: string | null
           owner_id: string
           partner_type?: Database["public"]["Enums"]["partner_type"]
           phone?: string | null
           province_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          service_category?: string | null
+          service_tags?: string[]
           signup_fee_required?: boolean
           slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           category?: string | null
@@ -2308,16 +2316,20 @@ export type Database = {
           logo_url?: string | null
           municipality_id?: string | null
           name?: string
+          opening_hours?: string | null
           owner_id?: string
           partner_type?: Database["public"]["Enums"]["partner_type"]
           phone?: string | null
           province_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
+          service_category?: string | null
+          service_tags?: string[]
           signup_fee_required?: boolean
           slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: [
           {
