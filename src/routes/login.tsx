@@ -8,6 +8,11 @@ import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
+import {
+  checkLoginThrottle,
+  registerLoginFailure,
+  clearLoginThrottle,
+} from "@/lib/auth-throttle.functions";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -37,28 +42,40 @@ function Login() {
     e.preventDefault();
     setBusy(true);
     const cleanEmail = email.trim().toLowerCase();
-    console.info("[login] submit", { email: cleanEmail, pwdLen: pwd.length });
+    // Anti-força-bruta: bloqueio temporário após tentativas falhadas.
+    try {
+      const gate = await checkLoginThrottle({ data: { email: cleanEmail } });
+      if (gate.blocked) {
+        setBusy(false);
+        toast.error(
+          `Demasiadas tentativas. Tente novamente em ${Math.ceil(gate.retryAfterSeconds / 60)} min.`,
+        );
+        return;
+      }
+    } catch {
+      // Falha do serviço de throttle não deve impedir o login legítimo.
+    }
     const { data, error } = await supabase.auth.signInWithPassword({
       email: cleanEmail,
       password: pwd,
     });
     setBusy(false);
     if (error) {
-      // Log detalhado para debug do gestor do Chrome / API
-      console.error("[login] falha", {
-        name: error.name,
-        message: error.message,
-        status: (error as { status?: number }).status,
-        code: (error as { code?: string }).code,
-      });
-      const msg =
-        error.message === "Invalid login credentials"
-          ? "E-mail ou senha incorretos"
-          : `[${(error as { code?: string }).code ?? error.name}] ${error.message}`;
-      toast.error(msg);
+      let blockedMsg: string | null = null;
+      try {
+        const res = await registerLoginFailure({ data: { email: cleanEmail } });
+        if (res.blocked) {
+          blockedMsg = `Demasiadas tentativas. Conta bloqueada durante ${Math.ceil(res.retryAfterSeconds / 60)} min.`;
+        }
+      } catch {
+        // ignorado — auditoria/throttle nunca bloqueia o fluxo de UI
+      }
+      // Mensagem genérica: não revela se o e-mail existe.
+      toast.error(blockedMsg ?? "E-mail ou senha incorretos");
       return;
     }
-    console.info("[login] ok", { userId: data.user?.id });
+    void data;
+    void clearLoginThrottle({ data: { email: cleanEmail } }).catch(() => {});
     nav({ to: "/home", replace: true });
   };
 
