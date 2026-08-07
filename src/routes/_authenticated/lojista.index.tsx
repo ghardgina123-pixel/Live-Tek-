@@ -132,6 +132,7 @@ function PartnersFooter() {
 }
 
 function PendingState({ reason, rejected }: { reason: string | null; rejected?: boolean }) {
+  const { t } = useT();
   return (
     <div className="px-5 py-10 text-center">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent">
@@ -141,7 +142,7 @@ function PendingState({ reason, rejected }: { reason: string | null; rejected?: 
       <p className="mt-2 text-sm text-muted-foreground">
         {rejected
           ? reason || t("s_sua_loja_foi_rejeitada_entre_em_contato_com_o_su")
-          : "Sua loja foi enviada para análise. Você receberá uma notificação assim que for aprovada."}
+          : t("s_sua_loja_foi_enviada_para_analise_voce_recebera_u")}
       </p>
     </div>
   );

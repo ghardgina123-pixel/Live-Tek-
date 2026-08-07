@@ -342,6 +342,7 @@ const ProductCard = memo(function ProductCard({ product, onBuy }: { product: Non
 });
 
 const ChatRow = memo(function ChatRow({ msg, profile }: { msg: LiveMsg; profile?: { display_name: string | null; avatar_url: string | null } }) {
+  const { t } = useT();
   return (
     <div className="flex items-start gap-2 text-sm">
       <div className="mt-0.5 h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white/20">

@@ -168,6 +168,7 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
 }
 
 const Row = memo(function Row({ msg, profile }: { msg: Msg; profile?: Profile }) {
+  const { t } = useT();
   return (
     <div className="flex items-start gap-2">
       <div className="mt-0.5 h-6 w-6 shrink-0 overflow-hidden rounded-full bg-muted">
