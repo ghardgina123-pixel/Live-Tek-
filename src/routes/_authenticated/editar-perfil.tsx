@@ -27,13 +27,17 @@ function EditarPerfil() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("display_name, phone, avatar_url").eq("id", user.id).maybeSingle()
-      .then(({ data }) => {
-        setDisplayName(data?.display_name ?? "");
-        setPhone(data?.phone ?? "");
-        setAvatarUrl(data?.avatar_url ?? "");
-        setLoading(false);
-      });
+    // O telefone deixou de ser legível na tabela (protecção de dados pessoais):
+    // é obtido pela função `get_own_phone`, que devolve apenas o do próprio utilizador.
+    Promise.all([
+      supabase.from("profiles").select("display_name, avatar_url").eq("id", user.id).maybeSingle(),
+      supabase.rpc("get_own_phone"),
+    ]).then(([{ data }, { data: ownPhone }]) => {
+      setDisplayName(data?.display_name ?? "");
+      setPhone((ownPhone as string | null) ?? "");
+      setAvatarUrl(data?.avatar_url ?? "");
+      setLoading(false);
+    });
   }, [user?.id]);
 
   const save = async () => {
