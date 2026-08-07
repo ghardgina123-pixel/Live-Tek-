@@ -28,6 +28,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
 import { createVoiceChain, micConstraints, type AudioChain } from "@/lib/live-audio";
 import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
+import { logLiveAuditEvent, reportCameraTelemetry } from "@/lib/live-cameras.functions";
 
 type Props = {
   liveId: string;
@@ -474,9 +475,59 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
 
       setState("publishing");
       onConnected?.();
+      const settings = (
+        tracksRef.current.find((t) => t.kind === Track.Kind.Video) as LocalVideoTrack | undefined
+      )?.mediaStreamTrack?.getSettings?.();
+      void logLiveAuditEvent({
+        data: {
+          liveId,
+          kind: "publish_start",
+          level: "info",
+          message: "Transmissão do telemóvel iniciada",
+          metadata: {
+            width: settings?.width ?? null,
+            height: settings?.height ?? null,
+            micId: micId || "default",
+          },
+        },
+      }).catch(() => {});
       // Bitrate adaptativo: prioriza a voz, degrada o vídeo em rede fraca.
       const publishedVideo = videoPublication.track as LocalVideoTrack;
-      adaptiveStopRef.current = startAdaptiveBitrate(publishedVideo, setNet);
+      let lastReport = 0;
+      adaptiveStopRef.current = startAdaptiveBitrate(
+        publishedVideo,
+        (report) => {
+          setNet(report);
+          // Telemetria real da câmara do telemóvel (a cada ~15s).
+          const now = Date.now();
+          if (now - lastReport > 15_000) {
+            lastReport = now;
+            const s = publishedVideo.mediaStreamTrack?.getSettings?.();
+            void reportCameraTelemetry({
+              data: {
+                liveId,
+                bitrateKbps: Math.max(0, report.bitrateKbps),
+                latencyMs: Math.max(0, report.rttMs),
+                lossPct: Math.min(100, Math.max(0, report.lossPct)),
+                ...(s?.frameRate ? { fps: Math.round(s.frameRate) } : {}),
+                ...(s?.width ? { width: s.width } : {}),
+                ...(s?.height ? { height: s.height } : {}),
+              },
+            }).catch(() => {});
+          }
+        },
+        (change) => {
+          void logLiveAuditEvent({
+            data: {
+              liveId,
+              kind: "bitrate_change",
+              level: change.toKbps < change.fromKbps ? "warn" : "info",
+              message: `Qualidade ajustada: ${change.fromKbps} → ${change.toKbps} kbps`,
+              metadata: { rttMs: change.net.rttMs, lossPct: change.net.lossPct },
+            },
+          }).catch(() => {});
+        },
+      );
     } catch (error) {
       // (3) Log técnico específico da conexão LiveKit para o debug pedido.
 
