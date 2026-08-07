@@ -1410,6 +1410,51 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_requests: {
+        Row: {
+          amount_aoa: number
+          created_at: string
+          destination: Json
+          due_at: string
+          id: string
+          kind: string
+          method: string
+          note: string | null
+          processed_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_aoa: number
+          created_at?: string
+          destination?: Json
+          due_at?: string
+          id?: string
+          kind: string
+          method?: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_aoa?: number
+          created_at?: string
+          destination?: Json
+          due_at?: string
+          id?: string
+          kind?: string
+          method?: string
+          note?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payouts: {
         Row: {
           commission_pct: number
@@ -2644,9 +2689,14 @@ export type Database = {
         Args: { _approve?: boolean; _reference: string }
         Returns: Json
       }
+      admin_settle_payout: {
+        Args: { _note?: string; _payout_id: string; _status?: string }
+        Returns: Json
+      }
       affiliate_dashboard: { Args: never; Returns: Json }
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
+      affiliate_withdrawable: { Args: never; Returns: Json }
       approved_stores_count: { Args: never; Returns: number }
       calc_transaction_split: {
         Args: { _amount_aoa: number; _store_id: string }
@@ -2659,6 +2709,7 @@ export type Database = {
       }
       check_login_throttle: { Args: { _keys: string[] }; Returns: Json }
       clear_login_attempts: { Args: { _keys: string[] }; Returns: undefined }
+      courier_withdrawable: { Args: never; Returns: Json }
       create_order_with_items: {
         Args: {
           p_address_id: string
@@ -2744,6 +2795,10 @@ export type Database = {
       }
       reject_subscription_by_reference: {
         Args: { _payload?: Json; _reference: string; _status: string }
+        Returns: Json
+      }
+      request_payout: {
+        Args: { _destination?: Json; _kind: string; _method?: string }
         Returns: Json
       }
       seller_create_delivery: { Args: { _order_id: string }; Returns: string }
