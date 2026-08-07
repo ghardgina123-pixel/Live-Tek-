@@ -302,6 +302,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     }
     voiceChainRef.current = chain;
     chain.setEnabled(noiseGate);
+    rawMicRef.current = audioTrack;
     const processed = new LocalAudioTrack(chain.track, undefined, false);
     const tick = () => {
       const level = chain.level();
@@ -432,6 +433,9 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
 
       setState("publishing");
       onConnected?.();
+      // Bitrate adaptativo: prioriza a voz, degrada o vídeo em rede fraca.
+      const publishedVideo = videoPublication.track as LocalVideoTrack;
+      adaptiveStopRef.current = startAdaptiveBitrate(publishedVideo, setNet);
     } catch (error) {
       // (3) Log técnico específico da conexão LiveKit para o debug pedido.
       // eslint-disable-next-line no-console
