@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
   head: () => ({ meta: [{ title: "Minha Loja — Live Teká" }] }),
@@ -24,6 +25,7 @@ type Store = {
 };
 
 function LojistaIndex() {
+  const { t } = useT();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<Store | null>(null);
@@ -70,7 +72,7 @@ function LojistaIndex() {
           <ArrowLeft size={18} />
         </Link>
         <div>
-          <h1 className="text-lg font-semibold">Painel do Lojista</h1>
+          <h1 className="text-lg font-semibold">{t("s_painel_do_lojista")}</h1>
           <p className="text-xs text-white/80">{store ? store.name : "Cadastre sua loja"}</p>
         </div>
       </header>
@@ -96,14 +98,13 @@ function LojistaIndex() {
             </div>
           )}
           <div className="rounded-2xl bg-card p-5 shadow-[var(--shadow-soft)]">
-            <h2 className="text-lg font-bold leading-tight text-foreground">Abra a sua loja e venda ao vivo.</h2>
+            <h2 className="text-lg font-bold leading-tight text-foreground">{t("s_abra_a_sua_loja_e_venda_ao_vivo")}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Torne-se um vendedor e comece a transmitir os seus produtos para milhares de compradores em toda Angola. Configure a sua loja em minutos.
             </p>
             <p className="mt-3 text-[11px] font-medium text-primary">
               {status?.fee_required
-                ? "Aprovação manual feita pela administração após confirmação do pagamento."
-                : "Aprovação manual feita pela administração. Gratuito para as 50 primeiras lojas."}
+                ? t("s_aprovacao_manual_feita_pela_administracao_apos_c") : t("s_aprovacao_manual_feita_pela_administracao_gratui")}
             </p>
           </div>
         </section>
@@ -117,10 +118,11 @@ function LojistaIndex() {
 }
 
 function PartnersFooter() {
+  const { t } = useT();
   return (
     <footer className="mx-5 mb-8 mt-4 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
-      <p className="font-bold tracking-wide">LIVE TEKÁ — Parceiros & Lojistas</p>
-      <p className="mt-1 text-[11px] opacity-80">Vendas em direto para milhares de compradores em toda a África. Configure sua loja em minutos.</p>
+      <p className="font-bold tracking-wide">{t("s_live_teka_parceiros_lojistas")}</p>
+      <p className="mt-1 text-[11px] opacity-80">{t("s_vendas_em_direto_para_milhares_de_compradores_em")}</p>
       <div className="mt-3 space-y-1 text-[11px]">
         <p>🌐 <a href="https://www.livemarketplece.live" className="font-semibold underline">www.livemarketplece.live</a></p>
         <p>☎️ Apoio ao lojista: <a href="tel:+244927046161" className="font-semibold underline">+244 927 046 161</a></p>
@@ -135,10 +137,10 @@ function PendingState({ reason, rejected }: { reason: string | null; rejected?: 
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent">
         {rejected ? <XCircle className="text-destructive" size={32} /> : <Clock className="text-primary" size={32} />}
       </div>
-      <h2 className="text-lg font-bold">{rejected ? "Loja rejeitada" : "Aguardando aprovação"}</h2>
+      <h2 className="text-lg font-bold">{rejected ? t("s_loja_rejeitada") : t("s_aguardando_aprovacao")}</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         {rejected
-          ? reason || "Sua loja foi rejeitada. Entre em contato com o suporte."
+          ? reason || t("s_sua_loja_foi_rejeitada_entre_em_contato_com_o_su")
           : "Sua loja foi enviada para análise. Você receberá uma notificação assim que for aprovada."}
       </p>
     </div>
@@ -156,6 +158,7 @@ async function uploadStoreAsset(userId: string, file: File, kind: "logo" | "cove
 }
 
 function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () => void; feeRequired: boolean; feeAoa: number }) {
+  const { t } = useT();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -176,11 +179,11 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
   });
 
   const captureLocation = () => {
-    if (!navigator.geolocation) return toast.error("Geolocalização não suportada");
+    if (!navigator.geolocation) return toast.error(t("s_geolocalizacao_nao_suportada"));
     setGeoBusy(true);
     navigator.geolocation.getCurrentPosition(
-      (p) => { setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); setGeoBusy(false); toast.success("Localização capturada"); },
-      (e) => { setGeoBusy(false); toast.error("Não foi possível obter localização: " + e.message); },
+      (p) => { setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); setGeoBusy(false); toast.success(t("s_localizacao_capturada")); },
+      (e) => { setGeoBusy(false); toast.error(t("s_nao_foi_possivel_obter_localizacao") + e.message); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
@@ -188,12 +191,12 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.name.trim()) return toast.error("Nome da loja é obrigatório");
-    if (!form.nif.trim()) return toast.error("NIF é obrigatório");
+    if (!form.name.trim()) return toast.error(t("s_nome_da_loja_e_obrigatorio"));
+    if (!form.nif.trim()) return toast.error(t("s_nif_e_obrigatorio"));
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
-      return toast.error("Dados bancários completos são obrigatórios");
-    if (!loc.province_id || !loc.municipality_id) return toast.error("Selecione província e município");
-    if (feeRequired && !proofFile) return toast.error("Anexe o comprovativo da Taxa de Inscrição");
+      return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
+    if (!loc.province_id || !loc.municipality_id) return toast.error(t("s_selecione_provincia_e_municipio"));
+    if (feeRequired && !proofFile) return toast.error(t("s_anexe_o_comprovativo_da_taxa_de_inscricao"));
     setSubmitting(true);
     try {
       let logo_url: string | null = null;
@@ -255,7 +258,7 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
       }
 
       await supabase.from("user_roles").insert({ user_id: user.id, role: "seller" });
-      toast.success(feeRequired ? "Loja e comprovativo enviados para aprovação!" : "Loja enviada para aprovação!");
+      toast.success(feeRequired ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
       onCreated();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erro ao enviar";
@@ -271,14 +274,14 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
         Preencha os dados completos. Após análise, sua loja ficará ativa e você terá acesso ao painel completo com produtos, pedidos e repasses.
       </div>
 
-      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">Identidade da loja</h3>
-      <Field label="Nome da loja *">
-        <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Boutique Luanda" />
+      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">{t("s_identidade_da_loja")}</h3>
+      <Field label={t("s_nome_da_loja")}>
+        <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("s_ex_boutique_luanda")} />
       </Field>
-      <Field label="Descrição">
+      <Field label={t("s_descricao")}>
         <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
       </Field>
-      <Field label="Categoria">
+      <Field label={t("s_categoria")}>
         <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
           {["Moda", "Beleza", "Eletrônicos", "Casa", "Alimentos", "Esportes", "Outros"].map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -287,33 +290,33 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <FileField label="Logo" file={logoFile} setFile={setLogoFile} icon={<ImagePlus size={14} />} />
-        <FileField label="Capa" file={coverFile} setFile={setCoverFile} icon={<ImagePlus size={14} />} />
+        <FileField label={t("s_logo")} file={logoFile} setFile={setLogoFile} icon={<ImagePlus size={14} />} />
+        <FileField label={t("s_capa")} file={coverFile} setFile={setCoverFile} icon={<ImagePlus size={14} />} />
       </div>
 
-      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">Dados Fiscais</h3>
-      <Field label="NIF *">
+      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">{t("s_dados_fiscais")}</h3>
+      <Field label={t("s_nif")}>
         <Input value={form.nif} onChange={(e) => setForm({ ...form, nif: e.target.value })} />
       </Field>
-      <Field label="Telefone">
+      <Field label={t("s_telefone")}>
         <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+244 ..." />
       </Field>
 
-      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">Dados Bancários (saques) *</h3>
-      <Field label="Banco">
-        <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder="Ex: BAI, BFA, BIC..." />
+      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">{t("s_dados_bancarios_saques")}</h3>
+      <Field label={t("s_banco")}>
+        <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} placeholder={t("s_ex_bai_bfa_bic")} />
       </Field>
-      <Field label="IBAN / Conta">
+      <Field label={t("s_iban_conta")}>
         <Input value={form.bank_account} onChange={(e) => setForm({ ...form, bank_account: e.target.value })} />
       </Field>
-      <Field label="Titular">
+      <Field label={t("s_titular")}>
         <Input value={form.bank_holder} onChange={(e) => setForm({ ...form, bank_holder: e.target.value })} />
       </Field>
 
-      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">Localização</h3>
+      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">{t("s_localizacao")}</h3>
       <LocationCascade value={loc} onChange={setLoc} required />
       <Button type="button" variant="outline" onClick={captureLocation} disabled={geoBusy} className="h-11 w-full">
-        {geoBusy ? <Loader2 className="animate-spin" /> : <><MapPin size={16} className="mr-2" /> {coords ? "Atualizar" : "Usar minha localização"}</>}
+        {geoBusy ? <Loader2 className="animate-spin" /> : <><MapPin size={16} className="mr-2" /> {coords ? t("s_atualizar") : t("s_usar_minha_localizacao")}</>}
       </Button>
       {coords && (
         <p className="text-[11px] text-muted-foreground">Lat: {coords.lat.toFixed(5)} · Lng: {coords.lng.toFixed(5)}</p>
@@ -327,18 +330,19 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
               Pague por Referência Multicaixa ou transferência IBAN e anexe o comprovativo. A sua loja só será enviada à administração após este passo.
             </p>
           </div>
-          <FileField label="Comprovativo de pagamento *" file={proofFile} setFile={setProofFile} icon={<Upload size={14} />} />
+          <FileField label={t("s_comprovativo_de_pagamento")} file={proofFile} setFile={setProofFile} icon={<Upload size={14} />} />
         </div>
       )}
 
       <Button type="submit" disabled={submitting} className="h-12 w-full">
-        {submitting ? <Loader2 className="animate-spin" /> : <><Upload size={16} className="mr-2" /> Enviar para aprovação</>}
+        {submitting ? <Loader2 className="animate-spin" /> : <><Upload size={16} className="mr-2" /> {t("s_enviar_para_aprovacao")}</>}
       </Button>
     </form>
   );
 }
 
 function FileField({ label, file, setFile, icon }: { label: string; file: File | null; setFile: (f: File | null) => void; icon: React.ReactNode }) {
+  const { t } = useT();
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">{label}</Label>
@@ -346,12 +350,12 @@ function FileField({ label, file, setFile, icon }: { label: string; file: File |
         {file ? (
           <>
             <span className="px-2 truncate max-w-full">{file.name}</span>
-            <span className="mt-1 text-[10px] text-primary">Clique para trocar</span>
+            <span className="mt-1 text-[10px] text-primary">{t("s_clique_para_trocar")}</span>
           </>
         ) : (
           <>
             {icon}
-            <span className="mt-1">Selecionar imagem</span>
+            <span className="mt-1">{t("s_selecionar_imagem")}</span>
           </>
         )}
         <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />

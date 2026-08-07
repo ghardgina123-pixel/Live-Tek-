@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/enderecos")({
   head: () => ({ meta: [{ title: "Endereços para entrega — Live Teká" }] }),
@@ -25,6 +26,7 @@ type Address = {
 };
 
 function AddressesPage() {
+  const { t } = useT();
   const { user } = useAuth();
   const [items, setItems] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ function AddressesPage() {
     if (!user) return;
     await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
     await supabase.from("addresses").update({ is_default: true }).eq("id", id);
-    toast.success("Endereço padrão atualizado");
+    toast.success(t("s_endereco_padrao_atualizado"));
     load();
   };
 
@@ -56,7 +58,7 @@ function AddressesPage() {
     if (!confirm("Excluir este endereço?")) return;
     const { error } = await supabase.from("addresses").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Endereço excluído");
+    toast.success(t("s_endereco_excluido"));
     load();
   };
 
@@ -67,15 +69,15 @@ function AddressesPage() {
           <ArrowLeft size={18} />
         </Link>
         <div className="flex-1">
-          <h1 className="text-lg font-semibold">Endereços para entrega</h1>
-          <p className="text-xs text-white/80">Para entrega rápida em Angola</p>
+          <h1 className="text-lg font-semibold">{t("s_enderecos_para_entrega")}</h1>
+          <p className="text-xs text-white/80">{t("s_para_entrega_rapida_em_angola")}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <button className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><Plus size={18} /></button>
           </DialogTrigger>
           <DialogContent className="max-w-[420px]">
-            <DialogHeader><DialogTitle>Novo endereço</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{t("s_novo_endereco")}</DialogTitle></DialogHeader>
             <AddressForm onDone={() => { setOpen(false); load(); }} />
           </DialogContent>
         </Dialog>
@@ -87,8 +89,8 @@ function AddressesPage() {
         ) : items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border p-8 text-center">
             <MapPin className="mx-auto text-muted-foreground" size={28} />
-            <p className="mt-3 text-sm font-semibold">Nenhum endereço cadastrado</p>
-            <p className="mt-1 text-xs text-muted-foreground">Adicione um endereço para finalizar suas compras</p>
+            <p className="mt-3 text-sm font-semibold">{t("s_nenhum_endereco_cadastrado")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("s_adicione_um_endereco_para_finalizar_suas_compras")}</p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -99,7 +101,7 @@ function AddressesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{a.label}</p>
-                      {a.is_default && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">Padrão</span>}
+                      {a.is_default && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{t("s_padrao")}</span>}
                     </div>
                     <p className="text-xs text-muted-foreground">{a.street}{a.district ? `, ${a.district}` : ""}</p>
                     <p className="text-xs text-muted-foreground">{a.municipalities?.name} · {a.provinces?.name}</p>
@@ -112,7 +114,7 @@ function AddressesPage() {
                 <div className="mt-3 flex justify-end gap-2">
                   {!a.is_default && (
                     <Button variant="outline" size="sm" onClick={() => setDefault(a.id)}>
-                      <Star size={14} /> Tornar padrão
+                      <Star size={14} /> {t("s_tornar_padrao")}
                     </Button>
                   )}
                   <Button variant="ghost" size="sm" onClick={() => del(a.id)}>
@@ -129,6 +131,7 @@ function AddressesPage() {
 }
 
 function AddressForm({ onDone }: { onDone: () => void }) {
+  const { t } = useT();
   const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [loc, setLoc] = useState<LocationValue>({ country_id: "", province_id: "", municipality_id: "", district_id: "" });
@@ -147,14 +150,14 @@ function AddressForm({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     if (!user) return;
     if (!loc.province_id || !loc.municipality_id || !form.street.trim()) {
-      return toast.error("Província, município e rua são obrigatórios");
+      return toast.error(t("s_provincia_municipio_e_rua_sao_obrigatorios"));
     }
     setBusy(true);
     const { count } = await supabase.from("addresses").select("*", { count: "exact", head: true }).eq("user_id", user.id);
     const isFirst = (count ?? 0) === 0;
     const { error } = await supabase.from("addresses").insert({
       user_id: user.id,
-      label: form.label || "Casa",
+      label: form.label || t("s_casa"),
       country_id: loc.country_id || null,
       province_id: loc.province_id,
       municipality_id: loc.municipality_id,
@@ -168,15 +171,15 @@ function AddressForm({ onDone }: { onDone: () => void }) {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Endereço salvo");
+    toast.success(t("s_endereco_salvo"));
     onDone();
   };
 
   return (
     <form onSubmit={submit} className="space-y-3">
       <div className="space-y-1.5">
-        <Label className="text-xs">Identificação</Label>
-        <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Casa / Trabalho" />
+        <Label className="text-xs">{t("s_identificacao")}</Label>
+        <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder={t("s_casa_trabalho")} />
       </div>
       <LocationCascade value={loc} onChange={setLoc} required />
       {shippingFee != null && (
@@ -185,20 +188,20 @@ function AddressForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
       <div className="space-y-1.5">
-        <Label className="text-xs">Rua / Avenida *</Label>
-        <Input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder="Rua, número, casa…" />
+        <Label className="text-xs">{t("s_rua_avenida")}</Label>
+        <Input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder={t("s_rua_numero_casa")} />
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">Ponto de referência</Label>
-        <Input value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} placeholder="Perto de…" />
+        <Label className="text-xs">{t("s_ponto_de_referencia")}</Label>
+        <Input value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} placeholder={t("s_perto_de")} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs">Destinatário</Label>
+          <Label className="text-xs">{t("s_destinatario")}</Label>
           <Input value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">Telefone</Label>
+          <Label className="text-xs">{t("s_telefone")}</Label>
           <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+244 …" />
         </div>
       </div>

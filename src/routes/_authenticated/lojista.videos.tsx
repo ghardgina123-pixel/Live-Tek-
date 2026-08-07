@@ -9,14 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/videos")({
   head: () => ({ meta: [{ title: "Shorts da loja — Lojista" }] }),
-  component: () => (
-    <LojistaShell title="Shorts da loja">
-      <VideosManager />
-    </LojistaShell>
-  ),
+  component: ShellPage,
 });
 
 const BUCKET = "product-videos";
@@ -37,6 +34,7 @@ type Video = {
 };
 
 function VideosManager() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [videos, setVideos] = useState<Video[] | null>(null);
@@ -61,18 +59,18 @@ function VideosManager() {
       .select("id, caption, video_url, thumbnail_url, views, created_at, product_id, product:products(id, name)")
       .eq("store_id", sid)
       .order("created_at", { ascending: false });
-    if (error) { toast.error("Não foi possível carregar os vídeos"); setVideos([]); return; }
+    if (error) { toast.error(t("s_nao_foi_possivel_carregar_os_videos")); setVideos([]); return; }
     setVideos((data as unknown as Video[]) ?? []);
   };
 
   const onPick = (f: File | null) => {
     if (!f) return setFile(null);
     if (!ACCEPT.includes(f.type) && !/\.(mp4|mov)$/i.test(f.name)) {
-      toast.error("Formato inválido. Use .mp4 ou .mov");
+      toast.error(t("s_formato_invalido_use_mp4_ou_mov"));
       return;
     }
     if (f.size > MAX_SIZE) {
-      toast.error("Arquivo acima do limite de 100 MB");
+      toast.error(t("s_arquivo_acima_do_limite_de_100_mb"));
       return;
     }
     setFile(f);
@@ -105,7 +103,7 @@ function VideosManager() {
       if (insErr) throw insErr;
 
       setProgress(100);
-      toast.success("Vídeo enviado!");
+      toast.success(t("s_video_enviado"));
       setFile(null);
       setCaption("");
       setProductId("");
@@ -121,7 +119,7 @@ function VideosManager() {
   const unlink = async (v: Video) => {
       const { error } = await supabase.from("product_videos").update({ product_id: null }).eq("id", v.id);
     if (error) return toast.error(error.message);
-    toast.success("Produto desvinculado");
+    toast.success(t("s_produto_desvinculado"));
     if (storeId) loadVideos(storeId);
   };
 
@@ -133,7 +131,7 @@ function VideosManager() {
     if (path) await supabase.storage.from(BUCKET).remove([path]);
     const { error } = await supabase.from("product_videos").delete().eq("id", v.id);
     if (error) return toast.error(error.message);
-    toast.success("Vídeo removido");
+    toast.success(t("s_video_removido"));
     if (storeId) loadVideos(storeId);
   };
 
@@ -143,7 +141,7 @@ function VideosManager() {
       <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex items-center gap-2">
           <UploadCloud size={18} className="text-primary" />
-          <h2 className="text-sm font-semibold">Novo Short</h2>
+          <h2 className="text-sm font-semibold">{t("s_novo_short")}</h2>
         </div>
 
         <label
@@ -152,7 +150,7 @@ function VideosManager() {
         >
           <Film size={28} className="text-muted-foreground" />
           <p className="text-sm font-medium">{file ? file.name : "Toque para selecionar um vídeo"}</p>
-          <p className="text-xs text-muted-foreground">.mp4 ou .mov · até 100 MB</p>
+          <p className="text-xs text-muted-foreground">{t("s_mp4_ou_mov_ate_100_mb")}</p>
           <Input
             id="video-file"
             ref={inputRef}
@@ -165,12 +163,12 @@ function VideosManager() {
 
         <div className="mt-3 space-y-3">
           <div>
-            <Label htmlFor="caption" className="text-xs">Legenda (opcional)</Label>
+            <Label htmlFor="caption" className="text-xs">{t("s_legenda_opcional")}</Label>
             <Textarea
               id="caption"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Descreva o vídeo…"
+              placeholder={t("s_descreva_o_video")}
               maxLength={280}
               className="mt-1 resize-none"
               rows={2}
@@ -179,14 +177,14 @@ function VideosManager() {
           </div>
 
           <div>
-            <Label className="text-xs">Vincular a um produto (opcional)</Label>
+            <Label className="text-xs">{t("s_vincular_a_um_produto_opcional")}</Label>
             <Select value={productId} onValueChange={setProductId}>
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Sem produto vinculado" />
+                <SelectValue placeholder={t("s_sem_produto_vinculado")} />
               </SelectTrigger>
               <SelectContent>
                 {products.length === 0 && (
-                  <div className="px-3 py-2 text-xs text-muted-foreground">Nenhum produto cadastrado</div>
+                  <div className="px-3 py-2 text-xs text-muted-foreground">{t("s_nenhum_produto_cadastrado")}</div>
                 )}
                 {products.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -202,7 +200,7 @@ function VideosManager() {
           )}
 
           <Button onClick={upload} disabled={!file || progress !== null} className="w-full">
-            {progress !== null ? <><Loader2 className="mr-2 animate-spin" size={16} /> Enviando…</> : "Publicar Short"}
+            {progress !== null ? <><Loader2 className="mr-2 animate-spin" size={16} /> {t("s_enviando")}</> : "Publicar Short"}
           </Button>
         </div>
       </section>
@@ -210,7 +208,7 @@ function VideosManager() {
       {/* Listagem */}
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Meus Shorts</h2>
+          <h2 className="text-sm font-semibold">{t("s_meus_shorts")}</h2>
           <span className="text-xs text-muted-foreground">{videos?.length ?? 0} vídeo(s)</span>
         </div>
 
@@ -241,16 +239,16 @@ function VideosManager() {
                   {v.caption && <p className="line-clamp-2 text-xs">{v.caption}</p>}
                   <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <LinkIcon size={11} />
-                    {v.product?.name ?? <span className="italic">sem produto</span>}
+                    {v.product?.name ?? <span className="italic">{t("s_sem_produto")}</span>}
                   </p>
                   <div className="flex gap-1.5">
                     {v.product_id && (
                       <Button variant="outline" size="sm" className="h-8 flex-1 text-xs" onClick={() => unlink(v)}>
-                        <Unlink size={12} className="mr-1" /> Desvincular
+                        <Unlink size={12} className="mr-1" /> {t("s_desvincular")}
                       </Button>
                     )}
                     <Button variant="destructive" size="sm" className="h-8 flex-1 text-xs" onClick={() => remove(v)}>
-                      <Trash2 size={12} className="mr-1" /> Apagar
+                      <Trash2 size={12} className="mr-1" /> {t("s_apagar")}
                     </Button>
                   </div>
                 </div>
@@ -260,5 +258,14 @@ function VideosManager() {
         )}
       </section>
     </div>
+  );
+}
+
+function ShellPage() {
+  const { t } = useT();
+  return (
+    <LojistaShell title={t("s_shorts_da_loja")}>
+      <VideosManager />
+    </LojistaShell>
   );
 }

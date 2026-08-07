@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
 const LojistaLivePanel = lazy(() => import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })));
@@ -30,11 +31,7 @@ function liveErrorMessage(msg: string) {
 
 export const Route = createFileRoute("/_authenticated/lojista/lives")({
   head: () => ({ meta: [{ title: "Lives — Lojista" }] }),
-  component: () => (
-    <LojistaShell title="Transmissões ao vivo">
-      <LivesManager />
-    </LojistaShell>
-  ),
+  component: ShellPage,
 });
 
 type Live = {
@@ -48,6 +45,7 @@ type Live = {
 };
 
 function LivesManager() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const [lives, setLives] = useState<Live[] | null>(null);
   const [title, setTitle] = useState("");
@@ -88,8 +86,8 @@ function LivesManager() {
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!storeId || !title.trim()) return;
-    if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
-    if (limitReached) return toast.error("Atingiu o limite de lives do seu plano este mês.");
+    if (!canGoLive) return toast.error(t("s_subscricao_inativa_ative_um_plano_para_transmiti"));
+    if (limitReached) return toast.error(t("s_atingiu_o_limite_de_lives_do_seu_plano_este_mes"));
     setCreating(true);
     const { data, error } = await supabase
       .from("lives")
@@ -102,7 +100,7 @@ function LivesManager() {
       return toast.error(liveErrorMessage(error.message));
     }
     setTitle("");
-    toast.success("Live criada. A preparar câmara…");
+    toast.success(t("s_live_criada_a_preparar_camara"));
     if (data?.id) {
       if (storeId) await load(storeId);
       prepareLive(data.id);
@@ -111,8 +109,8 @@ function LivesManager() {
 
   const quickCreate = async () => {
     if (!storeId) return;
-    if (!canGoLive) return toast.error("Subscrição inativa. Ative um plano para transmitir.");
-    if (limitReached) return toast.error("Atingiu o limite de lives do seu plano este mês.");
+    if (!canGoLive) return toast.error(t("s_subscricao_inativa_ative_um_plano_para_transmiti"));
+    if (limitReached) return toast.error(t("s_atingiu_o_limite_de_lives_do_seu_plano_este_mes"));
     setCreating(true);
     const defaultTitle = `Live de ${store?.name ?? "loja"}`;
     const { data, error } = await supabase
@@ -125,7 +123,7 @@ function LivesManager() {
       await reloadSub();
       return toast.error(liveErrorMessage(error.message));
     }
-    toast.success("Live criada. A preparar câmara…");
+    toast.success(t("s_live_criada_a_preparar_camara"));
     if (data?.id) {
       if (storeId) await load(storeId);
       prepareLive(data.id);
@@ -153,7 +151,7 @@ function LivesManager() {
       .from("lives")
       .update({ status: "scheduled", started_at: null })
       .eq("id", id);
-    toast.error(reason || "Não foi possível iniciar a transmissão.");
+    toast.error(reason || t("s_nao_foi_possivel_iniciar_a_transmissao"));
   };
 
   const endLive = async (id: string) => {
@@ -169,7 +167,7 @@ function LivesManager() {
     setDeleteId(null);
     if (error) return toast.error(error.message);
     if (activeId === id) setActiveId(null);
-    toast.success("Live apagada");
+    toast.success(t("s_live_apagada"));
     if (storeId) load(storeId);
   };
 
@@ -181,12 +179,12 @@ function LivesManager() {
       <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex items-center gap-2">
           <Plus size={18} className="text-primary" />
-          <h2 className="text-sm font-semibold">Nova transmissão</h2>
+          <h2 className="text-sm font-semibold">{t("s_nova_transmissao")}</h2>
         </div>
         {blocked && (
           <div className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
             A sua subscrição está inativa. Ative um plano para iniciar lives.{" "}
-            <Link to="/lojista/subscricao" className="font-semibold text-primary underline">Ver planos</Link>
+            <Link to="/lojista/subscricao" className="font-semibold text-primary underline">{t("s_ver_planos")}</Link>
           </div>
         )}
         {usage && !blocked && (
@@ -213,16 +211,16 @@ function LivesManager() {
           className="w-full"
           size="lg"
         >
-          {creating ? <Loader2 className="animate-spin" size={18} /> : <><Radio size={18} className="mr-2" /> Criar live</>}
+          {creating ? <Loader2 className="animate-spin" size={18} /> : <><Radio size={18} className="mr-2" /> {t("s_criar_live")}</>}
         </Button>
         <form onSubmit={create} className="mt-4 space-y-3 border-t border-border pt-4">
           <div>
-            <Label htmlFor="live-title" className="text-xs">Título personalizado (opcional)</Label>
+            <Label htmlFor="live-title" className="text-xs">{t("s_titulo_personalizado_opcional")}</Label>
             <Input
               id="live-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Coleção nova de Verão"
+              placeholder={t("s_ex_colecao_nova_de_verao")}
               maxLength={120}
               className="mt-1"
             />
@@ -242,10 +240,10 @@ function LivesManager() {
               <p className="text-[11px] text-muted-foreground">Estado: {statusLabel(activeLive.status)}</p>
             </div>
             {activeLive.status !== "live" ? (
-              <span className="text-[11px] text-muted-foreground">Clique em “Iniciar câmara” abaixo</span>
+              <span className="text-[11px] text-muted-foreground">{t("s_clique_em_iniciar_camara_abaixo")}</span>
             ) : (
               <Button size="sm" variant="destructive" onClick={() => endLive(activeLive.id)}>
-                <Square size={14} className="mr-1" /> Encerrar
+                <Square size={14} className="mr-1" /> {t("s_encerrar")}
               </Button>
             )}
           </div>
@@ -275,7 +273,7 @@ function LivesManager() {
       {/* Lista */}
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Minhas lives</h2>
+          <h2 className="text-sm font-semibold">{t("s_minhas_lives")}</h2>
           <span className="text-xs text-muted-foreground">{lives?.length ?? 0} sessão(ões)</span>
         </div>
         {lives === null ? (
@@ -302,9 +300,9 @@ function LivesManager() {
                   {l.status === "scheduled" && (
                     <>
                       <Button size="sm" onClick={() => prepareLive(l.id)}>
-                        <Play size={12} className="mr-1" /> Iniciar
+                        <Play size={12} className="mr-1" /> {t("s_iniciar")}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label="Apagar live">
+                      <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label={t("s_apagar_live")}>
                         <Trash2 size={12} />
                       </Button>
                     </>
@@ -315,12 +313,12 @@ function LivesManager() {
                         Painel
                       </Button>
                       <Button size="sm" variant="destructive" onClick={() => endLive(l.id)}>
-                        <Square size={12} className="mr-1" /> Parar
+                        <Square size={12} className="mr-1" /> {t("s_parar")}
                       </Button>
                     </>
                   )}
                   {l.status === "ended" && (
-                    <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label="Apagar live">
+                    <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label={t("s_apagar_live")}>
                       <Trash2 size={12} />
                     </Button>
                   )}
@@ -334,15 +332,15 @@ function LivesManager() {
       <Dialog open={!!confirmId} onOpenChange={(open) => { if (!open) setConfirmId(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Preparar transmissão ao vivo?</DialogTitle>
+            <DialogTitle>{t("s_preparar_transmissao_ao_vivo")}</DialogTitle>
             <DialogDescription>
               Vamos abrir o painel de câmara. A live só ficará pública depois de a câmara ligar com sucesso — se falhar, o estado é revertido automaticamente.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmId(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setConfirmId(null)}>{t("s_cancelar")}</Button>
             <Button onClick={() => confirmId && prepareLive(confirmId)}>
-              <Radio size={14} className="mr-2" /> Preparar câmara
+              <Radio size={14} className="mr-2" /> {t("s_preparar_camara")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -351,15 +349,15 @@ function LivesManager() {
       <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Apagar esta live?</DialogTitle>
+            <DialogTitle>{t("s_apagar_esta_live")}</DialogTitle>
             <DialogDescription>
               A live e todo o histórico associado (mensagens, produtos destacados) serão removidos definitivamente. Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>{t("s_cancelar")}</Button>
             <Button variant="destructive" onClick={() => deleteId && deleteLive(deleteId)} disabled={deleting}>
-              {deleting ? <Loader2 className="animate-spin" size={14} /> : <><Trash2 size={14} className="mr-2" /> Apagar</>}
+              {deleting ? <Loader2 className="animate-spin" size={14} /> : <><Trash2 size={14} className="mr-2" /> {t("s_apagar")}</>}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -372,4 +370,13 @@ function statusLabel(s: Live["status"]) {
   if (s === "live") return "AO VIVO";
   if (s === "scheduled") return "Agendada";
   return "Encerrada";
+}
+
+function ShellPage() {
+  const { t } = useT();
+  return (
+    <LojistaShell title={t("s_transmissoes_ao_vivo")}>
+      <LivesManager />
+    </LojistaShell>
+  );
 }

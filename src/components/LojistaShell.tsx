@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { BackButton } from "@/components/BackButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useT } from "@/lib/i18n";
 
 export type LojistaStore = {
   id: string;
@@ -46,6 +47,7 @@ export function useLojistaStore() {
 }
 
 export function LojistaShell({ title, children }: { title: string; children: ReactNode }) {
+  const { t } = useT();
   const { store, loading } = useLojistaStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -76,7 +78,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
             <button
               className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 p-3 transition active:scale-95 active:bg-white/30 active:opacity-70"
               style={{ touchAction: "manipulation" }}
-              aria-label="Menu do lojista"
+              aria-label={t("s_menu_do_lojista")}
             >
               <Menu size={18} />
             </button>
@@ -84,7 +86,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
           <SheetContent side="left" className="w-[260px] p-0">
             <SheetHeader className="border-b p-4 text-left">
               <SheetTitle className="text-base">{store.name}</SheetTitle>
-              <p className="text-xs text-muted-foreground">Painel do Lojista</p>
+              <p className="text-xs text-muted-foreground">{t("s_painel_do_lojista")}</p>
             </SheetHeader>
             <nav className="p-2">
               {NAV.map((item) => {
@@ -103,10 +105,10 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
               })}
               <div className="my-2 border-t" />
               <Link to="/perfil" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent">
-                <ArrowLeft size={18} /> Voltar ao perfil
+                <ArrowLeft size={18} /> {t("s_voltar_ao_perfil")}
               </Link>
               <Link to="/lojista" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent">
-                <Settings size={18} /> Configurações da loja
+                <Settings size={18} /> {t("s_configuracoes_da_loja")}
               </Link>
             </nav>
           </SheetContent>
@@ -116,7 +118,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
           <h1 className="truncate text-lg font-semibold">{title}</h1>
         </div>
         {store.logo_url && (
-          <img src={store.logo_url} alt="Logo" className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
+          <img src={store.logo_url} alt={t("s_logo")} className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
         )}
       </header>
       <div className="px-5 py-5">{children}</div>

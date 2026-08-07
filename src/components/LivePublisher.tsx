@@ -29,6 +29,7 @@ import { issueLiveKitToken } from "@/lib/livekit.functions";
 import { createVoiceChain, micConstraints, type AudioChain } from "@/lib/live-audio";
 import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
 import { logLiveAuditEvent, reportCameraTelemetry } from "@/lib/live-cameras.functions";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   liveId: string;
@@ -122,6 +123,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: Props) {
+  const { t } = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const roomRef = useRef<Room | null>(null);
   const tracksRef = useRef<LocalTrack[]>([]);
@@ -564,44 +566,44 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             {state === "idle" && (
               <>
                 <Video />
-                <p className="text-sm">Câmara desligada</p>
+                <p className="text-sm">{t("s_camara_desligada")}</p>
               </>
             )}
             {state === "requesting" && (
               <>
                 <Loader2 className="animate-spin" />
-                <p className="text-sm">A ligar câmara e microfone…</p>
+                <p className="text-sm">{t("s_a_ligar_camara_e_microfone")}</p>
               </>
             )}
             {state === "error" && (
               <>
                 <AlertTriangle className="text-yellow-400" />
-                <p className="text-sm font-medium">Falha ao iniciar vídeo</p>
+                <p className="text-sm font-medium">{t("s_falha_ao_iniciar_video")}</p>
                 <p className="text-[11px] text-white/70">{errorMsg}</p>
               </>
             )}
             {state === "unconfigured" && (
               <>
                 <Video />
-                <p className="text-sm">Streaming não configurado</p>
+                <p className="text-sm">{t("s_streaming_nao_configurado")}</p>
               </>
             )}
           </div>
         )}
         {state === "preflight" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white">
-            <ShieldCheck size={11} /> CÂMARA OK
+            <ShieldCheck size={11} /> {t("s_camara_ok")}
           </div>
         )}
         {state === "connecting" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 text-white">
             <Loader2 className="animate-spin" />
-            <p className="text-sm">A publicar transmissão…</p>
+            <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
           </div>
         )}
         {state === "publishing" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
-            <Radio size={11} /> AO VIVO
+            <Radio size={11} /> {t("s_ao_vivo")}
           </div>
         )}
       </div>
@@ -610,7 +612,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         <div className="space-y-2 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex items-center gap-2 text-xs">
             <CheckCircle2 size={14} className="text-green-500" />
-            <span>Câmara ativa no ecrã</span>
+            <span>{t("s_camara_ativa_no_ecra")}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
             {micOk ? (
@@ -618,7 +620,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             ) : (
               <Mic size={14} className="text-muted-foreground" />
             )}
-            <span>{micOk ? "Microfone ativo" : "Fale para testar o microfone…"}</span>
+            <span>{micOk ? t("s_microfone_ativo") : t("s_fale_para_testar_o_microfone")}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-background">
             <div
@@ -635,7 +637,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
       {/* Áudio profissional: microfone Bluetooth + supressão de ruído */}
       <div className="space-y-2 rounded-xl border border-border bg-card p-3">
         <label htmlFor="mic-select" className="flex items-center gap-1.5 text-xs font-semibold">
-          <Bluetooth size={13} className="text-primary" /> Microfone
+          <Bluetooth size={13} className="text-primary" /> {t("s_microfone")}
         </label>
         <select
           id="mic-select"
@@ -655,10 +657,10 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
           disabled={state === "publishing" || state === "connecting"}
           className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
         >
-          <option value="">Predefinido do sistema</option>
+          <option value="">{t("s_predefinido_do_sistema")}</option>
           {mics.map((d) => (
             <option key={d.deviceId} value={d.deviceId}>
-              {d.label || "Microfone"}
+              {d.label || t("s_microfone")}
             </option>
           ))}
         </select>
@@ -669,7 +671,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         )}
         <label className="flex items-center justify-between gap-2 text-xs">
           <span className="flex items-center gap-1.5">
-            <Mic size={13} /> Supressão de ruído da loja
+            <Mic size={13} /> {t("s_supressao_de_ruido_da_loja")}
           </span>
           <input
             type="checkbox"
@@ -688,8 +690,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
               net.rttMs > 400
                 ? "text-destructive"
                 : net.rttMs > 200
-                  ? "text-amber-500"
-                  : "text-emerald-500"
+                  ? "text-amber-500" : "text-emerald-500"
             }
           />
           <span>Latência {net.rttMs} ms</span>
@@ -704,7 +705,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             onClick={stop}
             className="flex-1 rounded-full bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground"
           >
-            <VideoOff size={16} className="mr-2 inline" /> Parar transmissão
+            <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
           </button>
         ) : state === "preflight" ? (
           <>
@@ -719,7 +720,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
               disabled={!cameraOk}
               className="flex-1 rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
             >
-              <Radio size={16} className="mr-2 inline" /> Iniciar
+              <Radio size={16} className="mr-2 inline" /> {t("s_iniciar")}
             </button>
           </>
         ) : state === "connecting" ? (
@@ -727,7 +728,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             disabled
             className="flex-1 rounded-full bg-primary/60 px-4 py-3 text-sm font-semibold text-primary-foreground"
           >
-            <Loader2 size={16} className="mr-2 inline animate-spin" /> A publicar…
+            <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
           </button>
         ) : (
           <button
@@ -735,7 +736,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             disabled={state === "requesting"}
             className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
-            <Video size={16} className="mr-2 inline" /> Ligar câmara
+            <Video size={16} className="mr-2 inline" /> {t("s_ligar_camara")}
           </button>
         )}
       </div>

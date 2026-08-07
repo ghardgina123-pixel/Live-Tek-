@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Download, ScrollText, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 
 export type LiveEventRow = {
   id: string;
@@ -38,6 +39,7 @@ export function eventsToCsv(rows: LiveEventRow[]): string {
 
 /** Registo de auditoria em tempo real das operações da live. */
 export function LiveAuditLog({ liveId }: { liveId: string }) {
+  const { t } = useT();
   const [rows, setRows] = useState<LiveEventRow[] | null>(null);
 
   const load = useCallback(async () => {
@@ -80,19 +82,19 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
     <section className="mt-3 rounded-2xl border bg-card p-3">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-          <ScrollText size={15} className="text-primary" /> Auditoria da live
+          <ScrollText size={15} className="text-primary" /> {t("s_auditoria_da_live")}
         </h3>
         <div className="flex items-center gap-1">
           <Button
             size="sm"
             variant="ghost"
-            aria-label="Atualizar registo"
+            aria-label={t("s_atualizar_registo")}
             onClick={() => void load()}
           >
             <RefreshCw size={14} />
           </Button>
           <Button size="sm" variant="outline" onClick={exportCsv} disabled={!rows?.length}>
-            <Download size={14} className="mr-1" /> CSV
+            <Download size={14} className="mr-1" /> {t("s_csv")}
           </Button>
         </div>
       </div>
@@ -114,7 +116,7 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
         ))}
       </ul>
       {rows?.length === 0 && (
-        <p className="py-2 text-center text-xs text-muted-foreground">Sem eventos registados.</p>
+        <p className="py-2 text-center text-xs text-muted-foreground">{t("s_sem_eventos_registados")}</p>
       )}
     </section>
   );

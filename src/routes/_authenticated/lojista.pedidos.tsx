@@ -5,14 +5,11 @@ import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/pedidos")({
   head: () => ({ meta: [{ title: "Pedidos — Lojista" }] }),
-  component: () => (
-    <LojistaShell title="Pedidos">
-      <Pedidos />
-    </LojistaShell>
-  ),
+  component: ShellPage,
 });
 
 type OrderStatus = "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled";
@@ -45,6 +42,7 @@ const NEXT: Record<OrderStatus, OrderStatus[]> = {
 };
 
 function Pedidos() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const [items, setItems] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +78,7 @@ function Pedidos() {
     const deliveryId = data as string;
     const url = `${window.location.origin}/entregador/${deliveryId}`;
     try { await navigator.clipboard.writeText(url); } catch { /* ignore */ }
-    toast.success("Entrega criada — link copiado para o estafeta.");
+    toast.success(t("s_entrega_criada_link_copiado_para_o_estafeta"));
     setItems((prev) => prev.map((o) => (o.id === orderId ? { ...o, delivery_id: deliveryId, status: "shipped" as OrderStatus } : o)));
   };
 
@@ -90,7 +88,7 @@ function Pedidos() {
     <div>
       <h2 className="mb-3 text-sm font-bold">{items.length} pedido(s)</h2>
       {loading ? (
-        <ul className="space-y-3" aria-busy="true" aria-label="Carregando pedidos">
+        <ul className="space-y-3" aria-busy="true" aria-label={t("s_carregando_pedidos")}>
           {Array.from({ length: 3 }).map((_, i) => (
             <li key={i} className="animate-pulse rounded-xl border border-border p-3">
               <div className="h-3 w-24 rounded bg-muted" />
@@ -100,7 +98,7 @@ function Pedidos() {
           ))}
         </ul>
       ) : items.length === 0 ? (
-        <Empty label="Nenhum pedido ainda." />
+        <Empty label={t("s_nenhum_pedido_ainda")} />
       ) : (
         <ul className="space-y-3">
           {items.map((o) => {
@@ -127,7 +125,7 @@ function Pedidos() {
                       onValueChange={(v) => updateStatus(o.id, v as OrderStatus)}
                     >
                       <SelectTrigger className="h-9 flex-1 text-xs">
-                        <SelectValue placeholder="Alterar status..." />
+                        <SelectValue placeholder={t("s_alterar_status")} />
                       </SelectTrigger>
                       <SelectContent>
                         {options.map((s) => (
@@ -146,7 +144,7 @@ function Pedidos() {
                         disabled={updating === o.id}
                         className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[11px] font-semibold text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
                       >
-                        <Truck size={12} /> Criar entrega
+                        <Truck size={12} /> {t("s_criar_entrega")}
                       </button>
                     )
                   ) : (
@@ -156,16 +154,16 @@ function Pedidos() {
                         params={{ orderId: o.id }}
                         className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary"
                       >
-                        <MapPin size={12} /> Ver mapa
+                        <MapPin size={12} /> {t("s_ver_mapa")}
                       </Link>
                       <button
                         onClick={async () => {
                           const url = `${window.location.origin}/entregador/${o.delivery_id}`;
-                          try { await navigator.clipboard.writeText(url); toast.success("Link do estafeta copiado"); } catch { toast.error("Não foi possível copiar"); }
+                          try { await navigator.clipboard.writeText(url); toast.success(t("s_link_do_estafeta_copiado")); } catch { toast.error(t("s_nao_foi_possivel_copiar")); }
                         }}
                         className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[11px] font-semibold hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary"
                       >
-                        <Copy size={12} /> Copiar link do estafeta
+                        <Copy size={12} /> {t("s_copiar_link_do_estafeta")}
                       </button>
                     </>
                   )}
@@ -181,4 +179,13 @@ function Pedidos() {
 
 function Empty({ label }: { label: string }) {
   return <div className="rounded-xl border border-dashed border-border py-10 text-center text-xs text-muted-foreground">{label}</div>;
+}
+
+function ShellPage() {
+  const { t } = useT();
+  return (
+    <LojistaShell title={t("s_pedidos")}>
+      <Pedidos />
+    </LojistaShell>
+  );
 }

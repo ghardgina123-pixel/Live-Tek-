@@ -9,6 +9,7 @@ import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { createSubscriptionCheckout, cancelSubscription } from "@/lib/subscriptions.functions";
 import { generateInvoicePdf, type InvoiceData } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/subscricao")({
   head: () => ({
@@ -21,11 +22,7 @@ export const Route = createFileRoute("/_authenticated/lojista/subscricao")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => (
-    <LojistaShell title="Subscrição e faturação">
-      <SubscriptionManager />
-    </LojistaShell>
-  ),
+  component: ShellPage,
 });
 
 type Plan = {
@@ -52,6 +49,7 @@ type Sub = {
 const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { maximumFractionDigits: 0 })}`;
 
 function SubscriptionManager() {
+  const { t } = useT();
   const { store } = useLojistaStore();
   const storeId = store?.id;
   const { status, usage, reload } = useSubscriptionStatus(storeId);
@@ -113,8 +111,8 @@ function SubscriptionManager() {
     setCancelling(true);
     try {
       const res = await cancelSubscription({ data: { storeId } });
-      if (!res.ok) throw new Error(res.reason === "no_subscription" ? "Não existe subscrição para cancelar" : "Falha ao cancelar");
-      toast.success("Subscrição cancelada. O histórico de faturação foi preservado.");
+      if (!res.ok) throw new Error(res.reason === "no_subscription" ? t("s_nao_existe_subscricao_para_cancelar") : t("s_falha_ao_cancelar"));
+      toast.success(t("s_subscricao_cancelada_o_historico_de_faturacao_fo"));
       await Promise.all([load(), reload()]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao cancelar");
@@ -139,12 +137,11 @@ function SubscriptionManager() {
                     status?.max_lives_per_month ? `${status.max_lives_per_month} lives/mês` : "lives ilimitadas"
                   }`
                 : status?.subscription_required
-                  ? "Como parceiro de Serviços precisa de um plano ativo para transmitir em direto."
-                  : "Como parceiro de Retalho paga apenas 10% de comissão por venda. Um plano acrescenta lives e ferramentas premium."}
+                  ? t("s_como_parceiro_de_servicos_precisa_de_um_plano_at") : t("s_como_parceiro_de_retalho_paga_apenas_10_de_comis")}
             </p>
             {pending && (
               <div className="mt-3 rounded-xl border border-border bg-card p-3">
-                <p className="text-[11px] text-muted-foreground">Pagamento pendente — referência Multicaixa Express</p>
+                <p className="text-[11px] text-muted-foreground">{t("s_pagamento_pendente_referencia_multicaixa_express")}</p>
                 <div className="mt-1 flex items-center gap-2">
                   <code className="truncate rounded bg-muted px-2 py-1 text-xs font-semibold">{pending.reference}</code>
                   <Button
@@ -152,7 +149,7 @@ function SubscriptionManager() {
                     variant="ghost"
                     onClick={() => {
                       navigator.clipboard.writeText(pending.reference ?? "");
-                      toast.success("Referência copiada");
+                      toast.success(t("s_referencia_copiada"));
                     }}
                   >
                     <Copy size={14} />
@@ -163,7 +160,7 @@ function SubscriptionManager() {
             )}
             {active && (
               <Button size="sm" variant="outline" className="mt-3" disabled={cancelling} onClick={cancel}>
-                {cancelling ? <Loader2 className="animate-spin" size={14} /> : <><Ban size={14} className="mr-1" /> Cancelar subscrição</>}
+                {cancelling ? <Loader2 className="animate-spin" size={14} /> : <><Ban size={14} className="mr-1" /> {t("s_cancelar_subscricao")}</>}
               </Button>
             )}
           </div>
@@ -174,7 +171,7 @@ function SubscriptionManager() {
       <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="flex items-center gap-2">
           <Radio size={16} className="text-primary" />
-          <h2 className="text-sm font-semibold">Lives deste mês</h2>
+          <h2 className="text-sm font-semibold">{t("s_lives_deste_mes")}</h2>
         </div>
         {usage ? (
           <>
@@ -199,13 +196,13 @@ function SubscriptionManager() {
             ) : null}
           </>
         ) : (
-          <p className="mt-2 text-xs text-muted-foreground">Sem plano ativo — nenhuma live disponível.</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t("s_sem_plano_ativo_nenhuma_live_disponivel")}</p>
         )}
       </section>
 
       {/* Planos */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold">Planos de parceiro</h2>
+        <h2 className="mb-3 text-sm font-semibold">{t("s_planos_de_parceiro")}</h2>
         {plans === null ? (
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
         ) : (
@@ -233,7 +230,7 @@ function SubscriptionManager() {
                     disabled={isCurrent || busy !== null}
                     onClick={() => upgrade(p.code)}
                   >
-                    {busy === p.code ? <Loader2 className="animate-spin" size={16} /> : isCurrent ? "Plano atual" : "Fazer upgrade"}
+                    {busy === p.code ? <Loader2 className="animate-spin" size={16} /> : isCurrent ? t("s_plano_atual") : t("s_fazer_upgrade")}
                   </Button>
                 </div>
               );
@@ -244,7 +241,7 @@ function SubscriptionManager() {
 
       {/* Faturas */}
       <section>
-        <h2 className="mb-3 text-sm font-semibold">Faturas</h2>
+        <h2 className="mb-3 text-sm font-semibold">{t("s_faturas")}</h2>
         {invoices.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
             Ainda não existem faturas. São emitidas automaticamente após a confirmação do pagamento.
@@ -261,7 +258,7 @@ function SubscriptionManager() {
                 </div>
                 <Badge variant="secondary" className="shrink-0">{inv.status === "paid" ? "Paga" : inv.status}</Badge>
                 <Button size="sm" variant="outline" onClick={() => generateInvoicePdf(inv)}>
-                  <Download size={14} className="mr-1" /> PDF
+                  <Download size={14} className="mr-1" /> {t("s_pdf")}
                 </Button>
               </li>
             ))}
@@ -269,5 +266,14 @@ function SubscriptionManager() {
         )}
       </section>
     </div>
+  );
+}
+
+function ShellPage() {
+  const { t } = useT();
+  return (
+    <LojistaShell title={t("s_subscricao_e_faturacao")}>
+      <SubscriptionManager />
+    </LojistaShell>
   );
 }

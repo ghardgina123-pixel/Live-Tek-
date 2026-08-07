@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/pagamentos")({
   head: () => ({ meta: [{ title: "Métodos de pagamento — Live Teká" }] }),
@@ -104,6 +105,7 @@ function descriptionFor(m: Method): string {
 }
 
 function Pagamentos() {
+  const { t } = useT();
   const { user } = useAuth();
   const [items, setItems] = useState<Method[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -148,10 +150,10 @@ function Pagamentos() {
     <AppShell>
       <header className="flex items-center gap-3 px-5 pt-6 pb-4 text-white" style={{ background: "var(--gradient-brand)" }}>
         <Link to="/perfil" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><ArrowLeft size={18} /></Link>
-        <h1 className="text-lg font-semibold">Métodos de pagamento</h1>
+        <h1 className="text-lg font-semibold">{t("s_metodos_de_pagamento")}</h1>
       </header>
       <div className="px-5 py-5">
-        <p className="mb-3 text-xs text-muted-foreground">Toque num método para adicionar ou editar os seus dados de pagamento.</p>
+        <p className="mb-3 text-xs text-muted-foreground">{t("s_toque_num_metodo_para_adicionar_ou_editar_os_seu")}</p>
         {loading ? (
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
         ) : (
@@ -189,12 +191,12 @@ function Pagamentos() {
                               </div>
                               <p className="text-[11px] text-muted-foreground line-clamp-1">
                                 {saved.length > 0
-                                  ? (saved[0].phone || saved[0].iban || (saved[0].card_last4 ? `•••• ${saved[0].card_last4}` : saved[0].label) || "Configurado")
+                                  ? (saved[0].phone || saved[0].iban || (saved[0].card_last4 ? `•••• ${saved[0].card_last4}` : saved[0].label) || t("s_configurado"))
                                   : descriptionFor(m)}
                               </p>
                             </div>
                             {m.is_cash_on_delivery ? (
-                              <span className="rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold uppercase">Na entrega</span>
+                              <span className="rounded-full bg-white/70 px-2 py-0.5 text-[9px] font-bold uppercase">{t("s_na_entrega")}</span>
                             ) : (
                               <ChevronRight size={18} className="text-muted-foreground" />
                             )}
@@ -230,6 +232,7 @@ function PaymentSheet({
   onClose: () => void;
   onChanged: () => void;
 }) {
+  const { t } = useT();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
 
@@ -244,10 +247,10 @@ function PaymentSheet({
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const save = async () => {
-    if (!userId) return toast.error("Faça login para continuar");
+    if (!userId) return toast.error(t("s_faca_login_para_continuar"));
     const required = keys.filter((k) => k !== "label");
     for (const k of required) {
-      if (!form[k]?.trim()) return toast.error("Preencha todos os campos");
+      if (!form[k]?.trim()) return toast.error(t("s_preencha_todos_os_campos"));
     }
     setSaving(true);
     const payload: Record<string, unknown> = {
@@ -269,7 +272,7 @@ function PaymentSheet({
     const { error } = await (supabase as any).from("user_payment_accounts").insert(payload);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Método configurado");
+    toast.success(t("s_metodo_configurado"));
     onChanged();
     onClose();
   };
@@ -277,7 +280,7 @@ function PaymentSheet({
   const remove = async (id: string) => {
     const { error } = await (supabase as any).from("user_payment_accounts").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Removido");
+    toast.success(t("s_removido"));
     onChanged();
   };
 
@@ -290,7 +293,7 @@ function PaymentSheet({
             <SheetHeader className="space-y-0 text-left">
               <SheetTitle className="text-base text-white">{displayNameFor(method)}</SheetTitle>
               <SheetDescription className="text-xs text-white/80">
-                {descriptionFor(method) || "Preencha os dados de pagamento"}
+                {descriptionFor(method) || t("s_preencha_os_dados_de_pagamento")}
               </SheetDescription>
             </SheetHeader>
           </div>
@@ -299,7 +302,7 @@ function PaymentSheet({
         <div className="space-y-4 px-5 py-5">
           {method.method_type === "bank_transfer" && (
             <section className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
-              <h3 className="text-xs font-bold uppercase text-primary">Dados oficiais para transferência</h3>
+              <h3 className="text-xs font-bold uppercase text-primary">{t("s_dados_oficiais_para_transferencia")}</h3>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
                 Efetue a transferência para uma das contas abaixo (TUSSALA KAKA - COMÉRCIO E PRESTAÇÃO DE SERVIÇOS, (SU), LDA.):
               </p>
@@ -316,7 +319,7 @@ function PaymentSheet({
 
           {accounts.length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">Guardados</h3>
+              <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">{t("s_guardados")}</h3>
               <ul className="space-y-2">
                 {accounts.map((a) => (
                   <li key={a.id} className="flex items-center justify-between rounded-xl border border-border p-3 text-sm">
@@ -326,7 +329,7 @@ function PaymentSheet({
                         {a.phone || a.iban || (a.card_last4 ? `•••• ${a.card_last4}` : "")}
                       </p>
                     </div>
-                    <button onClick={() => remove(a.id)} className="rounded-lg p-2 text-destructive hover:bg-destructive/10" aria-label="Remover">
+                    <button onClick={() => remove(a.id)} className="rounded-lg p-2 text-destructive hover:bg-destructive/10" aria-label={t("s_remover")}>
                       <Trash2 size={16} />
                     </button>
                   </li>
@@ -337,27 +340,27 @@ function PaymentSheet({
 
           <section className="space-y-3">
             <h3 className="text-xs font-bold uppercase text-muted-foreground">
-              {accounts.length > 0 ? "Adicionar outra conta" : "Dados de pagamento"}
+              {accounts.length > 0 ? t("s_adicionar_outra_conta") : t("s_dados_de_pagamento")}
             </h3>
 
             {keys.includes("account_holder") && (
-              <Field label="Nome do titular" value={form.account_holder ?? ""} onChange={(v) => set("account_holder", v)} placeholder="Nome completo" />
+              <Field label={t("s_nome_do_titular")} value={form.account_holder ?? ""} onChange={(v) => set("account_holder", v)} placeholder={t("s_nome_completo")} />
             )}
             {keys.includes("phone") && (
-              <Field label="Telemóvel" value={form.phone ?? ""} onChange={(v) => set("phone", v)} placeholder="+244 9XX XXX XXX" inputMode="tel" />
+              <Field label={t("s_telemovel")} value={form.phone ?? ""} onChange={(v) => set("phone", v)} placeholder="+244 9XX XXX XXX" inputMode="tel" />
             )}
             {keys.includes("iban") && (
-              <Field label="IBAN" value={form.iban ?? ""} onChange={(v) => set("iban", v.toUpperCase())} placeholder="AO06 0000 0000 0000 0000 0000 0" />
+              <Field label={t("s_iban")} value={form.iban ?? ""} onChange={(v) => set("iban", v.toUpperCase())} placeholder="AO06 0000 0000 0000 0000 0000 0" />
             )}
             {keys.includes("bank_name") && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Banco</Label>
+                <Label className="text-xs">{t("s_banco")}</Label>
                 <select
                   value={form.bank_name ?? ""}
                   onChange={(e) => set("bank_name", e.target.value)}
                   className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="">Selecione o banco</option>
+                  <option value="">{t("s_selecione_o_banco")}</option>
                   {ANGOLAN_BANKS.map((b) => (
                     <option key={b} value={b}>{b}</option>
                   ))}
@@ -365,13 +368,13 @@ function PaymentSheet({
               </div>
             )}
             {keys.includes("card_number") && (
-              <Field label="Número do cartão" value={form.card_number ?? ""} onChange={(v) => set("card_number", v)} placeholder="0000 0000 0000 0000" inputMode="numeric" />
+              <Field label={t("s_numero_do_cartao")} value={form.card_number ?? ""} onChange={(v) => set("card_number", v)} placeholder="0000 0000 0000 0000" inputMode="numeric" />
             )}
             {keys.includes("card_exp") && (
-              <Field label="Validade (MM/AA)" value={form.card_exp ?? ""} onChange={(v) => set("card_exp", v)} placeholder="MM/AA" inputMode="numeric" />
+              <Field label={t("s_validade_mm_aa")} value={form.card_exp ?? ""} onChange={(v) => set("card_exp", v)} placeholder={t("s_mm_aa")} inputMode="numeric" />
             )}
             {keys.includes("label") && (
-              <Field label="Apelido (opcional)" value={form.label ?? ""} onChange={(v) => set("label", v)} placeholder="Ex.: Pessoal" />
+              <Field label={t("s_apelido_opcional")} value={form.label ?? ""} onChange={(v) => set("label", v)} placeholder={t("s_ex_pessoal")} />
             )}
 
             <Button onClick={save} disabled={saving} className="h-12 w-full text-sm font-semibold">
