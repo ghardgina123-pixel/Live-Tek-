@@ -142,7 +142,7 @@ function PendingState({ reason, rejected }: { reason: string | null; rejected?: 
       <p className="mt-2 text-sm text-muted-foreground">
         {rejected
           ? reason || t("s_sua_loja_foi_rejeitada_entre_em_contato_com_o_su")
-          : t("s_sua_loja_foi_enviada_para_analise_voce_recebera_u")}
+          : "Sua loja foi enviada para análise. Você receberá uma notificação assim que for aprovada."}
       </p>
     </div>
   );
