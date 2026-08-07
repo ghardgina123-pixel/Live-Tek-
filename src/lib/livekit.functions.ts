@@ -7,6 +7,10 @@ const inputSchema = z.object({
   canPublish: z.boolean().optional(),
 });
 
+// Short-lived room credentials: LiveKit tokens are temporary by design and are
+// re-issued by this authenticated endpoint whenever a viewer/publisher joins.
+const TOKEN_TTL_SECONDS = 10 * 60;
+
 export const issueLiveKitToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => inputSchema.parse(data))
@@ -31,6 +35,19 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
     if (!room) throw new Error("LIVE_NOT_FOUND");
     const ownerId = (live as { stores?: { owner_id?: string } } | null)?.stores?.owner_id;
     const canPublish = !!data.canPublish && !!ownerId && ownerId === context.userId;
+    const { recordSecurityEvent, requestAuditMeta } = await import("./audit.server");
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const meta = requestAuditMeta(getRequest());
+    if (data.canPublish && !canPublish) {
+      // Someone asked for publish rights on a room they do not own.
+      await recordSecurityEvent({
+        event: "livekit.publish_denied",
+        severity: "warning",
+        actorId: context.userId,
+        subjectId: data.liveId,
+        ...meta,
+      });
+    }
     // Derive a non-identifying display name from the profile (never the email).
     const { data: profile } = await supabaseAdmin
       .from("profiles")
@@ -52,5 +69,13 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
       canPublishData: true,
     });
     const token = await at.toJwt();
-    return { token, url: wsUrl };
+    await recordSecurityEvent({
+      event: "livekit.token_issued",
+      severity: "info",
+      actorId: context.userId,
+      subjectId: data.liveId,
+      metadata: { canPublish, ttl_seconds: TOKEN_TTL_SECONDS },
+      ...meta,
+    });
+    return { token, url: wsUrl, expiresIn: TOKEN_TTL_SECONDS };
   });
