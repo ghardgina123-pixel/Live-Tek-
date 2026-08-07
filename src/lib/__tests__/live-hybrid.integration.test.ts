@@ -40,12 +40,12 @@ describe("leitura real das estatísticas WebRTC", () => {
   it("calcula bitrate, RTT e perda entre amostras", () => {
     const cursor = emptyCursor();
     parseVideoStats(
-      [{ type: "outbound-rtp", kind: "video", bytesSent: 0, timestamp: 0, packetsSent: 0 }],
+      [{ type: "outbound-rtp", kind: "video", bytesSent: 0, timestamp: 1000, packetsSent: 0 }],
       cursor,
     );
     const report = parseVideoStats(
       [
-        { type: "outbound-rtp", kind: "video", bytesSent: 125_000, timestamp: 1000, packetsSent: 100 },
+        { type: "outbound-rtp", kind: "video", bytesSent: 125_000, timestamp: 2000, packetsSent: 100 },
         { type: "remote-inbound-rtp", kind: "video", roundTripTime: 0.25, packetsLost: 5 },
       ],
       cursor,
@@ -132,22 +132,22 @@ vi.mock("@/lib/live-cameras.server", async (orig) => {
   };
 });
 
-function table(name: string) {
-  const rows = () => state[name.replace("live_", "") as "cameras" | "events"] ?? [];
-  let filters: Array<[string, unknown]> = [];
+function makeTable(rows: () => Row[]) {
+  const filters: Array<[string, unknown]> = [];
+  const matched = () => rows().filter((r) => filters.every(([c, v]) => r[c] === v));
   const api: Record<string, unknown> = {
     select: () => api,
     order: () => api,
+    limit: () => api,
     eq: (col: string, val: unknown) => {
       filters.push([col, val]);
       return api;
     },
-    maybeSingle: async () => ({
-      data: rows().find((r) => filters.every(([c, v]) => r[c] === v)) ?? null,
-    }),
-    then: undefined,
+    maybeSingle: async () => ({ data: matched()[0] ?? null, error: null }),
+    single: async () => ({ data: matched()[0] ?? null, error: null }),
+    then: (res: (v: unknown) => void) => res({ data: matched(), error: null }),
     insert: (payload: Row) => {
-      const row = { id: `id-${rows().length + 1}`, ...payload };
+      const row: Row = { id: `id-${rows().length + 1}`, ...payload };
       rows().push(row);
       return {
         select: () => ({ single: async () => ({ data: row, error: null }) }),
@@ -175,27 +175,9 @@ function table(name: string) {
 vi.mock("@/integrations/supabase/client.server", () => ({
   supabaseAdmin: {
     from: (name: string) => {
-      if (name === "lives") {
-        let filters: Array<[string, unknown]> = [];
-        const api: Record<string, unknown> = {
-          select: () => api,
-          eq: (c: string, v: unknown) => {
-            filters.push([c, v]);
-            return api;
-          },
-          maybeSingle: async () => ({
-            data: state.lives.find((r) => filters.every(([c, v]) => r[c] === v)) ?? null,
-          }),
-          update: (patch: Row) => ({
-            eq: async (c: string, v: unknown) => {
-              for (const r of state.lives) if (r[c] === v) Object.assign(r, patch);
-              return { error: null };
-            },
-          }),
-        };
-        return api;
-      }
-      return table(name);
+      if (name === "lives") return makeTable(() => state.lives);
+      if (name === "live_events") return makeTable(() => state.events);
+      return makeTable(() => state.cameras);
     },
   },
 }));
