@@ -63,7 +63,8 @@ export function startAdaptiveBitrate(
           const lost = Number(r["packetsLost"] ?? 0);
           const deltaLost = Math.max(0, lost - lastLost);
           lastLost = lost;
-          if (lastPackets > 0) lossPct = Math.min(100, (deltaLost / Math.max(1, lastPackets)) * 100);
+          if (lastPackets > 0)
+            lossPct = Math.min(100, (deltaLost / Math.max(1, lastPackets)) * 100);
         }
         if (r["type"] === "candidate-pair" && r["nominated"]) {
           const rtt = Number(r["currentRoundTripTime"] ?? 0);
@@ -75,10 +76,16 @@ export function startAdaptiveBitrate(
       let next = current;
       if (rttMs > 400 || lossPct > 5) next = Math.max(MIN_BITRATE, Math.round(current * 0.6));
       else if (rttMs > 200 || lossPct > 2) next = Math.max(MIN_BITRATE, Math.round(current * 0.8));
-      else if (rttMs > 0 && rttMs < 120 && lossPct < 1) next = Math.min(MAX_BITRATE, Math.round(current * 1.15));
+      else if (rttMs > 0 && rttMs < 120 && lossPct < 1)
+        next = Math.min(MAX_BITRATE, Math.round(current * 1.15));
       if (Math.abs(next - current) > 20_000) await apply(next);
 
-      onReport({ rttMs: Math.round(rttMs), lossPct: Number(lossPct.toFixed(1)), bitrateKbps: Math.round(bitrateKbps), targetKbps: Math.round(current / 1000) });
+      onReport({
+        rttMs: Math.round(rttMs),
+        lossPct: Number(lossPct.toFixed(1)),
+        bitrateKbps: Math.round(bitrateKbps),
+        targetKbps: Math.round(current / 1000),
+      });
     } catch {
       // estatísticas indisponíveis neste browser
     }

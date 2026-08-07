@@ -22,11 +22,16 @@ const cameraIdSchema = z.object({ cameraId: z.string().uuid() });
 export const listLiveCameras = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => liveIdSchema.parse(d))
-  .handler(async ({ data, context }): Promise<{ cameras: LiveCameraDTO[]; activeCameraId: string | null }> => {
-    const { loadCameras, requireLiveOwner } = await import("@/lib/live-cameras.repo.server");
-    const live = await requireLiveOwner(data.liveId, context.userId);
-    return loadCameras(live, context.userId);
-  });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ cameras: LiveCameraDTO[]; activeCameraId: string | null }> => {
+      const { loadCameras, requireLiveOwner } = await import("@/lib/live-cameras.repo.server");
+      const live = await requireLiveOwner(data.liveId, context.userId);
+      return loadCameras(live, context.userId);
+    },
+  );
 
 export const createLiveCamera = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -76,8 +81,10 @@ export const switchLiveCamera = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ liveId: z.string().uuid(), cameraId: z.string().uuid() }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ activeCameraId: string; activeIdentity: string }> => {
-    const { requireLiveOwner, switchCamera } = await import("@/lib/live-cameras.repo.server");
-    const live = await requireLiveOwner(data.liveId, context.userId);
-    return switchCamera(live, data.cameraId);
-  });
+  .handler(
+    async ({ data, context }): Promise<{ activeCameraId: string; activeIdentity: string }> => {
+      const { requireLiveOwner, switchCamera } = await import("@/lib/live-cameras.repo.server");
+      const live = await requireLiveOwner(data.liveId, context.userId);
+      return switchCamera(live, data.cameraId);
+    },
+  );

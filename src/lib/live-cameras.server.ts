@@ -30,7 +30,10 @@ export function roomClient(cfg: LiveKitConfig) {
 }
 
 /** Mapeia o estado numérico do Ingress para um estado legível guardado na BD. */
-export function ingressStatus(info: IngressInfo | undefined | null): { status: string; error: string | null } {
+export function ingressStatus(info: IngressInfo | undefined | null): {
+  status: string;
+  error: string | null;
+} {
   const status = info?.state?.status;
   switch (status) {
     case 2:
@@ -63,13 +66,19 @@ export function ingressEncoding() {
     }),
     video: new IngressVideoOptions({
       name: "video",
-      encodingOptions: { case: "preset", value: IngressVideoEncodingPreset.H264_720P_30FPS_1_LAYER },
+      encodingOptions: {
+        case: "preset",
+        value: IngressVideoEncodingPreset.H264_720P_30FPS_1_LAYER,
+      },
     }),
   };
 }
 
 /** Normaliza e valida a URL de uma câmara IP na rede da loja. */
-export function normalizeSourceUrl(sourceType: string, raw: string | undefined): string | undefined {
+export function normalizeSourceUrl(
+  sourceType: string,
+  raw: string | undefined,
+): string | undefined {
   if (sourceType !== "rtsp") return undefined;
   const url = (raw ?? "").trim();
   if (!/^(rtsp|rtsps|http|https):\/\//i.test(url)) {

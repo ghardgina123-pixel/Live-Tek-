@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Room, RoomEvent, ConnectionState, Track, type RemoteTrack, type RemoteTrackPublication, type RemoteParticipant } from "livekit-client";
+import {
+  Room,
+  RoomEvent,
+  ConnectionState,
+  Track,
+  type RemoteTrack,
+  type RemoteTrackPublication,
+  type RemoteParticipant,
+} from "livekit-client";
 import { Loader2, Video, WifiOff, AlertTriangle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
@@ -38,7 +46,9 @@ export function LivePlayer({ liveId }: Props) {
     const track = (wanted && map.get(wanted)) || map.values().next().value;
     if (!track) return;
     // detach() de outros tracks evita dois vídeos a decodificar no mesmo elemento
-    map.forEach((t) => { if (t !== track) t.detach(video); });
+    map.forEach((t) => {
+      if (t !== track) t.detach(video);
+    });
     track.attach(video);
     void video.play().catch(() => undefined);
     setState("live");
@@ -52,7 +62,11 @@ export function LivePlayer({ liveId }: Props) {
     });
     roomRef.current = room;
 
-    const onSubscribed = (track: RemoteTrack, _pub: RemoteTrackPublication, participant: RemoteParticipant) => {
+    const onSubscribed = (
+      track: RemoteTrack,
+      _pub: RemoteTrackPublication,
+      participant: RemoteParticipant,
+    ) => {
       if (track.kind === Track.Kind.Video) {
         videoTracksRef.current.set(participant.identity, track);
         attachActive();
@@ -65,10 +79,16 @@ export function LivePlayer({ liveId }: Props) {
         audioHostRef.current.appendChild(el);
       }
     };
-    const onUnsubscribed = (track: RemoteTrack, _pub: RemoteTrackPublication, participant: RemoteParticipant) => {
+    const onUnsubscribed = (
+      track: RemoteTrack,
+      _pub: RemoteTrackPublication,
+      participant: RemoteParticipant,
+    ) => {
       if (track.kind === Track.Kind.Video) {
         videoTracksRef.current.delete(participant.identity);
-        track.detach().forEach((el) => { if (el !== videoRef.current) el.remove(); });
+        track.detach().forEach((el) => {
+          if (el !== videoRef.current) el.remove();
+        });
         attachActive();
       } else {
         track.detach().forEach((el) => el.remove());
@@ -102,7 +122,11 @@ export function LivePlayer({ liveId }: Props) {
 
     (async () => {
       try {
-        const { data: liveRow } = await supabase.from("lives").select("active_identity").eq("id", liveId).maybeSingle();
+        const { data: liveRow } = await supabase
+          .from("lives")
+          .select("active_identity")
+          .eq("id", liveId)
+          .maybeSingle();
         if (liveRow?.active_identity) activeIdentityRef.current = liveRow.active_identity;
         const { token, url } = await issue({ data: { liveId, canPublish: false } });
         if (cancelled) return;
@@ -125,13 +149,17 @@ export function LivePlayer({ liveId }: Props) {
     // Realtime: o lojista alterna a câmara → a live actualiza active_identity.
     const ch = supabase
       .channel(`live-cam-${liveId}`)
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "lives", filter: `id=eq.${liveId}` }, (payload) => {
-        const next = (payload.new as { active_identity?: string | null }).active_identity ?? null;
-        if (next && next !== activeIdentityRef.current) {
-          activeIdentityRef.current = next;
-          attachActive();
-        }
-      })
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "lives", filter: `id=eq.${liveId}` },
+        (payload) => {
+          const next = (payload.new as { active_identity?: string | null }).active_identity ?? null;
+          if (next && next !== activeIdentityRef.current) {
+            activeIdentityRef.current = next;
+            attachActive();
+          }
+        },
+      )
       .subscribe();
 
     return () => {
@@ -145,15 +173,50 @@ export function LivePlayer({ liveId }: Props) {
 
   return (
     <>
-      <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <div ref={audioHostRef} className="hidden" aria-hidden />
       {state !== "live" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/80 text-center text-white/85">
-          {state === "connecting" && <><Loader2 className="animate-spin" /> <p className="text-sm">Conectando ao stream…</p></>}
-          {state === "reconnecting" && <><WifiOff /> <p className="text-sm">Reconectando…</p><p className="text-[11px] text-white/60">Sua conexão oscilou. O chat continua ativo.</p></>}
-          {state === "waiting" && <><Video /> <p className="text-sm">Aguardando o lojista iniciar a transmissão</p></>}
-          {state === "error" && <><AlertTriangle className="text-yellow-400" /><p className="text-sm">Falha no stream</p><p className="text-[11px] text-white/60">{errorMsg}</p></>}
-          {state === "unconfigured" && <><Video /><p className="text-sm">Streaming não configurado</p><p className="text-[11px] text-white/60">Adicione as credenciais LiveKit nos secrets.</p></>}
+          {state === "connecting" && (
+            <>
+              <Loader2 className="animate-spin" /> <p className="text-sm">Conectando ao stream…</p>
+            </>
+          )}
+          {state === "reconnecting" && (
+            <>
+              <WifiOff /> <p className="text-sm">Reconectando…</p>
+              <p className="text-[11px] text-white/60">
+                Sua conexão oscilou. O chat continua ativo.
+              </p>
+            </>
+          )}
+          {state === "waiting" && (
+            <>
+              <Video /> <p className="text-sm">Aguardando o lojista iniciar a transmissão</p>
+            </>
+          )}
+          {state === "error" && (
+            <>
+              <AlertTriangle className="text-yellow-400" />
+              <p className="text-sm">Falha no stream</p>
+              <p className="text-[11px] text-white/60">{errorMsg}</p>
+            </>
+          )}
+          {state === "unconfigured" && (
+            <>
+              <Video />
+              <p className="text-sm">Streaming não configurado</p>
+              <p className="text-[11px] text-white/60">
+                Adicione as credenciais LiveKit nos secrets.
+              </p>
+            </>
+          )}
         </div>
       )}
     </>

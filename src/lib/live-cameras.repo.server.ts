@@ -9,7 +9,13 @@ import {
   roomClient,
 } from "@/lib/live-cameras.server";
 
-export type OwnedLive = { id: string; storeId: string; room: string; activeCameraId: string | null; ownerId: string };
+export type OwnedLive = {
+  id: string;
+  storeId: string;
+  room: string;
+  activeCameraId: string | null;
+  ownerId: string;
+};
 
 type CameraRow = {
   id: string;
@@ -216,7 +222,8 @@ async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCa
 
 export async function startCamera(cameraId: string, userId: string) {
   const { row, live } = await requireCameraOwner(cameraId, userId);
-  if (row.source_type === "phone") throw new Error("A câmara do telemóvel liga-se pelo botão de transmissão.");
+  if (row.source_type === "phone")
+    throw new Error("A câmara do telemóvel liga-se pelo botão de transmissão.");
   return provisionIngress(live, row);
 }
 
@@ -230,7 +237,13 @@ export async function stopCamera(cameraId: string, userId: string) {
       // já parado
     }
   }
-  const patch = { ingress_id: null, ingress_url: null, stream_key: null, status: "idle", last_error: null };
+  const patch = {
+    ingress_id: null,
+    ingress_url: null,
+    stream_key: null,
+    status: "idle",
+    last_error: null,
+  };
   await db.from("live_cameras").update(patch).eq("id", row.id);
   return toDTO({ ...row, ...patch }, live.activeCameraId);
 }
@@ -268,7 +281,10 @@ export async function switchCamera(live: OwnedLive, cameraId: string) {
     .eq("id", live.id);
   try {
     const cfg = livekitConfig();
-    await roomClient(cfg).updateRoomMetadata(live.room, JSON.stringify({ activeIdentity: identity, activeCameraId: cameraId }));
+    await roomClient(cfg).updateRoomMetadata(
+      live.room,
+      JSON.stringify({ activeIdentity: identity, activeCameraId: cameraId }),
+    );
   } catch {
     // sala ainda sem sessão activa — o estado na BD é a fonte de verdade.
   }

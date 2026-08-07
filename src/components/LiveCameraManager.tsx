@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Camera,
-  Cctv,
-  Loader2,
-  Plus,
-  Power,
-  RefreshCw,
-  Trash2,
-  Radio,
-  Copy,
-} from "lucide-react";
+import { Camera, Cctv, Loader2, Plus, Power, RefreshCw, Trash2, Radio, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,10 +79,13 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 
   const add = async () => {
     if (!label.trim()) return toast.error("Dê um nome à câmara");
-    if (sourceType === "rtsp" && !sourceUrl.trim()) return toast.error("Indique a URL RTSP da câmara");
+    if (sourceType === "rtsp" && !sourceUrl.trim())
+      return toast.error("Indique a URL RTSP da câmara");
     setSaving(true);
     try {
-      await create({ data: { liveId, label: label.trim(), sourceType, sourceUrl: sourceUrl.trim() || undefined } });
+      await create({
+        data: { liveId, label: label.trim(), sourceType, sourceUrl: sourceUrl.trim() || undefined },
+      });
       toast.success("Câmara ligada à live");
       setOpen(false);
       setLabel("");
@@ -125,7 +118,12 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           <Cctv size={15} className="text-primary" /> Câmaras da live
         </h3>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" onClick={() => void reload()} aria-label="Atualizar estado">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => void reload()}
+            aria-label="Atualizar estado"
+          >
             <RefreshCw size={14} />
           </Button>
           <Button size="sm" onClick={() => setOpen(true)}>
@@ -135,21 +133,30 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       </div>
 
       {cameras === null && (
-        <div className="flex justify-center py-4"><Loader2 className="animate-spin text-primary" size={16} /></div>
+        <div className="flex justify-center py-4">
+          <Loader2 className="animate-spin text-primary" size={16} />
+        </div>
       )}
 
       <ul className="space-y-2">
         {cameras?.map((cam) => (
-          <li key={cam.id} className={`rounded-xl border p-2.5 ${cam.isActive ? "border-primary bg-primary/5" : ""}`}>
+          <li
+            key={cam.id}
+            className={`rounded-xl border p-2.5 ${cam.isActive ? "border-primary bg-primary/5" : ""}`}
+          >
             <div className="flex items-center gap-2">
               {cam.sourceType === "phone" ? <Camera size={15} /> : <Cctv size={15} />}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{cam.label}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
-                  {cam.sourceType === "phone" ? "Câmara do telemóvel" : cam.sourceUrl ?? cam.sourceType.toUpperCase()}
+                  {cam.sourceType === "phone"
+                    ? "Câmara do telemóvel"
+                    : (cam.sourceUrl ?? cam.sourceType.toUpperCase())}
                 </p>
               </div>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusTone[cam.status] ?? statusTone["idle"]}`}>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusTone[cam.status] ?? statusTone["idle"]}`}
+              >
                 {statusLabel[cam.status] ?? cam.status}
               </span>
             </div>
@@ -168,23 +175,67 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 size="sm"
                 variant={cam.isActive ? "secondary" : "default"}
                 disabled={cam.isActive || busyId === cam.id}
-                onClick={() => void run(cam.id, () => switchTo({ data: { liveId, cameraId: cam.id } }), `Fonte: ${cam.label}`)}
+                onClick={() =>
+                  void run(
+                    cam.id,
+                    () => switchTo({ data: { liveId, cameraId: cam.id } }),
+                    `Fonte: ${cam.label}`,
+                  )
+                }
               >
-                {busyId === cam.id ? <Loader2 size={13} className="mr-1 animate-spin" /> : <Radio size={13} className="mr-1" />}
+                {busyId === cam.id ? (
+                  <Loader2 size={13} className="mr-1 animate-spin" />
+                ) : (
+                  <Radio size={13} className="mr-1" />
+                )}
                 {cam.isActive ? "No ar" : "Passar ao ar"}
               </Button>
               {cam.sourceType !== "phone" && (
                 <>
                   {cam.ingressId ? (
-                    <Button size="sm" variant="outline" disabled={busyId === cam.id} onClick={() => void run(cam.id, () => stop({ data: { cameraId: cam.id } }), "Câmara parada")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busyId === cam.id}
+                      onClick={() =>
+                        void run(
+                          cam.id,
+                          () => stop({ data: { cameraId: cam.id } }),
+                          "Câmara parada",
+                        )
+                      }
+                    >
                       <Power size={13} className="mr-1" /> Parar
                     </Button>
                   ) : (
-                    <Button size="sm" variant="outline" disabled={busyId === cam.id} onClick={() => void run(cam.id, () => start({ data: { cameraId: cam.id } }), "Câmara ligada")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busyId === cam.id}
+                      onClick={() =>
+                        void run(
+                          cam.id,
+                          () => start({ data: { cameraId: cam.id } }),
+                          "Câmara ligada",
+                        )
+                      }
+                    >
                       <Power size={13} className="mr-1" /> Ligar
                     </Button>
                   )}
-                  <Button size="sm" variant="ghost" className="text-destructive" disabled={busyId === cam.id} onClick={() => void run(cam.id, () => remove({ data: { cameraId: cam.id } }), "Câmara removida")}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive"
+                    disabled={busyId === cam.id}
+                    onClick={() =>
+                      void run(
+                        cam.id,
+                        () => remove({ data: { cameraId: cam.id } }),
+                        "Câmara removida",
+                      )
+                    }
+                  >
                     <Trash2 size={13} />
                   </Button>
                 </>
@@ -209,7 +260,12 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           <div className="space-y-3">
             <div>
               <Label htmlFor="cam-label">Nome</Label>
-              <Input id="cam-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Câmara de segurança (plano geral)" />
+              <Input
+                id="cam-label"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Câmara de segurança (plano geral)"
+              />
             </div>
             <div>
               <Label htmlFor="cam-type">Tipo de fonte</Label>
@@ -235,13 +291,16 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                   autoComplete="off"
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  A câmara tem de estar acessível a partir da internet (encaminhamento de porta ou DDNS) para o servidor de streaming a poder captar.
+                  A câmara tem de estar acessível a partir da internet (encaminhamento de porta ou
+                  DDNS) para o servidor de streaming a poder captar.
                 </p>
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
             <Button onClick={() => void add()} disabled={saving}>
               {saving && <Loader2 size={14} className="mr-1 animate-spin" />} Ligar câmara
             </Button>
@@ -261,7 +320,10 @@ function CopyRow({ label, value }: { label: string; value: string }) {
         type="button"
         aria-label={`Copiar ${label}`}
         className="ml-auto shrink-0 text-primary"
-        onClick={() => { void navigator.clipboard.writeText(value); toast.success("Copiado"); }}
+        onClick={() => {
+          void navigator.clipboard.writeText(value);
+          toast.success("Copiado");
+        }}
       >
         <Copy size={12} />
       </button>
