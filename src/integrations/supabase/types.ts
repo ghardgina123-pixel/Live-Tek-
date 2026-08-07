@@ -1410,6 +1410,7 @@ export type Database = {
           display_name: string | null
           id: string
           is_online: boolean
+          language_code: string | null
           last_seen_at: string | null
           partner_type: Database["public"]["Enums"]["partner_type"] | null
           phone: string | null
@@ -1423,6 +1424,7 @@ export type Database = {
           display_name?: string | null
           id: string
           is_online?: boolean
+          language_code?: string | null
           last_seen_at?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"] | null
           phone?: string | null
@@ -1436,6 +1438,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_online?: boolean
+          language_code?: string | null
           last_seen_at?: string | null
           partner_type?: Database["public"]["Enums"]["partner_type"] | null
           phone?: string | null
