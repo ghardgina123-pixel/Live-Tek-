@@ -25,11 +25,14 @@ export const Route = createFileRoute("/api/public/subscription-cron")({
         const { data: expiredCount, error } = await supabaseAdmin.rpc("expire_due_subscriptions");
         if (error) return new Response(error.message, { status: 500 });
 
+        // Avisos de renovação 15/7/3/1/0 dias (idempotentes por marco e ciclo).
+        const { data: noticeCount } = await supabaseAdmin.rpc("subscription_renewal_notices");
+
         const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
         const { data: rows } = await supabaseAdmin
           .from("store_subscriptions")
           .select("id, plan, expires_at, updated_at, store_id, stores:store_id(name, owner_id)")
-          .eq("status", "expired")
+          .in("status", ["grace", "suspended", "expired"])
           .gte("updated_at", since);
 
         let emailed = 0;
@@ -58,7 +61,7 @@ export const Route = createFileRoute("/api/public/subscription-cron")({
           if (res.sent) emailed += 1;
         }
 
-        return Response.json({ ok: true, expired: expiredCount ?? 0, emailed });
+        return Response.json({ ok: true, expired: expiredCount ?? 0, notices: noticeCount ?? 0, emailed });
       },
     },
   },
