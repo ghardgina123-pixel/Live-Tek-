@@ -23,7 +23,7 @@ export const Route = createFileRoute("/home")({
       { title: "Live Teká — Mercado ao Vivo" },
       { name: "description", content: "Descubra lojas ao vivo, compre direto da live, converse com vendedores e receba em casa." },
       { property: "og:title", content: "Live Teká — Mercado ao Vivo" },
-      { property: "og:description", content: "Descubra lojas ao vivo em Angola, compre direto da live e receba em casa." },
+      { property: "og:description", content: "Descubra lojas ao vivo, compre direto da live e receba em casa." },
       { property: "og:url", content: "https://www.livemarketplece.live/home" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/home" }],
@@ -229,7 +229,7 @@ function Home() {
         <Link to="/lojas" className="group relative block overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
           <img
             src={homeHero}
-            alt="Compre ao vivo nas lojas angolanas do Live Teká"
+            alt="Compre ao vivo nas lojas do Live Teká"
             width={1280}
             height={896}
             loading="eager"
@@ -242,7 +242,7 @@ function Home() {
               <Radio size={11} /> Ao vivo agora
             </span>
             <p className="mt-1.5 text-base font-bold leading-tight">Compre · Converse · Receba</p>
-            <p className="text-[11px] text-white/85">Lojas reais de Angola, em tempo real.</p>
+            <p className="text-[11px] text-white/85">Lojas reais, em tempo real.</p>
           </div>
         </Link>
       </section>
