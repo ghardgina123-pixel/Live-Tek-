@@ -39,12 +39,24 @@ export const Route = createFileRoute("/api/public/push-dispatch")({
           .maybeSingle();
         const expected = (vaultRow as { decrypted_secret?: string } | null)?.decrypted_secret;
         if (!expected || !token) {
+          const { recordSecurityEvent, requestAuditMeta } = await import("@/lib/audit.server");
+          await recordSecurityEvent({
+            event: "webhook.push_dispatch.unauthorized",
+            severity: "warning",
+            ...requestAuditMeta(request),
+          });
           return new Response("Unauthorized", { status: 401 });
         }
         const { timingSafeEqual } = await import("crypto");
         const a = Buffer.from(token);
         const b = Buffer.from(expected);
         if (a.length !== b.length || !timingSafeEqual(a, b)) {
+          const { recordSecurityEvent, requestAuditMeta } = await import("@/lib/audit.server");
+          await recordSecurityEvent({
+            event: "webhook.push_dispatch.bad_signature",
+            severity: "critical",
+            ...requestAuditMeta(request),
+          });
           return new Response("Unauthorized", { status: 401 });
         }
 

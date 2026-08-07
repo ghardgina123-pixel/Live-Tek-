@@ -1819,6 +1819,42 @@ export type Database = {
           },
         ]
       }
+      security_audit_log: {
+        Row: {
+          actor_id: string | null
+          event: string
+          id: string
+          ip: unknown
+          metadata: Json
+          occurred_at: string
+          severity: string
+          subject_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          event: string
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          occurred_at?: string
+          severity?: string
+          subject_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          event?: string
+          id?: string
+          ip?: unknown
+          metadata?: Json
+          occurred_at?: string
+          severity?: string
+          subject_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       short_comments: {
         Row: {
           created_at: string
@@ -2491,6 +2527,16 @@ export type Database = {
       is_delivery_participant: {
         Args: { _delivery_id: string; _user: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          _actor?: string
+          _event: string
+          _metadata?: Json
+          _severity?: string
+          _subject?: string
+        }
+        Returns: string
       }
       move_to_dlq: {
         Args: {
