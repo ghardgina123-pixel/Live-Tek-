@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -184,7 +185,7 @@ export function NotificationBell() {
       </SheetTrigger>
       <SheetContent side="right" className="flex w-full max-w-sm flex-col gap-0 p-0">
         <SheetHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-3">
-          <SheetTitle className="text-base">Notificações</SheetTitle>
+          <SheetTitle className="text-base">{t("notifications_title")}</SheetTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -245,7 +246,7 @@ export function NotificationBell() {
                       {unread && (
                         <span
                           role="button"
-                          aria-label="Marcar como lida"
+                          aria-label={t("mark_all_read")}
                           onClick={(e) => { e.stopPropagation(); markOne(it); }}
                           className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
                         >

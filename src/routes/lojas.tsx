@@ -4,6 +4,7 @@ import { AppShell, StoreCover } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
@@ -103,7 +104,7 @@ function Lojas() {
         <h1 className="text-2xl font-bold">Lojas</h1>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar lojas e categorias…" className="h-11 rounded-xl bg-muted pl-10" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search_placeholder")} className="h-11 rounded-xl bg-muted pl-10" />
         </div>
         <div className="mt-3 flex gap-2">
           {(["all", "live"] as const).map((f) => (

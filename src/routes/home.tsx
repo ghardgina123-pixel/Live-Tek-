@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import logoAsset from "@/assets/live-teka-logo.png.asset.json";
 import homeHero from "@/assets/marketing/home-hero.jpg";
@@ -212,7 +213,7 @@ function Home() {
             onChange={(e) => setQ(e.target.value)}
             enterKeyHint="search"
             aria-label="Buscar produtos, lojas, lives"
-            placeholder="Buscar produtos, lojas, lives…"
+            placeholder={t("search_placeholder")}
             className="h-11 rounded-xl border-0 bg-white pl-10 text-foreground placeholder:text-muted-foreground"
           />
         </form>
