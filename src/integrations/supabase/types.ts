@@ -661,6 +661,72 @@ export type Database = {
         }
         Relationships: []
       }
+      live_cameras: {
+        Row: {
+          created_at: string
+          id: string
+          ingress_id: string | null
+          ingress_url: string | null
+          label: string
+          last_error: string | null
+          live_id: string | null
+          participant_identity: string
+          source_type: string
+          source_url: string | null
+          status: string
+          store_id: string
+          stream_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingress_id?: string | null
+          ingress_url?: string | null
+          label: string
+          last_error?: string | null
+          live_id?: string | null
+          participant_identity: string
+          source_type: string
+          source_url?: string | null
+          status?: string
+          store_id: string
+          stream_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingress_id?: string | null
+          ingress_url?: string | null
+          label?: string
+          last_error?: string | null
+          live_id?: string | null
+          participant_identity?: string
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          store_id?: string
+          stream_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_cameras_live_id_fkey"
+            columns: ["live_id"]
+            isOneToOne: false
+            referencedRelation: "lives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_cameras_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_likes: {
         Row: {
           created_at: string
@@ -780,6 +846,8 @@ export type Database = {
       }
       lives: {
         Row: {
+          active_camera_id: string | null
+          active_identity: string | null
           created_at: string
           ended_at: string | null
           id: string
@@ -791,6 +859,8 @@ export type Database = {
           viewer_count: number
         }
         Insert: {
+          active_camera_id?: string | null
+          active_identity?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -802,6 +872,8 @@ export type Database = {
           viewer_count?: number
         }
         Update: {
+          active_camera_id?: string | null
+          active_identity?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -813,6 +885,13 @@ export type Database = {
           viewer_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "lives_active_camera_id_fkey"
+            columns: ["active_camera_id"]
+            isOneToOne: false
+            referencedRelation: "live_cameras"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lives_store_id_fkey"
             columns: ["store_id"]

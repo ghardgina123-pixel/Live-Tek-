@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
 const LojistaLivePanel = lazy(() => import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })));
+const LiveCameraManager = lazy(() => import("@/components/LiveCameraManager").then((m) => ({ default: m.LiveCameraManager })));
 
 function liveErrorMessage(msg: string) {
   if (msg.includes("live_limit_reached")) return "Atingiu o limite de lives do seu plano este mês. Faça upgrade para continuar.";
@@ -256,6 +257,9 @@ function LivesManager() {
               }}
               onError={(msg) => rollbackLive(activeLive.id, msg)}
             />
+          </Suspense>
+          <Suspense fallback={<div className="mt-3 flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={16} /></div>}>
+            <LiveCameraManager liveId={activeLive.id} />
           </Suspense>
           <Suspense fallback={<div className="mt-3 flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={16} /></div>}>
             <LojistaLivePanel liveId={activeLive.id} />

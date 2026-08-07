@@ -2,19 +2,32 @@ import { useEffect, useRef, useState } from "react";
 import {
   AudioPresets,
   ConnectionState,
+  LocalAudioTrack,
   Room,
   RoomEvent,
   Track,
   VideoPresets,
   createLocalTracks,
   type LocalTrack,
-  type LocalAudioTrack,
   type LocalVideoTrack,
   type LocalTrackPublication,
 } from "livekit-client";
-import { Loader2, Video, VideoOff, Radio, AlertTriangle, Mic, CheckCircle2, ShieldCheck } from "lucide-react";
+import {
+  Loader2,
+  Video,
+  VideoOff,
+  Radio,
+  AlertTriangle,
+  Mic,
+  CheckCircle2,
+  ShieldCheck,
+  Activity,
+  Bluetooth,
+} from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
+import { createVoiceChain, micConstraints, type AudioChain } from "@/lib/live-audio";
+import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
 
 type Props = {
   liveId: string;
@@ -23,18 +36,19 @@ type Props = {
   onError?: (message: string) => void;
 };
 
-type State = "idle" | "requesting" | "preflight" | "connecting" | "publishing" | "error" | "unconfigured";
+type State =
+  | "idle"
+  | "requesting"
+  | "preflight"
+  | "connecting"
+  | "publishing"
+  | "error"
+  | "unconfigured";
 
 const PREVIEW_TIMEOUT_MS = 3_000;
 const PUBLISH_TIMEOUT_MS = 8_000;
 
-const audioConstraints = {
-  // Otimização para hardware fraco (ex: Unisoc T606): desativar processamento
-  // extra de áudio reduz carga no DSP e evita timeouts do pipeline de media.
-  echoCancellation: false,
-  noiseSuppression: false,
-  autoGainControl: false,
-} as const;
+const MIC_PREF_KEY = "liveteka.micDeviceId";
 
 // Resolução baixa forçada (640x480 @ 15fps) para dispositivos entry-level
 // Android. VideoPresets.h480 = 640x480. Reduz drasticamente o consumo do
@@ -94,8 +108,10 @@ function getErrorMessage(error: unknown) {
 
   if (detail.includes("LIVEKIT_NOT_CONFIGURED")) return "LIVEKIT_NOT_CONFIGURED";
   const prefix = name ? `[${name}] ` : "";
-  if (name === "NotAllowedError") return `${prefix}Permissão de câmara/microfone negada. Autorize no browser e recarregue.`;
-  if (name === "NotFoundError") return `${prefix}Nenhuma câmara ou microfone encontrado neste dispositivo.`;
+  if (name === "NotAllowedError")
+    return `${prefix}Permissão de câmara/microfone negada. Autorize no browser e recarregue.`;
+  if (name === "NotFoundError")
+    return `${prefix}Nenhuma câmara ou microfone encontrado neste dispositivo.`;
   if (name === "NotReadableError") return `${prefix}Câmara/microfone em uso por outra aplicação.`;
   if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError")
     return `${prefix}Formato de vídeo não suportado: ${detail}`;
@@ -111,11 +127,20 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
   const audioMeterRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const disconnectedByUserRef = useRef(false);
+  const voiceChainRef = useRef<AudioChain | null>(null);
+  const adaptiveStopRef = useRef<(() => void) | null>(null);
+  const rawMicRef = useRef<LocalAudioTrack | null>(null);
   const [state, setState] = useState<State>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [micOk, setMicOk] = useState(false);
   const [cameraOk, setCameraOk] = useState(false);
+  const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
+  const [micId, setMicId] = useState<string>(() =>
+    typeof window === "undefined" ? "" : (localStorage.getItem(MIC_PREF_KEY) ?? ""),
+  );
+  const [noiseGate, setNoiseGate] = useState(true);
+  const [net, setNet] = useState<(NetworkReport & { targetKbps: number }) | null>(null);
   const issue = useServerFn(issueLiveKitToken);
 
   // (1) Pré-aquecimento de permissões: pede acesso à câmara/microfone assim que o
@@ -130,8 +155,11 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
           try {
             const cam = await navigator.permissions.query({ name: "camera" as PermissionName });
             const mic = await navigator.permissions.query({ name: "microphone" as PermissionName });
-            // eslint-disable-next-line no-console
-            console.info("[LivePublisher] permissions", { camera: cam.state, microphone: mic.state });
+
+            console.info("[LivePublisher] permissions", {
+              camera: cam.state,
+              microphone: mic.state,
+            });
             if (cam.state === "granted" && mic.state === "granted") return;
             if (cam.state === "denied" || mic.state === "denied") return;
           } catch {
@@ -146,8 +174,10 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         // Prompt aceite — libertar imediatamente. O clique real irá voltar a pedir sem prompt.
         stream.getTracks().forEach((t) => t.stop());
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn("[LivePublisher] pré-permissão falhou (o utilizador terá o prompt no clique)", error);
+        console.warn(
+          "[LivePublisher] pré-permissão falhou (o utilizador terá o prompt no clique)",
+          error,
+        );
       }
     })();
     return () => {
@@ -155,10 +185,47 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     };
   }, []);
 
+  // Lista de microfones (inclui lapelas/headsets Bluetooth emparelhados).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.enumerateDevices) return;
+    const refresh = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        setMics(devices.filter((d) => d.kind === "audioinput"));
+      } catch {
+        // noop
+      }
+    };
+    void refresh();
+    navigator.mediaDevices.addEventListener?.("devicechange", refresh);
+    return () => navigator.mediaDevices.removeEventListener?.("devicechange", refresh);
+  }, []);
+
+  // O noise gate pode ser alternado em direto, sem interromper a transmissão.
+  useEffect(() => {
+    voiceChainRef.current?.setEnabled(noiseGate);
+  }, [noiseGate]);
+
   const cleanupHardware = async () => {
     if (audioMeterRef.current) {
       cancelAnimationFrame(audioMeterRef.current);
       audioMeterRef.current = null;
+    }
+    if (adaptiveStopRef.current) {
+      adaptiveStopRef.current();
+      adaptiveStopRef.current = null;
+    }
+    if (voiceChainRef.current) {
+      await voiceChainRef.current.close();
+      voiceChainRef.current = null;
+    }
+    if (rawMicRef.current) {
+      try {
+        rawMicRef.current.stop();
+      } catch {
+        // noop
+      }
+      rawMicRef.current = null;
     }
     if (audioCtxRef.current) {
       try {
@@ -187,6 +254,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     setAudioLevel(0);
     setMicOk(false);
     setCameraOk(false);
+    setNet(null);
   };
 
   const cleanupRoom = async () => {
@@ -205,7 +273,6 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
   };
 
   const fail = async (error: unknown, notify = true) => {
-    // eslint-disable-next-line no-console
     console.error("[LivePublisher] falha", error);
     const message = getErrorMessage(error);
     disconnectedByUserRef.current = true;
@@ -226,7 +293,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     for (const tier of videoConstraintTiers) {
       try {
         const tracks = await createLocalTracks({
-          audio: audioConstraints,
+          audio: micConstraints(micId || undefined),
           video: {
             resolution: tier.resolution,
             facingMode: tier.facingMode,
@@ -241,7 +308,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         return tracks;
       } catch (error) {
         // Log técnico completo para diagnóstico no console do browser
-        // eslint-disable-next-line no-console
+
         console.warn("[LivePublisher] createLocalTracks falhou", tier, error);
         lastError = error;
       }
@@ -249,32 +316,33 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     throw lastError;
   };
 
-  const startMicMeter = (audioTrack: LocalAudioTrack) => {
-    try {
-      const stream = audioTrack.mediaStream ?? new MediaStream([audioTrack.mediaStreamTrack]);
-      const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const context = new AudioContextCtor();
-      audioCtxRef.current = context;
-      const source = context.createMediaStreamSource(stream);
-      const analyser = context.createAnalyser();
-      analyser.fftSize = 512;
-      source.connect(analyser);
-      const buffer = new Uint8Array(analyser.frequencyBinCount);
-      const tick = () => {
-        analyser.getByteTimeDomainData(buffer);
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-          peak = Math.max(peak, Math.abs(buffer[i] - 128));
-        }
-        const level = Math.min(1, peak / 64);
-        setAudioLevel(level);
-        if (level > 0.04) setMicOk(true);
-        audioMeterRef.current = requestAnimationFrame(tick);
-      };
-      audioMeterRef.current = requestAnimationFrame(tick);
-    } catch {
+  /**
+   * Substitui o track de microfone pelo áudio processado (passa-alto + noise
+   * gate + compressor) e usa o mesmo grafo para alimentar o medidor de nível.
+   */
+  const applyVoiceProcessing = (
+    tracks: LocalTrack[],
+    audioTrack: LocalAudioTrack,
+  ): LocalTrack[] => {
+    const chain = createVoiceChain(audioTrack.mediaStreamTrack);
+    if (!chain) {
       setMicOk(true);
+      return tracks;
     }
+    voiceChainRef.current = chain;
+    chain.setEnabled(noiseGate);
+    rawMicRef.current = audioTrack;
+    const processed = new LocalAudioTrack(chain.track, undefined, false);
+    const tick = () => {
+      const level = chain.level();
+      setAudioLevel(level);
+      if (level > 0.04) setMicOk(true);
+      audioMeterRef.current = requestAnimationFrame(tick);
+    };
+    audioMeterRef.current = requestAnimationFrame(tick);
+    return tracks.map((t) =>
+      t === (audioTrack as unknown as LocalTrack) ? (processed as unknown as LocalTrack) : t,
+    );
   };
 
   const preflight = async () => {
@@ -292,12 +360,16 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     try {
       // Primeira operação assíncrona real após o clique: pedir hardware.
       const tracks = await acquireTracks();
-      const videoTrack = tracks.find((track) => track.kind === Track.Kind.Video) as LocalVideoTrack | undefined;
-      const audioTrack = tracks.find((track) => track.kind === Track.Kind.Audio) as LocalAudioTrack | undefined;
+      const videoTrack = tracks.find((track) => track.kind === Track.Kind.Video) as
+        | LocalVideoTrack
+        | undefined;
+      const audioTrack = tracks.find((track) => track.kind === Track.Kind.Audio) as
+        | LocalAudioTrack
+        | undefined;
       if (!videoTrack) throw new Error("Erro no dispositivo: a câmara não iniciou.");
       if (!audioTrack) throw new Error("Erro no dispositivo: o microfone não iniciou.");
 
-      tracksRef.current = tracks;
+      tracksRef.current = applyVoiceProcessing(tracks, audioTrack);
       const video = videoRef.current;
       if (!video) throw new Error("Erro no dispositivo: o preview de vídeo não está disponível.");
       videoTrack.attach(video);
@@ -309,7 +381,6 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
 
       setCameraOk(true);
       setMicOk(audioTrack.mediaStreamTrack.readyState === "live");
-      startMicMeter(audioTrack);
       setState("preflight");
     } catch (error) {
       await fail(error);
@@ -332,7 +403,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
       try {
         const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
         const now = Math.floor(Date.now() / 1000);
-        // eslint-disable-next-line no-console
+
         console.info("[LivePublisher] livekit token", {
           url,
           iat: payload.iat,
@@ -346,7 +417,6 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
           throw new Error("Erro no dispositivo: token LiveKit já expirou (exp < 30s).");
         }
       } catch (decodeError) {
-        // eslint-disable-next-line no-console
         console.warn("[LivePublisher] não foi possível decodificar o token LiveKit", decodeError);
       }
       const room = new Room({
@@ -373,12 +443,17 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         onDisconnected?.();
       });
 
-      await withTimeout(room.connect(url, token), PUBLISH_TIMEOUT_MS, "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.");
+      await withTimeout(
+        room.connect(url, token),
+        PUBLISH_TIMEOUT_MS,
+        "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.",
+      );
       const publications = await withTimeout(
         Promise.all(
           tracksRef.current.map((track) =>
             room.localParticipant.publishTrack(track, {
-              source: track.kind === Track.Kind.Video ? Track.Source.Camera : Track.Source.Microphone,
+              source:
+                track.kind === Track.Kind.Video ? Track.Source.Camera : Track.Source.Microphone,
               stream: `live-${liveId}`,
             }),
           ),
@@ -387,7 +462,9 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         "Erro no dispositivo: a transmissão não começou dentro do tempo esperado.",
       );
 
-      const videoPublication = publications.find((publication: LocalTrackPublication) => publication.kind === Track.Kind.Video);
+      const videoPublication = publications.find(
+        (publication: LocalTrackPublication) => publication.kind === Track.Kind.Video,
+      );
       if (!videoPublication || videoPublication.isMuted || !videoPublication.track) {
         throw new Error("Erro no dispositivo: o vídeo não foi publicado na sala da live.");
       }
@@ -397,9 +474,12 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
 
       setState("publishing");
       onConnected?.();
+      // Bitrate adaptativo: prioriza a voz, degrada o vídeo em rede fraca.
+      const publishedVideo = videoPublication.track as LocalVideoTrack;
+      adaptiveStopRef.current = startAdaptiveBitrate(publishedVideo, setNet);
     } catch (error) {
       // (3) Log técnico específico da conexão LiveKit para o debug pedido.
-      // eslint-disable-next-line no-console
+
       console.error("[LivePublisher] connectToLiveKit failed", error);
       await fail(error);
     }
@@ -417,12 +497,36 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     <div className="space-y-3">
       <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black">
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
-        {(state === "idle" || state === "requesting" || state === "error" || state === "unconfigured") && (
+        {(state === "idle" ||
+          state === "requesting" ||
+          state === "error" ||
+          state === "unconfigured") && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 px-4 text-center text-white/85">
-            {state === "idle" && <><Video /><p className="text-sm">Câmara desligada</p></>}
-            {state === "requesting" && <><Loader2 className="animate-spin" /><p className="text-sm">A ligar câmara e microfone…</p></>}
-            {state === "error" && <><AlertTriangle className="text-yellow-400" /><p className="text-sm font-medium">Falha ao iniciar vídeo</p><p className="text-[11px] text-white/70">{errorMsg}</p></>}
-            {state === "unconfigured" && <><Video /><p className="text-sm">Streaming não configurado</p></>}
+            {state === "idle" && (
+              <>
+                <Video />
+                <p className="text-sm">Câmara desligada</p>
+              </>
+            )}
+            {state === "requesting" && (
+              <>
+                <Loader2 className="animate-spin" />
+                <p className="text-sm">A ligar câmara e microfone…</p>
+              </>
+            )}
+            {state === "error" && (
+              <>
+                <AlertTriangle className="text-yellow-400" />
+                <p className="text-sm font-medium">Falha ao iniciar vídeo</p>
+                <p className="text-[11px] text-white/70">{errorMsg}</p>
+              </>
+            )}
+            {state === "unconfigured" && (
+              <>
+                <Video />
+                <p className="text-sm">Streaming não configurado</p>
+              </>
+            )}
           </div>
         )}
         {state === "preflight" && (
@@ -450,7 +554,11 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             <span>Câmara ativa no ecrã</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            {micOk ? <CheckCircle2 size={14} className="text-green-500" /> : <Mic size={14} className="text-muted-foreground" />}
+            {micOk ? (
+              <CheckCircle2 size={14} className="text-green-500" />
+            ) : (
+              <Mic size={14} className="text-muted-foreground" />
+            )}
             <span>{micOk ? "Microfone ativo" : "Fale para testar o microfone…"}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-background">
@@ -465,26 +573,101 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         </div>
       )}
 
+      {/* Áudio profissional: microfone Bluetooth + supressão de ruído */}
+      <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+        <label htmlFor="mic-select" className="flex items-center gap-1.5 text-xs font-semibold">
+          <Bluetooth size={13} className="text-primary" /> Microfone
+        </label>
+        <select
+          id="mic-select"
+          value={micId}
+          onChange={(e) => {
+            setMicId(e.target.value);
+            if (typeof window !== "undefined") localStorage.setItem(MIC_PREF_KEY, e.target.value);
+          }}
+          disabled={state === "publishing" || state === "connecting"}
+          className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
+        >
+          <option value="">Predefinido do sistema</option>
+          {mics.map((d) => (
+            <option key={d.deviceId} value={d.deviceId}>
+              {d.label || "Microfone"}
+            </option>
+          ))}
+        </select>
+        {(state === "publishing" || state === "connecting") && (
+          <p className="text-[11px] text-muted-foreground">
+            Pare a transmissão para trocar de microfone.
+          </p>
+        )}
+        <label className="flex items-center justify-between gap-2 text-xs">
+          <span className="flex items-center gap-1.5">
+            <Mic size={13} /> Supressão de ruído da loja
+          </span>
+          <input
+            type="checkbox"
+            checked={noiseGate}
+            onChange={(e) => setNoiseGate(e.target.checked)}
+            className="h-4 w-4 accent-[var(--primary)]"
+          />
+        </label>
+      </div>
+
+      {state === "publishing" && net && (
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2.5 text-[11px]">
+          <Activity
+            size={13}
+            className={
+              net.rttMs > 400
+                ? "text-destructive"
+                : net.rttMs > 200
+                  ? "text-amber-500"
+                  : "text-emerald-500"
+            }
+          />
+          <span>Latência {net.rttMs} ms</span>
+          <span className="text-muted-foreground">· perda {net.lossPct}%</span>
+          <span className="ml-auto font-semibold">vídeo {net.targetKbps} kbps</span>
+        </div>
+      )}
+
       <div className="flex gap-2">
         {state === "publishing" ? (
-          <button onClick={stop} className="flex-1 rounded-full bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground">
+          <button
+            onClick={stop}
+            className="flex-1 rounded-full bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground"
+          >
             <VideoOff size={16} className="mr-2 inline" /> Parar transmissão
           </button>
         ) : state === "preflight" ? (
           <>
-            <button onClick={stop} className="rounded-full border border-border bg-background px-4 py-3 text-sm font-semibold">
+            <button
+              onClick={stop}
+              className="rounded-full border border-border bg-background px-4 py-3 text-sm font-semibold"
+            >
               Cancelar
             </button>
-            <button onClick={publish} disabled={!cameraOk} className="flex-1 rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50">
+            <button
+              onClick={publish}
+              disabled={!cameraOk}
+              className="flex-1 rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            >
               <Radio size={16} className="mr-2 inline" /> Iniciar
             </button>
           </>
         ) : state === "connecting" ? (
-          <button disabled className="flex-1 rounded-full bg-primary/60 px-4 py-3 text-sm font-semibold text-primary-foreground">
+          <button
+            disabled
+            className="flex-1 rounded-full bg-primary/60 px-4 py-3 text-sm font-semibold text-primary-foreground"
+          >
             <Loader2 size={16} className="mr-2 inline animate-spin" /> A publicar…
           </button>
         ) : (
-          <button onClick={preflight} disabled={state === "requesting"} className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          <button
+            onClick={preflight}
+            disabled={state === "requesting"}
+            className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
             <Video size={16} className="mr-2 inline" /> Ligar câmara
           </button>
         )}
