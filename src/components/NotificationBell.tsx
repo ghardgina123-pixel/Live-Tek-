@@ -36,6 +36,7 @@ type Item =
   | { kind: "admin"; row: AdminNotif };
 
 export function NotificationBell() {
+  const { t } = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);

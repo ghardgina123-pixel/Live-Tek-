@@ -47,6 +47,7 @@ export const Route = createFileRoute("/lojas")({
 });
 
 function Lojas() {
+  const { t } = useT();
   const initial = Route.useSearch().q ?? "";
   const [q, setQ] = useState(initial);
   const [filter, setFilter] = useState<"all" | "live">("all");

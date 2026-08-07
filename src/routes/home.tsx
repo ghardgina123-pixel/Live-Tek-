@@ -71,6 +71,7 @@ const DEMO_LIVES: LiveStore[] = [
 ];
 
 function Home() {
+  const { t } = useT();
   const currency = useCurrency();
   const navigate = useNavigate();
   const { user } = useAuth();
