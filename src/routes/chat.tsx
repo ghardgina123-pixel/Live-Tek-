@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -48,8 +49,8 @@ function ChatPage() {
       <AppShell>
         <div className="flex h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
           <MessageCircle className="text-primary" size={36} />
-          <p className="text-sm text-muted-foreground">Entre para ver suas conversas com as lojas.</p>
-          <button onClick={() => navigate({ to: "/login" })} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">Entrar</button>
+          <p className="text-sm text-muted-foreground">{t("login_to_continue")}</p>
+          <button onClick={() => navigate({ to: "/login" })} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">{t("login")}</button>
         </div>
       </AppShell>
     );
@@ -98,7 +99,7 @@ function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: str
         <h1 className="text-2xl font-bold">Mensagens</h1>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar conversas…" className="h-11 rounded-xl bg-muted pl-10" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search_placeholder")} className="h-11 rounded-xl bg-muted pl-10" />
         </div>
       </header>
       {items === null ? (
@@ -278,7 +279,7 @@ function ConversationView({ conversationId, userId, onBack }: { conversationId: 
         <Input
           value={input}
           onChange={(e) => { setInput(e.target.value); sendTyping(); }}
-          placeholder="Mensagem…"
+          placeholder={t("chat_placeholder")}
           maxLength={4000}
           aria-label="Mensagem"
           className="h-11 flex-1 rounded-full bg-muted"
