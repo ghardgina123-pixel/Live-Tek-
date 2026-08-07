@@ -31,4 +31,5 @@ export const ja: Dict = {
   stores: "ショップ", products: "商品", price: "価格", stock: "在庫", description: "説明", store: "ショップ",
   notifications_title: "通知", mark_all_read: "すべて既読にする", no_notifications: "通知はありません",
   province: "都道府県 / 州", municipality: "市区町村", district: "地区", select_country_first: "先に国を選択してください", select_province_first: "先に都道府県を選択してください", select_municipality_first: "先に市区町村を選択してください",
+  admin_panel: "管理者ダッシュボード", courier_panel: "配達員になる / 車両を登録", realestate_panel: "不動産 / 物件を掲載", following: "フォロー中", login_to_continue: "続行するにはログインしてください", country_default_hint: "配送・ショップ・物件の既定の国を設定します。",
 };

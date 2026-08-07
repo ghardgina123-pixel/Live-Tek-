@@ -30,4 +30,5 @@ export const en: Dict = {
   stores: "Stores", products: "Products", price: "Price", stock: "Stock", description: "Description", store: "Store",
   notifications_title: "Notifications", mark_all_read: "Mark all as read", no_notifications: "No notifications",
   province: "State / Province", municipality: "City / Municipality", district: "District / Neighbourhood", select_country_first: "Select a country first", select_province_first: "Select a state/province first", select_municipality_first: "Select a city first",
+  admin_panel: "Admin dashboard", courier_panel: "Become a courier / register transport", realestate_panel: "Real estate / list a property", following: "Following", login_to_continue: "Sign in to continue", country_default_hint: "Sets the default country for deliveries, stores and properties.",
 };

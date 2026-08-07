@@ -30,4 +30,5 @@ export const ptPT: Dict = {
   stores: "Lojas", products: "Produtos", price: "Preço", stock: "Stock", description: "Descrição", store: "Loja",
   notifications_title: "Notificações", mark_all_read: "Marcar todas como lidas", no_notifications: "Sem notificações",
   province: "Província / Região", municipality: "Município / Cidade", district: "Distrito / Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro a província", select_municipality_first: "Selecione primeiro o município",
+  admin_panel: "Painel do administrador", courier_panel: "Quero entregar / registar transporte", realestate_panel: "Imobiliária / registar imóvel", following: "A seguir", login_to_continue: "Inicie sessão para continuar", country_default_hint: "Define o país padrão para entregas, lojas e imóveis.",
 };

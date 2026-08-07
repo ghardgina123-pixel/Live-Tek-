@@ -9,4 +9,5 @@ export const ptAO: Dict = {
   order_placed: "Pedido criado com sucesso", place_order: "Confirmar pedido", viewers: "Espectadores", likes: "Curtidas",
   settings: "Configurações", stock: "Estoque",
   province: "Província", municipality: "Município", district: "Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro a província", select_municipality_first: "Selecione primeiro o município",
+  admin_panel: "Painel do administrador", courier_panel: "Quero entregar / cadastrar transporte", realestate_panel: "Imobiliária / registar imóvel", following: "A seguir", login_to_continue: "Faça login para continuar", country_default_hint: "Define o país padrão para entregas, lojas e imóveis.",
 };

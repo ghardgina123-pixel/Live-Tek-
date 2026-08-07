@@ -31,4 +31,5 @@ export const zhHans: Dict = {
   stores: "店铺", products: "商品", price: "价格", stock: "库存", description: "描述", store: "店铺",
   notifications_title: "通知", mark_all_read: "全部标记为已读", no_notifications: "暂无通知",
   province: "省 / 州", municipality: "城市 / 区县", district: "街道 / 社区", select_country_first: "请先选择国家/地区", select_province_first: "请先选择省/州", select_municipality_first: "请先选择城市",
+  admin_panel: "管理后台", courier_panel: "成为配送员 / 登记运输", realestate_panel: "房产 / 发布房源", following: "关注中", login_to_continue: "请登录后继续", country_default_hint: "设置配送、店铺和房源的默认国家/地区。",
 };

@@ -31,4 +31,5 @@ export const nl: Dict = {
   stores: "Winkels", products: "Producten", price: "Prijs", stock: "Voorraad", description: "Beschrijving", store: "Winkel",
   notifications_title: "Meldingen", mark_all_read: "Alles als gelezen markeren", no_notifications: "Geen meldingen",
   province: "Provincie", municipality: "Stad / Gemeente", district: "Wijk", select_country_first: "Kies eerst een land", select_province_first: "Kies eerst een provincie", select_municipality_first: "Kies eerst een stad",
+  admin_panel: "Beheerdersdashboard", courier_panel: "Bezorger worden / vervoer registreren", realestate_panel: "Vastgoed / woning plaatsen", following: "Volgend", login_to_continue: "Log in om verder te gaan", country_default_hint: "Stelt het standaardland in voor bezorgingen, winkels en woningen.",
 };

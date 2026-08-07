@@ -13,4 +13,5 @@ export const ptBR: Dict = {
   search_placeholder: "Buscar lojas, produtos…", search: "Buscar", seller_panel: "Painel do lojista",
   cart_empty: "Seu carrinho está vazio", nav_shorts: "Shorts",
   province: "Estado", municipality: "Cidade / Município", district: "Bairro", select_country_first: "Selecione primeiro o país", select_province_first: "Selecione primeiro o estado", select_municipality_first: "Selecione primeiro a cidade",
+  admin_panel: "Painel do administrador", courier_panel: "Quero entregar / cadastrar transporte", realestate_panel: "Imobiliária / cadastrar imóvel", following: "Seguindo", login_to_continue: "Faça login para continuar", country_default_hint: "Define o país padrão para entregas, lojas e imóveis.",
 };

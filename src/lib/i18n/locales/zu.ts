@@ -31,4 +31,5 @@ export const zu: Dict = {
   stores: "Izitolo", products: "Imikhiqizo", price: "Intengo", stock: "Isitoko", description: "Incazelo", store: "Isitolo",
   notifications_title: "Izaziso", mark_all_read: "Maka konke njengokufundiwe", no_notifications: "Azikho izaziso",
   province: "Isifundazwe", municipality: "Idolobha / Umasipala", district: "Isigceme", select_country_first: "Khetha izwe kuqala", select_province_first: "Khetha isifundazwe kuqala", select_municipality_first: "Khetha idolobha kuqala",
+  admin_panel: "Iphaneli yomlawuli", courier_panel: "Yiba umlethi / bhalisa ezokuthutha", realestate_panel: "Izindlu / bhalisa impahla", following: "Olandelayo", login_to_continue: "Ngena ukuze uqhubeke", country_default_hint: "Ibeka izwe elizenzakalelayo lokulethwa, izitolo nezindlu.",
 };

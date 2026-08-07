@@ -17,6 +17,7 @@ export const KEYS = [
   "live_now","viewers","likes","start_live","end_live","chat_placeholder","send","live_ended",
   "stores","products","price","stock","description","store",
   "province","municipality","district","select_country_first","select_province_first","select_municipality_first",
+  "admin_panel","courier_panel","realestate_panel","following","login_to_continue","country_default_hint",
   "notifications_title","mark_all_read","no_notifications",
 ] as const;
 

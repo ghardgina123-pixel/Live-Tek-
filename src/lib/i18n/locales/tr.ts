@@ -31,4 +31,5 @@ export const tr: Dict = {
   stores: "Mağazalar", products: "Ürünler", price: "Fiyat", stock: "Stok", description: "Açıklama", store: "Mağaza",
   notifications_title: "Bildirimler", mark_all_read: "Tümünü okundu işaretle", no_notifications: "Bildirim yok",
   province: "İl / Eyalet", municipality: "Şehir / İlçe", district: "Mahalle", select_country_first: "Önce ülkeyi seçin", select_province_first: "Önce ili seçin", select_municipality_first: "Önce şehri seçin",
+  admin_panel: "Yönetici paneli", courier_panel: "Kurye ol / araç kaydet", realestate_panel: "Emlak / ilan ekle", following: "Takip edilenler", login_to_continue: "Devam etmek için giriş yapın", country_default_hint: "Teslimat, mağaza ve ilanlar için varsayılan ülkeyi belirler.",
 };

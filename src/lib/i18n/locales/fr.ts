@@ -31,4 +31,5 @@ export const fr: Dict = {
   stores: "Boutiques", products: "Produits", price: "Prix", stock: "Stock", description: "Description", store: "Boutique",
   notifications_title: "Notifications", mark_all_read: "Tout marquer comme lu", no_notifications: "Aucune notification",
   province: "Province / Région", municipality: "Ville / Commune", district: "Quartier", select_country_first: "Sélectionnez d'abord le pays", select_province_first: "Sélectionnez d'abord la province", select_municipality_first: "Sélectionnez d'abord la ville",
+  admin_panel: "Espace administrateur", courier_panel: "Devenir livreur / enregistrer un transport", realestate_panel: "Immobilier / publier un bien", following: "Abonnements", login_to_continue: "Connectez-vous pour continuer", country_default_hint: "Définit le pays par défaut pour les livraisons, les boutiques et les biens.",
 };

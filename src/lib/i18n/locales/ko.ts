@@ -31,4 +31,5 @@ export const ko: Dict = {
   stores: "상점", products: "상품", price: "가격", stock: "재고", description: "설명", store: "상점",
   notifications_title: "알림", mark_all_read: "모두 읽음으로 표시", no_notifications: "알림이 없습니다",
   province: "시/도", municipality: "시/군/구", district: "동/지역", select_country_first: "먼저 국가를 선택하세요", select_province_first: "먼저 시/도를 선택하세요", select_municipality_first: "먼저 도시를 선택하세요",
+  admin_panel: "관리자 대시보드", courier_panel: "배송원 등록 / 차량 등록", realestate_panel: "부동산 / 매물 등록", following: "팔로잉", login_to_continue: "계속하려면 로그인하세요", country_default_hint: "배송, 상점, 매물의 기본 국가를 설정합니다.",
 };

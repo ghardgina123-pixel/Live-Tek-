@@ -31,4 +31,5 @@ export const ru: Dict = {
   stores: "Магазины", products: "Товары", price: "Цена", stock: "Наличие", description: "Описание", store: "Магазин",
   notifications_title: "Уведомления", mark_all_read: "Отметить все как прочитанные", no_notifications: "Нет уведомлений",
   province: "Область / Регион", municipality: "Город / Муниципалитет", district: "Район", select_country_first: "Сначала выберите страну", select_province_first: "Сначала выберите регион", select_municipality_first: "Сначала выберите город",
+  admin_panel: "Панель администратора", courier_panel: "Стать курьером / зарегистрировать транспорт", realestate_panel: "Недвижимость / разместить объект", following: "Подписки", login_to_continue: "Войдите, чтобы продолжить", country_default_hint: "Задаёт страну по умолчанию для доставки, магазинов и недвижимости.",
 };

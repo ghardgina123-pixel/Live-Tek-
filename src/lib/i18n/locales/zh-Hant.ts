@@ -31,4 +31,5 @@ export const zhHant: Dict = {
   stores: "商店", products: "商品", price: "價格", stock: "庫存", description: "描述", store: "商店",
   notifications_title: "通知", mark_all_read: "全部標示為已讀", no_notifications: "沒有通知",
   province: "省 / 州", municipality: "城市 / 區", district: "區域 / 里", select_country_first: "請先選擇國家/地區", select_province_first: "請先選擇省/州", select_municipality_first: "請先選擇城市",
+  admin_panel: "管理後台", courier_panel: "成為配送員 / 登記運輸", realestate_panel: "房產 / 刊登物件", following: "追蹤中", login_to_continue: "請登入後繼續", country_default_hint: "設定配送、商店與物件的預設國家/地區。",
 };

@@ -31,4 +31,5 @@ export const sw: Dict = {
   stores: "Maduka", products: "Bidhaa", price: "Bei", stock: "Hisa", description: "Maelezo", store: "Duka",
   notifications_title: "Arifa", mark_all_read: "Weka zote kuwa zimesomwa", no_notifications: "Hakuna arifa",
   province: "Mkoa / Jimbo", municipality: "Jiji / Manispaa", district: "Kata / Mtaa", select_country_first: "Chagua nchi kwanza", select_province_first: "Chagua mkoa kwanza", select_municipality_first: "Chagua jiji kwanza",
+  admin_panel: "Paneli ya msimamizi", courier_panel: "Kuwa msambazaji / sajili usafiri", realestate_panel: "Majengo / sajili nyumba", following: "Ninaowafuata", login_to_continue: "Ingia ili kuendelea", country_default_hint: "Huweka nchi chaguo-msingi kwa usafirishaji, maduka na majengo.",
 };

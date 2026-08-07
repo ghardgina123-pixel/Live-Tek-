@@ -31,4 +31,5 @@ export const ar: Dict = {
   stores: "المتاجر", products: "المنتجات", price: "السعر", stock: "المخزون", description: "الوصف", store: "المتجر",
   notifications_title: "الإشعارات", mark_all_read: "تعليم الكل كمقروء", no_notifications: "لا توجد إشعارات",
   province: "الولاية / المقاطعة", municipality: "المدينة / البلدية", district: "الحي", select_country_first: "اختر الدولة أولاً", select_province_first: "اختر المقاطعة أولاً", select_municipality_first: "اختر المدينة أولاً",
+  admin_panel: "لوحة المشرف", courier_panel: "كن مندوب توصيل / سجّل وسيلة نقل", realestate_panel: "العقارات / أضف عقارًا", following: "المتابَعون", login_to_continue: "سجّل الدخول للمتابعة", country_default_hint: "يحدد الدولة الافتراضية للتوصيل والمتاجر والعقارات.",
 };
