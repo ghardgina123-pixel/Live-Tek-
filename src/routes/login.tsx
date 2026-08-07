@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -26,6 +27,7 @@ function Login() {
   const [pwd, setPwd] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const { t } = useT();
 
   useEffect(() => {
     if (user) nav({ to: "/home", replace: true });
@@ -93,8 +95,8 @@ function Login() {
         <p className="text-xs text-white/80">Compre, Converse e Receba.</p>
       </div>
       <form onSubmit={onSubmit} className="-mt-6 flex-1 rounded-t-3xl bg-background px-6 pt-8">
-        <h2 className="text-2xl font-bold text-foreground">Entrar</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Acesse sua conta para comprar ao vivo</p>
+        <h2 className="text-2xl font-bold text-foreground">{t("login")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("login_to_continue")}</p>
 
         <div className="mt-6 space-y-4">
           <div className="relative">
@@ -125,7 +127,7 @@ function Login() {
               required
               minLength={6}
               className="h-12 pl-10 pr-10"
-              placeholder="Senha"
+              placeholder={t("password")}
               value={pwd}
               onChange={(e) => setPwd(e.target.value)}
             />
@@ -133,23 +135,23 @@ function Login() {
               type="button"
               onClick={() => setShowPwd((v) => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"}
+              aria-label={showPwd ? t("hide_password") : t("show_password")}
             >
               {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           <div className="flex justify-end">
-            <button type="button" className="text-xs font-medium text-primary">Esqueci minha senha</button>
+            <button type="button" className="text-xs font-medium text-primary">{t("forgot_password")}</button>
           </div>
         </div>
 
         <Button type="submit" disabled={busy} className="mt-6 h-12 w-full rounded-xl text-base font-semibold shadow-[var(--shadow-glow)]">
-          {busy ? <Loader2 className="animate-spin" size={18} /> : "Entrar"}
+          {busy ? <Loader2 className="animate-spin" size={18} /> : t("login")}
         </Button>
 
         <div className="mt-4 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">ou continue com</span>
+          <span className="text-xs text-muted-foreground">{t("continue")}</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
@@ -161,12 +163,12 @@ function Login() {
           className="mt-4 h-12 w-full rounded-xl text-base font-semibold"
         >
           <Chrome size={18} className="mr-2" />
-          Continuar com Google
+          {t("continue_google")}
         </Button>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          Novo por aqui?{" "}
-          <Link to="/cadastro" className="font-semibold text-primary">Criar conta</Link>
+          {t("no_account")}{" "}
+          <Link to="/cadastro" className="font-semibold text-primary">{t("create_account")}</Link>
         </p>
       </form>
     </div>
