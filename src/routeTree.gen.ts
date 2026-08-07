@@ -25,6 +25,8 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AjudaRouteImport } from './routes/ajuda'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicosIndexRouteImport } from './routes/servicos.index'
+import { Route as ServicosIdRouteImport } from './routes/servicos.$id'
 import { Route as RastreioOrderIdRouteImport } from './routes/rastreio.$orderId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaIdRouteImport } from './routes/loja.$id'
@@ -146,6 +148,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicosIndexRoute = ServicosIndexRouteImport.update({
+  id: '/servicos/',
+  path: '/servicos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicosIdRoute = ServicosIdRouteImport.update({
+  id: '/servicos/$id',
+  path: '/servicos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RastreioOrderIdRoute = RastreioOrderIdRouteImport.update({
@@ -421,6 +433,8 @@ export interface FileRoutesByFullPath {
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
+  '/servicos/$id': typeof ServicosIdRoute
+  '/servicos/': typeof ServicosIndexRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -480,6 +494,8 @@ export interface FileRoutesByTo {
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
+  '/servicos/$id': typeof ServicosIdRoute
+  '/servicos': typeof ServicosIndexRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -542,6 +558,8 @@ export interface FileRoutesById {
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
+  '/servicos/$id': typeof ServicosIdRoute
+  '/servicos/': typeof ServicosIndexRoute
   '/_authenticated/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/_authenticated/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/_authenticated/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -604,6 +622,8 @@ export interface FileRouteTypes {
     | '/loja/$id'
     | '/produto/$id'
     | '/rastreio/$orderId'
+    | '/servicos/$id'
+    | '/servicos/'
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
@@ -663,6 +683,8 @@ export interface FileRouteTypes {
     | '/loja/$id'
     | '/produto/$id'
     | '/rastreio/$orderId'
+    | '/servicos/$id'
+    | '/servicos'
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
@@ -724,6 +746,8 @@ export interface FileRouteTypes {
     | '/loja/$id'
     | '/produto/$id'
     | '/rastreio/$orderId'
+    | '/servicos/$id'
+    | '/servicos/'
     | '/_authenticated/admin/imobiliarias'
     | '/_authenticated/admin/lojas'
     | '/_authenticated/admin/subscricoes'
@@ -771,6 +795,8 @@ export interface RootRouteChildren {
   LojaIdRoute: typeof LojaIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   RastreioOrderIdRoute: typeof RastreioOrderIdRoute
+  ServicosIdRoute: typeof ServicosIdRoute
+  ServicosIndexRoute: typeof ServicosIndexRoute
   ApiPublicExchangeRoute: typeof ApiPublicExchangeRoute
   ApiPublicMulticaixaCallbackRoute: typeof ApiPublicMulticaixaCallbackRoute
   ApiPublicMulticaixaSubscriptionCallbackRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRoute
@@ -896,6 +922,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servicos/': {
+      id: '/servicos/'
+      path: '/servicos'
+      fullPath: '/servicos/'
+      preLoaderRoute: typeof ServicosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servicos/$id': {
+      id: '/servicos/$id'
+      path: '/servicos/$id'
+      fullPath: '/servicos/$id'
+      preLoaderRoute: typeof ServicosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rastreio/$orderId': {
@@ -1305,6 +1345,8 @@ const rootRouteChildren: RootRouteChildren = {
   LojaIdRoute: LojaIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   RastreioOrderIdRoute: RastreioOrderIdRoute,
+  ServicosIdRoute: ServicosIdRoute,
+  ServicosIndexRoute: ServicosIndexRoute,
   ApiPublicExchangeRoute: ApiPublicExchangeRoute,
   ApiPublicMulticaixaCallbackRoute: ApiPublicMulticaixaCallbackRoute,
   ApiPublicMulticaixaSubscriptionCallbackRoute:

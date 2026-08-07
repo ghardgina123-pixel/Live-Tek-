@@ -36,9 +36,9 @@ const categories = [
   { e: "💻", n: "Tech", to: "/lojas" as const },
   { e: "👗", n: "Moda", to: "/lojas" as const },
   { e: "🏘️", n: "Imóveis", to: "/imoveis" as const },
+  { e: "🛠️", n: "Serviços", to: "/servicos" as const },
   { e: "⚽", n: "Esporte", to: "/lojas" as const },
   { e: "💄", n: "Beleza", to: "/lojas" as const },
-  { e: "🍯", n: "Mercado", to: "/lojas" as const },
   { e: "🎁", n: "Ofertas", to: "/lojas" as const },
 ];
 

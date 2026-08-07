@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { SERVICE_CATEGORIES } from "@/lib/services";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
   head: () => ({ meta: [{ title: "Minha Loja — Live Teká" }] }),
@@ -168,10 +169,15 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [loc, setLoc] = useState<LocationValue>({ country_id: "", province_id: "", municipality_id: "", district_id: "" });
+  const [partnerType, setPartnerType] = useState<"retail" | "service">("retail");
   const [form, setForm] = useState({
     name: "",
     description: "",
     category: "Moda",
+    service_category: "salao",
+    opening_hours: "",
+    whatsapp: "",
+    service_tags: "",
     nif: "",
     phone: "",
     bank_name: "",
@@ -193,6 +199,7 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     e.preventDefault();
     if (!user) return;
     if (!form.name.trim()) return toast.error(t("s_nome_da_loja_e_obrigatorio"));
+    if (partnerType === "service" && !form.service_category) return toast.error("Selecione a categoria de serviço");
     if (!form.nif.trim()) return toast.error(t("s_nif_e_obrigatorio"));
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
       return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
@@ -211,7 +218,15 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
         name: form.name.trim(),
         slug,
         description: form.description || null,
-        category: form.category || null,
+        category: partnerType === "service" ? null : form.category || null,
+        partner_type: partnerType,
+        service_category: partnerType === "service" ? form.service_category : null,
+        opening_hours: partnerType === "service" ? form.opening_hours || null : null,
+        whatsapp: partnerType === "service" ? form.whatsapp || null : null,
+        service_tags:
+          partnerType === "service"
+            ? form.service_tags.split(",").map((s) => s.trim()).filter(Boolean)
+            : [],
         phone: form.phone || null,
         logo_url,
         cover_url,
@@ -272,7 +287,26 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
   return (
     <form onSubmit={submit} className="space-y-4 px-5 py-5">
       <div className="rounded-2xl bg-accent/50 p-4 text-xs text-muted-foreground">
-        Preencha os dados completos. Após análise, sua loja ficará ativa e você terá acesso ao painel completo com produtos, pedidos e repasses.
+        Preencha os dados completos. Após análise, o seu negócio ficará ativo e você terá acesso ao painel completo.
+      </div>
+
+      <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">Tipo de negócio</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {([
+          { key: "retail", title: "Vendo produtos", desc: "Loja com catálogo e entregas", emoji: "🛍️" },
+          { key: "service", title: "Presto serviços", desc: "Salão, hotel, farmácia, bar…", emoji: "🛠️" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.key}
+            type="button"
+            onClick={() => setPartnerType(opt.key)}
+            className={`rounded-2xl border-2 p-3 text-left transition ${partnerType === opt.key ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+          >
+            <span className="text-xl">{opt.emoji}</span>
+            <p className="mt-1 text-sm font-bold">{opt.title}</p>
+            <p className="text-[11px] text-muted-foreground">{opt.desc}</p>
+          </button>
+        ))}
       </div>
 
       <h3 className="pt-2 text-xs font-bold uppercase text-muted-foreground">{t("s_identidade_da_loja")}</h3>
@@ -282,13 +316,47 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
       <Field label={t("s_descricao")}>
         <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
       </Field>
-      <Field label={t("s_categoria")}>
-        <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-          {["Moda", "Beleza", "Eletrônicos", "Casa", "Alimentos", "Esportes", "Outros"].map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </Field>
+      {partnerType === "retail" ? (
+        <Field label={t("s_categoria")}>
+          <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+            {["Moda", "Beleza", "Eletrônicos", "Casa", "Alimentos", "Esportes", "Outros"].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </Field>
+      ) : (
+        <>
+          <Field label="Categoria de serviço">
+            <select
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={form.service_category}
+              onChange={(e) => setForm({ ...form, service_category: e.target.value })}
+            >
+              {SERVICE_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Horário de funcionamento">
+            <Input
+              value={form.opening_hours}
+              onChange={(e) => setForm({ ...form, opening_hours: e.target.value })}
+              placeholder="Seg–Sáb, 08h–19h"
+            />
+          </Field>
+          <Field label="WhatsApp para marcações">
+            <Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="+244 ..." />
+          </Field>
+          <Field label="Serviços oferecidos (separados por vírgula)">
+            <Textarea
+              rows={2}
+              value={form.service_tags}
+              onChange={(e) => setForm({ ...form, service_tags: e.target.value })}
+              placeholder="Corte de cabelo, Manicure, Massagem"
+            />
+          </Field>
+        </>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <FileField label={t("s_logo")} file={logoFile} setFile={setLogoFile} icon={<ImagePlus size={14} />} />
