@@ -4,6 +4,7 @@ import { Mail, Lock, User as UserIcon, Phone, ShieldCheck, Loader2, ShoppingBag,
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import { signupSchema } from "@/lib/schemas";
 import cadastroHero from "@/assets/marketing/cadastro-hero.jpg";
@@ -24,6 +25,7 @@ function Signup() {
   const [accountType, setAccountType] = useState<"customer" | "seller">("customer");
   const [f, setF] = useState({ name: "", email: "", phone: "", pwd: "" });
   const [busy, setBusy] = useState(false);
+  const { t } = useT();
   const [sellerStatus, setSellerStatus] = useState<{ approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number } | null>(null);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ function Signup() {
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-background">
       <header className="flex items-center gap-3 px-5 pt-6 pb-3">
         <Link to="/login" className="text-2xl text-foreground">←</Link>
-        <h1 className="text-lg font-semibold">Criar conta</h1>
+        <h1 className="text-lg font-semibold">{t("create_account")}</h1>
       </header>
       <form onSubmit={onSubmit} className="flex-1 px-6">
         <div className="relative mb-4 overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
@@ -100,10 +102,10 @@ function Signup() {
         </div>
 
         <div className="mt-6 space-y-4">
-          <Field icon={<UserIcon size={18} />} placeholder="Nome completo" value={f.name} onChange={(v) => setF({ ...f, name: v })} required />
-          <Field icon={<Mail size={18} />} placeholder="E-mail" type="email" value={f.email} onChange={(v) => setF({ ...f, email: v })} required />
-          <Field icon={<Phone size={18} />} placeholder="Telefone" value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
-          <Field icon={<Lock size={18} />} type="password" placeholder="Crie uma senha (mín. 6)" value={f.pwd} onChange={(v) => setF({ ...f, pwd: v })} required />
+          <Field icon={<UserIcon size={18} />} placeholder={t("full_name")} value={f.name} onChange={(v) => setF({ ...f, name: v })} required />
+          <Field icon={<Mail size={18} />} placeholder={t("email")} type="email" value={f.email} onChange={(v) => setF({ ...f, email: v })} required />
+          <Field icon={<Phone size={18} />} placeholder={t("phone")} value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
+          <Field icon={<Lock size={18} />} type="password" placeholder={t("password")} value={f.pwd} onChange={(v) => setF({ ...f, pwd: v })} required />
         </div>
         {accountType === "seller" ? (
           <>
@@ -139,7 +141,7 @@ function Signup() {
           {busy ? <Loader2 className="animate-spin" size={18} /> : accountType === "seller" ? "Criar conta de lojista" : "Criar conta"}
         </Button>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Já tem conta? <Link to="/login" className="font-semibold text-primary">Entrar</Link>
+          {t("have_account")} <Link to="/login" className="font-semibold text-primary">{t("login")}</Link>
         </p>
       </form>
     </div>

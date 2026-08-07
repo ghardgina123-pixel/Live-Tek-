@@ -8,7 +8,7 @@ import { CountrySelect } from "@/components/LocationCascade";
 import { SettingsSheet } from "@/components/SettingsSheet";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useT } from "@/lib/i18n";
+import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -21,10 +21,10 @@ export const Route = createFileRoute("/perfil")({
   component: Perfil,
 });
 
-const menu = [
-  { icon: Package, label: "Meus pedidos", badge: "3", to: "/compras" as const },
-  { icon: Heart, label: "Favoritos", to: "/favoritos" as const },
-  { icon: HelpCircle, label: "Ajuda e suporte", to: "/ajuda" as const },
+const menu: { icon: typeof Package; key: TKey; badge?: string; to: "/compras" | "/favoritos" | "/ajuda" }[] = [
+  { icon: Package, key: "my_orders", badge: "3", to: "/compras" },
+  { icon: Heart, key: "favorites", to: "/favoritos" },
+  { icon: HelpCircle, key: "help_support", to: "/ajuda" },
 ];
 
 function Perfil() {
@@ -89,10 +89,10 @@ function Perfil() {
     <AppShell>
       <header className="px-5 pt-6 pb-6 text-white" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold">Perfil</h1>
+          <h1 className="text-lg font-semibold">{t("profile_title")}</h1>
           <SettingsSheet
             trigger={
-              <button aria-label="Configurações" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+              <button aria-label={t("settings")} className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 backdrop-blur">
                 <Settings size={18} />
               </button>
             }
@@ -103,7 +103,7 @@ function Perfil() {
             type="button"
             onClick={() => user && fileRef.current?.click()}
             disabled={!user || uploading}
-            aria-label="Carregar foto de perfil"
+            aria-label={t("edit_profile")}
             className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white text-2xl font-bold text-secondary disabled:opacity-70"
           >
             {avatarUrl ? (
@@ -129,14 +129,14 @@ function Perfil() {
               <p className="text-lg font-bold">{displayName}</p>
               <BadgeCheck size={16} />
             </div>
-            <p className="text-xs text-white/80">{user?.email ?? "Faça login para continuar"}</p>
+            <p className="text-xs text-white/80">{user?.email ?? t("login_to_continue")}</p>
             <span className="mt-1 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold">Cliente Gold</span>
           </div>
         </div>
         <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-white/15 p-3 text-center backdrop-blur">
-          <Stat n="12" l="Pedidos" />
-          <Stat n="48" l="Favoritos" />
-          <Stat n="9" l="Seguindo" />
+          <Stat n="12" l={t("my_orders")} />
+          <Stat n="48" l={t("favorites")} />
+          <Stat n="9" l={t("following")} />
         </div>
       </header>
 
@@ -145,7 +145,7 @@ function Perfil() {
           <li>
             <Link to="/admin-dashboard" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl text-white" style={{ background: "var(--gradient-brand)" }}><Shield size={18} /></div>
-              <span className="flex-1 text-sm font-bold text-foreground">Painel do Administrador</span>
+              <span className="flex-1 text-sm font-bold text-foreground">{t("admin_panel")}</span>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">Admin</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
@@ -155,7 +155,7 @@ function Perfil() {
           <li>
             <Link to="/lojista" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl text-white" style={{ background: "var(--gradient-brand)" }}><StoreIcon size={18} /></div>
-              <span className="flex-1 text-sm font-semibold text-foreground">Quero vender / Registrar loja</span>
+              <span className="flex-1 text-sm font-semibold text-foreground">{t("seller_panel")}</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
           </li>
@@ -164,7 +164,7 @@ function Perfil() {
           <li>
             <Link to="/transportador" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><Truck size={18} /></div>
-              <span className="flex-1 text-sm font-semibold text-foreground">Quero entregar / Cadastrar transporte</span>
+              <span className="flex-1 text-sm font-semibold text-foreground">{t("courier_panel")}</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
           </li>
@@ -173,7 +173,7 @@ function Perfil() {
           <li>
             <Link to="/imobiliaria" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary"><HomeIcon size={18} /></div>
-              <span className="flex-1 text-sm font-semibold text-foreground">Imobiliária / Registrar imóvel</span>
+              <span className="flex-1 text-sm font-semibold text-foreground">{t("realestate_panel")}</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
           </li>
@@ -182,16 +182,16 @@ function Perfil() {
           <li>
             <Link to="/enderecos" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-accent-foreground"><MapPin size={18} /></div>
-              <span className="flex-1 text-sm font-medium text-foreground">Endereços para entrega</span>
+              <span className="flex-1 text-sm font-medium text-foreground">{t("addresses")}</span>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
           </li>
         )}
-        {menu.map(({ icon: Icon, label, badge, to }) => (
-          <li key={label}>
+        {menu.map(({ icon: Icon, key, badge, to }) => (
+          <li key={key}>
             <Link to={to} className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-accent-foreground"><Icon size={18} /></div>
-              <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
+              <span className="flex-1 text-sm font-medium text-foreground">{t(key)}</span>
               {badge && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">{badge}</span>}
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
@@ -200,7 +200,7 @@ function Perfil() {
       </ul>
 
       <div className="px-5 pt-4">
-        <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">Região e moeda</h3>
+        <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">{t("currency")}</h3>
         <CurrencySelector variant="row" />
       </div>
 
@@ -209,7 +209,7 @@ function Perfil() {
           <h3 className="mb-2 text-xs font-bold uppercase text-muted-foreground">{t("country")}</h3>
           <CountrySelect value={countryId} onChange={persistCountry} />
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Define o país padrão para entregas, lojas e imóveis.
+            {t("country_default_hint")}
           </p>
         </div>
       )}
@@ -217,11 +217,11 @@ function Perfil() {
       <div className="px-5 pt-3">
         {user ? (
           <button onClick={handleLogout} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-semibold text-destructive">
-            <LogOut size={16} /> Sair da conta
+            <LogOut size={16} /> {t("logout")}
           </button>
         ) : (
           <Link to="/login" className="flex h-11 items-center justify-center gap-2 rounded-xl border border-border text-sm font-semibold text-primary">
-            Entrar
+            {t("login")}
           </Link>
         )}
         <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Teká v1.0 · Feito com 💚</p>

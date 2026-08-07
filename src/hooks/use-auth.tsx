@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { langStore } from "@/lib/i18n";
 import { toast } from "sonner";
 
 // Sessão expira após 30 min sem atividade do usuário
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
+      if (s) void langStore.syncFromAccount();
       router.invalidate();
       qc.invalidateQueries();
     });
