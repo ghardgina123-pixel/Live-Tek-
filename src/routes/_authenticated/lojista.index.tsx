@@ -162,6 +162,7 @@ async function uploadStoreAsset(userId: string, file: File, kind: "logo" | "cove
 function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () => void; feeRequired: boolean; feeAoa: number }) {
   const { t } = useT();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
