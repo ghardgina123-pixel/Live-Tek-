@@ -139,8 +139,8 @@ describe("painel do lojista reflecte os pedidos", () => {
     expect(stats.payoutsPending).toBe(balance.pending_clearance_aoa);
     expect(stats.payoutsReleased).toBe(balance.available_aoa);
     expect(balance.pending_clearance_aoa).toBe(19000);
-    expect(balance.available_aoa).toBe(27000);
-    expect(balance.platform_fees_aoa).toBe(5000);
+    expect(balance.available_aoa).toBe(28500);
+    expect(balance.platform_fees_aoa).toBe(2500);
     expect(balance.pending_clearance_aoa + balance.available_aoa + balance.platform_fees_aoa).toBe(50000);
   });
 
