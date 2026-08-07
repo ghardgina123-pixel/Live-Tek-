@@ -77,7 +77,7 @@ export async function logLiveEvent(input: {
       kind: input.kind,
       level: input.level ?? "info",
       message: input.message,
-      metadata: input.metadata ?? {},
+      metadata: (input.metadata ?? {}) as never,
     });
   } catch {
     // auditoria best-effort
@@ -186,7 +186,7 @@ export async function loadCameras(live: OwnedLive, userId: string) {
           .update({
             status: next.status,
             last_error: next.error,
-            last_stats: stats as unknown as Record<string, unknown>,
+            last_stats: stats as never,
             last_seen_at: stats.updatedAt,
           })
           .eq("id", row.id);
@@ -255,7 +255,7 @@ export async function saveCameraTelemetry(
   await db
     .from("live_cameras")
     .update({
-      last_stats: { ...stats, online: true, ingestActive: true, updatedAt: now },
+      last_stats: { ...stats, online: true, ingestActive: true, updatedAt: now } as never,
       last_seen_at: now,
       status: "publishing",
       last_error: null,
