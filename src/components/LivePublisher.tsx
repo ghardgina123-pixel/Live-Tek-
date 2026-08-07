@@ -504,6 +504,51 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         </div>
       )}
 
+      {/* Áudio profissional: microfone Bluetooth + supressão de ruído */}
+      <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+        <label htmlFor="mic-select" className="flex items-center gap-1.5 text-xs font-semibold">
+          <Bluetooth size={13} className="text-primary" /> Microfone
+        </label>
+        <select
+          id="mic-select"
+          value={micId}
+          onChange={(e) => {
+            setMicId(e.target.value);
+            if (typeof window !== "undefined") localStorage.setItem(MIC_PREF_KEY, e.target.value);
+          }}
+          disabled={state === "publishing" || state === "connecting"}
+          className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
+        >
+          <option value="">Predefinido do sistema</option>
+          {mics.map((d) => (
+            <option key={d.deviceId} value={d.deviceId}>
+              {d.label || "Microfone"}
+            </option>
+          ))}
+        </select>
+        {(state === "publishing" || state === "connecting") && (
+          <p className="text-[11px] text-muted-foreground">Pare a transmissão para trocar de microfone.</p>
+        )}
+        <label className="flex items-center justify-between gap-2 text-xs">
+          <span className="flex items-center gap-1.5"><Mic size={13} /> Supressão de ruído da loja</span>
+          <input
+            type="checkbox"
+            checked={noiseGate}
+            onChange={(e) => setNoiseGate(e.target.checked)}
+            className="h-4 w-4 accent-[var(--primary)]"
+          />
+        </label>
+      </div>
+
+      {state === "publishing" && net && (
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2.5 text-[11px]">
+          <Activity size={13} className={net.rttMs > 400 ? "text-destructive" : net.rttMs > 200 ? "text-amber-500" : "text-emerald-500"} />
+          <span>Latência {net.rttMs} ms</span>
+          <span className="text-muted-foreground">· perda {net.lossPct}%</span>
+          <span className="ml-auto font-semibold">vídeo {net.targetKbps} kbps</span>
+        </div>
+      )}
+
       <div className="flex gap-2">
         {state === "publishing" ? (
           <button onClick={stop} className="flex-1 rounded-full bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground">
