@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Wallet, Loader2, Clock, BanknoteArrowDown } from "lucide-react";
+import { Wallet, Loader2, Clock, Banknote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -111,7 +111,7 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
         </div>
       ) : (
         <Button onClick={request} disabled={!canRequest || busy} className="mt-3 w-full gap-2">
-          {busy ? <Loader2 size={16} className="animate-spin" /> : <BanknoteArrowDown size={16} />}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
           {available >= min ? `Sacar ${kz(available)}` : `Saque a partir de ${kz(min)}`}
         </Button>
       )}
