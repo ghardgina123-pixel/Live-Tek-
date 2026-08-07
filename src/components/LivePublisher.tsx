@@ -107,11 +107,17 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
   const audioMeterRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const disconnectedByUserRef = useRef(false);
+  const voiceChainRef = useRef<AudioChain | null>(null);
+  const adaptiveStopRef = useRef<(() => void) | null>(null);
   const [state, setState] = useState<State>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [micOk, setMicOk] = useState(false);
   const [cameraOk, setCameraOk] = useState(false);
+  const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
+  const [micId, setMicId] = useState<string>(() => (typeof window === "undefined" ? "" : localStorage.getItem(MIC_PREF_KEY) ?? ""));
+  const [noiseGate, setNoiseGate] = useState(true);
+  const [net, setNet] = useState<(NetworkReport & { targetKbps: number }) | null>(null);
   const issue = useServerFn(issueLiveKitToken);
 
   // (1) Pré-aquecimento de permissões: pede acesso à câmara/microfone assim que o
@@ -151,10 +157,34 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     };
   }, []);
 
+  // Lista de microfones (inclui lapelas/headsets Bluetooth emparelhados).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.enumerateDevices) return;
+    const refresh = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        setMics(devices.filter((d) => d.kind === "audioinput"));
+      } catch {
+        // noop
+      }
+    };
+    void refresh();
+    navigator.mediaDevices.addEventListener?.("devicechange", refresh);
+    return () => navigator.mediaDevices.removeEventListener?.("devicechange", refresh);
+  }, []);
+
   const cleanupHardware = async () => {
     if (audioMeterRef.current) {
       cancelAnimationFrame(audioMeterRef.current);
       audioMeterRef.current = null;
+    }
+    if (adaptiveStopRef.current) {
+      adaptiveStopRef.current();
+      adaptiveStopRef.current = null;
+    }
+    if (voiceChainRef.current) {
+      await voiceChainRef.current.close();
+      voiceChainRef.current = null;
     }
     if (audioCtxRef.current) {
       try {
@@ -183,6 +213,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     setAudioLevel(0);
     setMicOk(false);
     setCameraOk(false);
+    setNet(null);
   };
 
   const cleanupRoom = async () => {
@@ -222,7 +253,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     for (const tier of videoConstraintTiers) {
       try {
         const tracks = await createLocalTracks({
-          audio: audioConstraints,
+          audio: micConstraints(micId || undefined),
           video: {
             resolution: tier.resolution,
             facingMode: tier.facingMode,
@@ -245,32 +276,27 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     throw lastError;
   };
 
-  const startMicMeter = (audioTrack: LocalAudioTrack) => {
-    try {
-      const stream = audioTrack.mediaStream ?? new MediaStream([audioTrack.mediaStreamTrack]);
-      const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const context = new AudioContextCtor();
-      audioCtxRef.current = context;
-      const source = context.createMediaStreamSource(stream);
-      const analyser = context.createAnalyser();
-      analyser.fftSize = 512;
-      source.connect(analyser);
-      const buffer = new Uint8Array(analyser.frequencyBinCount);
-      const tick = () => {
-        analyser.getByteTimeDomainData(buffer);
-        let peak = 0;
-        for (let i = 0; i < buffer.length; i += 1) {
-          peak = Math.max(peak, Math.abs(buffer[i] - 128));
-        }
-        const level = Math.min(1, peak / 64);
-        setAudioLevel(level);
-        if (level > 0.04) setMicOk(true);
-        audioMeterRef.current = requestAnimationFrame(tick);
-      };
-      audioMeterRef.current = requestAnimationFrame(tick);
-    } catch {
+  /**
+   * Substitui o track de microfone pelo áudio processado (passa-alto + noise
+   * gate + compressor) e usa o mesmo grafo para alimentar o medidor de nível.
+   */
+  const applyVoiceProcessing = (tracks: LocalTrack[], audioTrack: LocalAudioTrack): LocalTrack[] => {
+    const chain = createVoiceChain(audioTrack.mediaStreamTrack);
+    if (!chain) {
       setMicOk(true);
+      return tracks;
     }
+    voiceChainRef.current = chain;
+    chain.setEnabled(noiseGate);
+    const processed = new LocalAudioTrack(chain.track, undefined, false);
+    const tick = () => {
+      const level = chain.level();
+      setAudioLevel(level);
+      if (level > 0.04) setMicOk(true);
+      audioMeterRef.current = requestAnimationFrame(tick);
+    };
+    audioMeterRef.current = requestAnimationFrame(tick);
+    return tracks.map((t) => (t === (audioTrack as unknown as LocalTrack) ? (processed as unknown as LocalTrack) : t));
   };
 
   const preflight = async () => {
@@ -293,7 +319,7 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
       if (!videoTrack) throw new Error("Erro no dispositivo: a câmara não iniciou.");
       if (!audioTrack) throw new Error("Erro no dispositivo: o microfone não iniciou.");
 
-      tracksRef.current = tracks;
+      tracksRef.current = applyVoiceProcessing(tracks, audioTrack);
       const video = videoRef.current;
       if (!video) throw new Error("Erro no dispositivo: o preview de vídeo não está disponível.");
       videoTrack.attach(video);
@@ -305,7 +331,6 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
 
       setCameraOk(true);
       setMicOk(audioTrack.mediaStreamTrack.readyState === "live");
-      startMicMeter(audioTrack);
       setState("preflight");
     } catch (error) {
       await fail(error);
