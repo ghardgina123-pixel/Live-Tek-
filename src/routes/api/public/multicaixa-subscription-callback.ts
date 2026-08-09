@@ -14,6 +14,9 @@ export const Route = createFileRoute("/api/public/multicaixa-subscription-callba
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { limitRequest } = await import("@/lib/rate-limit.server");
+        const limited = await limitRequest(request, "api:mcx-sub", 120, 60, 15);
+        if (limited) return limited;
         const secret = process.env["MULTICAIXA_EXPRESS_WEBHOOK_SECRET"];
         if (!secret) return new Response("provider_not_configured", { status: 503 });
 

@@ -10,6 +10,9 @@ export const Route = createFileRoute("/api/public/subscription-cron")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { limitRequest } = await import("@/lib/rate-limit.server");
+        const limited = await limitRequest(request, "api:sub-cron", 120, 60, 15);
+        if (limited) return limited;
         const secret = process.env["PUSH_WEBHOOK_SECRET"];
         if (!secret) return new Response("not_configured", { status: 503 });
         const provided = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
