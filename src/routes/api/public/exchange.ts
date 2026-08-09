@@ -49,6 +49,57 @@ export const Route = createFileRoute("/api/public/exchange")({
       },
 
       POST: async ({ request }) => {
+        const { limitRequest } = await import("@/lib/rate-limit.server");
+        const limited = await limitRequest(request, "api:exchange", 30, 60, 30);
+        if (limited) return limited;
+        const expected = process.env.CRON_SECRET;
+        if (!expected) {
+          return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
+            status: 503,
+            headers: { "content-type": "application/json" },
+          });
+        }
+        const provided = request.headers.get("x-cron-secret") ?? "";
+        const a = Buffer.from(provided);
+        const b = Buffer.from(expected);
+        const { timingSafeEqual } = await import("crypto");
+        if (a.length !== b.length || !timingSafeEqual(a, b)) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          });
+        }
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const rows = mockFetchRates();
+        const { error } = await supabaseAdmin
+          .from("exchange_rates")
+          .upsert(rows, { onConflict: "from_currency,to_currency" });
+        if (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "content-type": "application/json" },
+          });
+        }
+        return Response.json({ updated: rows.length, rates: rows });
+      },
+
+      /* eslint-disable */
+      _unused: async () => {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data, error } = await supabaseAdmin
+          .from("exchange_rates")
+          .select("from_currency, to_currency, rate, source, updated_at")
+          .order("from_currency");
+        if (error) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { "content-type": "application/json" },
+          });
+        }
+        return Response.json({ rates: data ?? [] });
+      },
+
+      POST: async ({ request }) => {
         const expected = process.env.CRON_SECRET;
         if (!expected) {
           return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
