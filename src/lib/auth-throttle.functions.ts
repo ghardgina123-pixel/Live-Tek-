@@ -55,3 +55,48 @@ export const clearLoginThrottle = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+// Limitador genérico para acções sensíveis não autenticadas (cadastro,
+// recuperação de palavra-passe, etc.). Chave por IP + identificador opcional.
+export const checkActionThrottle = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        action: z.enum(["signup", "password_reset", "contact"]),
+        identifier: z.string().trim().toLowerCase().max(255).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { limitByKey } = await import("./rate-limit.server");
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const { requestAuditMeta, recordSecurityEvent } = await import("./audit.server");
+    const meta = requestAuditMeta(getRequest());
+    const limits: Record<string, [number, number, number]> = {
+      signup: [5, 60, 60],
+      password_reset: [5, 60, 60],
+      contact: [10, 60, 30],
+    };
+    const [max, windowMin, blockMin] = limits[data.action] ?? [10, 60, 30];
+    const keys = [
+      `${data.action}:ip:${meta.ip ?? "unknown"}`,
+      ...(data.identifier ? [`${data.action}:id:${data.identifier}`] : []),
+    ];
+    let blocked = false;
+    let retryAfterSeconds = 0;
+    for (const key of keys) {
+      const res = await limitByKey(key, max, windowMin, blockMin);
+      if (res.blocked) {
+        blocked = true;
+        retryAfterSeconds = Math.max(retryAfterSeconds, res.retryAfterSeconds);
+      }
+    }
+    if (blocked) {
+      await recordSecurityEvent({
+        event: `abuse.${data.action}_blocked`,
+        severity: "warning",
+        metadata: { identifier: data.identifier ?? null },
+        ...meta,
+      });
+    }
+    return { blocked, retryAfterSeconds };
+  });

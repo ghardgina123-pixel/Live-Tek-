@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import { signupSchema } from "@/lib/schemas";
+import { checkActionThrottle } from "@/lib/auth-throttle.functions";
 import cadastroHero from "@/assets/marketing/cadastro-hero.jpg";
 
 export const Route = createFileRoute("/cadastro")({
@@ -41,6 +42,18 @@ function Signup() {
     const parsed = signupSchema.safeParse(f);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos"); return; }
     setBusy(true);
+    try {
+      const gate = await checkActionThrottle({
+        data: { action: "signup", identifier: parsed.data.email },
+      });
+      if (gate.blocked) {
+        setBusy(false);
+        toast.error(`Demasiadas tentativas. Tente novamente em ${Math.ceil(gate.retryAfterSeconds / 60)} min.`);
+        return;
+      }
+    } catch {
+      // falha do limitador não deve bloquear utilizadores legítimos
+    }
     const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.pwd,

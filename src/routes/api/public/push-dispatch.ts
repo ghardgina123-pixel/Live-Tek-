@@ -19,6 +19,9 @@ export const Route = createFileRoute("/api/public/push-dispatch")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const { limitRequest } = await import("@/lib/rate-limit.server");
+        const limited = await limitRequest(request, "api:push", 120, 60, 15);
+        if (limited) return limited;
         const publicKey = process.env.VAPID_PUBLIC_KEY;
         const privateKey = process.env.VAPID_PRIVATE_KEY;
         const subject = process.env.VAPID_SUBJECT || "mailto:admin@livemarketplece.live";

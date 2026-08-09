@@ -2940,6 +2940,7 @@ export type Database = {
         Args: { _amount_aoa: number; _store_id: string }
         Returns: Json
       }
+      can_access_realtime_topic: { Args: { _topic: string }; Returns: boolean }
       can_store_go_live: { Args: { _store_id: string }; Returns: boolean }
       cancel_store_subscription: {
         Args: { _reason?: string; _store_id: string }
@@ -3013,6 +3014,15 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      rate_limit_hit: {
+        Args: {
+          _block_minutes: number
+          _key: string
+          _max_attempts: number
+          _window_minutes: number
+        }
+        Returns: Json
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

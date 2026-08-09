@@ -49,6 +49,9 @@ export const Route = createFileRoute("/api/public/exchange")({
       },
 
       POST: async ({ request }) => {
+        const { limitRequest } = await import("@/lib/rate-limit.server");
+        const limited = await limitRequest(request, "api:exchange", 30, 60, 30);
+        if (limited) return limited;
         const expected = process.env.CRON_SECRET;
         if (!expected) {
           return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
@@ -79,6 +82,7 @@ export const Route = createFileRoute("/api/public/exchange")({
         }
         return Response.json({ updated: rows.length, rates: rows });
       },
+
     },
   },
 });

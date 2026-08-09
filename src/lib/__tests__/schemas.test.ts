@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { signupSchema, productSchema, checkoutSchema } from "@/lib/schemas";
 
-const uuid = "11111111-1111-1111-1111-111111111111";
+const uuid = "11111111-1111-4111-8111-111111111111";
 
 describe("signupSchema", () => {
   const valid = { name: "João Silva", email: "joao@example.com", phone: "+244 923 000 000", pwd: "secret1" };
