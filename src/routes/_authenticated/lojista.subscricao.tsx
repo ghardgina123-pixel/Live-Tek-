@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/lojista/subscricao")({
       { title: "Subscrição e faturação — Live Teká" },
       { name: "description", content: "Gerir o plano de parceiro, pagar por Multicaixa Express e descarregar faturas." },
       { property: "og:title", content: "Subscrição e faturação — Live Teká" },
-      { property: "og:description", content: "Planos Básico, Profissional e Elite para parceiros Live Teká." },
+      { property: "og:description", content: "Planos de parceiro Live Teká com preços oficiais e faturação automática." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
