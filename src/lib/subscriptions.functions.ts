@@ -21,7 +21,10 @@ export const createSubscriptionCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { storeId: string; planCode: string }) => {
     if (!input?.storeId || !input?.planCode) throw new Error("invalid_input");
-    if (!["basico", "profissional", "elite"].includes(input.planCode)) throw new Error("plan_not_found");
+    // A lista de planos vive na base de dados (`subscription_plans`): aqui só
+    // validamos o formato do código; `create_subscription_intent` rejeita
+    // qualquer plano inexistente ou inativo e fixa o preço oficial.
+    if (!/^[a-z0-9_-]{2,40}$/.test(input.planCode)) throw new Error("plan_not_found");
     return input;
   })
   .handler(async ({ data, context }) => {
