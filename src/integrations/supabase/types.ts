@@ -2858,7 +2858,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string | null
+          is_online: boolean | null
+          last_seen_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          last_seen_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          last_seen_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_subscription_by_reference: {
