@@ -222,7 +222,9 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
       return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
     if (!loc.province_id || !loc.municipality_id) return toast.error(t("s_selecione_provincia_e_municipio"));
-    if (feeRequired && !proofFile) return toast.error(t("s_anexe_o_comprovativo_da_taxa_de_inscricao"));
+    // Prestadores de serviços nunca pagam taxa de adesão.
+    const feeApplies = feeRequired && partnerType === "retail";
+    if (feeApplies && !proofFile) return toast.error(t("s_anexe_o_comprovativo_da_taxa_de_inscricao"));
     setSubmitting(true);
     try {
       let logo_url: string | null = null;
@@ -265,7 +267,14 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
           bank_holder: form.bank_holder || null,
         });
         if (privErr) throw privErr;
-        if (feeRequired) {
+        // O valor devido é sempre recalculado pelo servidor a partir da loja criada.
+        const { data: createdStore } = await supabase
+          .from("stores")
+          .select("signup_fee_aoa, signup_fee_status, registration_position")
+          .eq("id", created.id)
+          .maybeSingle();
+        const dueAoa = Number((createdStore as { signup_fee_aoa?: number } | null)?.signup_fee_aoa ?? 0);
+        if (dueAoa > 0) {
           let proof_url: string | null = null;
           if (proofFile) {
             const ext = proofFile.name.split(".").pop() || "png";
@@ -279,20 +288,17 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
               .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
             proof_url = signed?.signedUrl ?? null;
           }
-          const { error: subErr } = await supabase.from("store_subscriptions").insert({
+          const { error: feeErr } = await supabase.from("store_signup_fees").insert({
             store_id: created.id,
-            plan: "signup_fee",
-            status: "pending",
-            price_aoa: feeAoa,
-            payment_method: "manual",
+            method: "manual",
             proof_url,
           });
-          if (subErr) throw subErr;
+          if (feeErr) throw feeErr;
         }
       }
 
       await supabase.from("user_roles").insert({ user_id: user.id, role: "seller" });
-      toast.success(feeRequired ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
+      toast.success(feeApplies ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
       onCreated();
       if (partnerType === "service") {
         toast.info("Escolha o plano de serviços para concluir o registo.");
