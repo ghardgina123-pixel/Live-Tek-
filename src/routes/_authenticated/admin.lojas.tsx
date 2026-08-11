@@ -7,6 +7,7 @@ import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatAoa, FEE_STATUS_LABEL, type SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/_authenticated/admin/lojas")({
   head: () => ({ meta: [{ title: "Admin · Aprovação de Lojas — Live Teká" }] }),
@@ -39,9 +40,13 @@ type StoreRow = {
   owner_id: string;
   rejection_reason: string | null;
   owner_name: string | null;
-  signup_fee_required?: boolean | null;
-  fee_status?: string | null;
+  partner_type: "retail" | "service";
+  registration_position: number | null;
+  signup_fee_aoa: number;
+  signup_fee_status: "not_required" | "pending" | "paid" | "waived";
+  fee_id?: string | null;
   fee_proof_url?: string | null;
+  fee_payment_status?: string | null;
 };
 
 const FILTERS = [
@@ -56,37 +61,39 @@ function AdminLojas() {
   const [rows, setRows] = useState<StoreRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [approvedCount, setApprovedCount] = useState<number | null>(null);
+  const [campaign, setCampaign] = useState<SignupStatus | null>(null);
 
   const load = async () => {
     setLoading(true);
     let q = supabase
       .from("stores")
-      .select("id, name, status, phone, category, logo_url, created_at, owner_id, rejection_reason, signup_fee_required")
+      .select("id, name, status, phone, category, logo_url, created_at, owner_id, rejection_reason, partner_type, registration_position, signup_fee_aoa, signup_fee_status")
       .order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("status", filter);
     const { data, error } = await q;
     if (error) toast.error(error.message);
-    const stores = (data ?? []) as Omit<StoreRow, "nif" | "bank_name" | "bank_account" | "bank_holder" | "owner_name" | "fee_status" | "fee_proof_url">[];
+    const stores = (data ?? []) as unknown as Omit<StoreRow, "nif" | "bank_name" | "bank_account" | "bank_holder" | "owner_name" | "fee_id" | "fee_proof_url" | "fee_payment_status">[];
     const ids = stores.map((s) => s.id);
     const owners = Array.from(new Set(stores.map((s) => s.owner_id)));
     let priv: Record<string, { nif: string | null; bank_name: string | null; bank_account: string | null; bank_holder: string | null }> = {};
     let names: Record<string, string | null> = {};
-    let subs: Record<string, { status: string | null; proof_url: string | null }> = {};
+    let fees: Record<string, { id: string; status: string | null; proof_url: string | null }> = {};
     if (ids.length) {
-      const [{ data: pdata }, { data: sdata }] = await Promise.all([
+      const [{ data: pdata }, { data: fdata }] = await Promise.all([
         supabase
           .from("store_private")
           .select("store_id, nif, bank_name, bank_account, bank_holder")
           .in("store_id", ids),
         supabase
-          .from("store_subscriptions")
-          .select("store_id, status, proof_url, plan")
+          .from("store_signup_fees")
+          .select("id, store_id, status, proof_url, created_at")
           .in("store_id", ids)
-          .eq("plan", "signup_fee"),
+          .order("created_at", { ascending: false }),
       ]);
       priv = Object.fromEntries((pdata ?? []).map((p) => [p.store_id, p]));
-      subs = Object.fromEntries((sdata ?? []).map((s) => [s.store_id, { status: s.status, proof_url: s.proof_url }]));
+      for (const f of (fdata ?? []) as { id: string; store_id: string; status: string | null; proof_url: string | null }[]) {
+        if (!fees[f.store_id]) fees[f.store_id] = { id: f.id, status: f.status, proof_url: f.proof_url };
+      }
     }
     if (owners.length) {
       const { data: profs } = await supabase
@@ -103,12 +110,13 @@ function AdminLojas() {
         bank_account: priv[s.id]?.bank_account ?? null,
         bank_holder: priv[s.id]?.bank_holder ?? null,
         owner_name: names[s.owner_id] ?? null,
-        fee_status: subs[s.id]?.status ?? null,
-        fee_proof_url: subs[s.id]?.proof_url ?? null,
+        fee_id: fees[s.id]?.id ?? null,
+        fee_payment_status: fees[s.id]?.status ?? null,
+        fee_proof_url: fees[s.id]?.proof_url ?? null,
       })),
     );
     const { data: st } = await supabase.rpc("seller_signup_status");
-    if (st && typeof st === "object") setApprovedCount((st as { approved_count?: number }).approved_count ?? null);
+    if (st && typeof st === "object") setCampaign(st as unknown as SignupStatus);
     setLoading(false);
   };
 
@@ -136,6 +144,27 @@ function AdminLojas() {
     load();
   };
 
+  const confirmFee = async (s: StoreRow) => {
+    if (!s.fee_id) return toast.error("Sem comprovativo submetido pelo lojista.");
+    setBusyId(s.id);
+    const { error } = await supabase.rpc("admin_confirm_signup_fee", { _fee_id: s.fee_id });
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success("Taxa de adesão confirmada.");
+    load();
+  };
+
+  const waiveFee = async (s: StoreRow) => {
+    const reason = window.prompt("Motivo da dispensa da taxa de adesão:", "");
+    if (reason === null) return;
+    setBusyId(s.id);
+    const { error } = await supabase.rpc("admin_waive_signup_fee", { _store_id: s.id, _reason: reason });
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success("Taxa dispensada com registo de auditoria.");
+    load();
+  };
+
   return (
     <AppShell>
       <header className="px-5 pt-6 pb-4 text-white" style={{ background: "var(--gradient-brand)" }}>
@@ -145,9 +174,12 @@ function AdminLojas() {
           <h1 className="text-lg font-semibold">Aprovação de Lojas</h1>
         </div>
         <p className="mt-1 text-xs text-white/80">Reveja os dados de onboarding e aprove ou rejeite cada loja.</p>
-        {approvedCount !== null && (
+        {campaign && (
           <p className="mt-2 text-[11px] text-white/90">
-            {approvedCount} / 50 lojas gratuitas aprovadas · {approvedCount >= 50 ? "Taxa de inscrição obrigatória." : `${50 - approvedCount} vagas gratuitas restantes.`}
+            {campaign.free_slots_used} / {campaign.free_slots_total} vagas gratuitas usadas ·{" "}
+            {campaign.fee_required
+              ? `Taxa de adesão obrigatória (${formatAoa(campaign.fee_aoa)}).`
+              : `${campaign.slots_left} vagas gratuitas restantes.`}
           </p>
         )}
       </header>
@@ -186,8 +218,16 @@ function AdminLojas() {
                   <div className="flex items-center gap-2">
                     <h2 className="truncate font-semibold">{s.name}</h2>
                     <StatusBadge status={s.status} />
-                    {s.signup_fee_required && (
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Taxa</span>
+                    {s.partner_type === "service" && (
+                      <span className="rounded-full bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-700">Serviço</span>
+                    )}
+                    {s.registration_position != null && (
+                      <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold">#{s.registration_position}</span>
+                    )}
+                    {s.signup_fee_aoa > 0 && (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        {FEE_STATUS_LABEL[s.signup_fee_status]}
+                      </span>
                     )}
                   </div>
                   <p className="text-[11px] text-muted-foreground">
@@ -204,13 +244,26 @@ function AdminLojas() {
                 <div className="col-span-2">
                   <Info label="IBAN / Conta" value={s.bank_account} mono />
                 </div>
-                {s.signup_fee_required && (
+                {s.signup_fee_aoa > 0 && (
                   <div className="col-span-2 rounded-lg bg-amber-500/10 p-2 text-[11px]">
-                    <p className="font-semibold text-amber-800">Taxa de inscrição (9.600 AOA): {s.fee_status ?? "—"}</p>
+                    <p className="font-semibold text-amber-800">
+                      Taxa de adesão ({formatAoa(s.signup_fee_aoa)}): {FEE_STATUS_LABEL[s.signup_fee_status]}
+                      {s.fee_payment_status ? ` · comprovativo ${s.fee_payment_status}` : " · sem comprovativo"}
+                    </p>
                     {s.fee_proof_url && /^https:\/\//i.test(s.fee_proof_url) && (
                       <a href={s.fee_proof_url} target="_blank" rel="noreferrer" className="text-primary underline">
                         Ver comprovativo
                       </a>
+                    )}
+                    {s.signup_fee_status !== "paid" && s.signup_fee_status !== "waived" && (
+                      <div className="mt-2 flex gap-2">
+                        <Button size="sm" variant="outline" disabled={busyId === s.id || !s.fee_id} onClick={() => confirmFee(s)}>
+                          Confirmar pagamento
+                        </Button>
+                        <Button size="sm" variant="ghost" disabled={busyId === s.id} onClick={() => waiveFee(s)}>
+                          Dispensar taxa
+                        </Button>
+                      </div>
                     )}
                   </div>
                 )}
