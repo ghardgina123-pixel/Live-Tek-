@@ -12,6 +12,7 @@ import { LocationCascade, type LocationValue } from "@/components/LocationCascad
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { SERVICE_CATEGORIES } from "@/lib/services";
+import { formatAoa, REVIEW_STATE_LABEL, FEE_STATUS_LABEL, type SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
   head: () => ({ meta: [{ title: "Minha Loja — Live Teká" }] }),
@@ -30,7 +31,7 @@ function LojistaIndex() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [store, setStore] = useState<Store | null>(null);
-  const [status, setStatus] = useState<{ approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number } | null>(null);
+  const [status, setStatus] = useState<SignupStatus | null>(null);
   const navigate = useNavigate();
 
   const refresh = async () => {
@@ -44,7 +45,7 @@ function LojistaIndex() {
       supabase.rpc("seller_signup_status"),
     ]);
     setStore((data as Store) ?? null);
-    if (st) setStatus(st as { approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number });
+    if (st) setStatus(st as unknown as SignupStatus);
     setLoading(false);
   };
 
@@ -86,13 +87,13 @@ function LojistaIndex() {
                 <div>
                   <p className="font-bold">
                     {status.fee_required
-                      ? "As 50 vagas gratuitas foram preenchidas."
-                      : `Aproveite! Restam ${status.slots_left} de 50 vagas gratuitas.`}
+                      ? `As ${status.free_slots_total} vagas gratuitas foram preenchidas.`
+                      : `Aproveite! Restam ${status.slots_left} de ${status.free_slots_total} vagas gratuitas.`}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed">
                     {status.fee_required
-                      ? `É obrigatório pagar a Taxa de Inscrição de ${status.fee_aoa.toLocaleString("pt-AO")} AOA (via Referência Multicaixa ou IBAN) antes de enviar a sua loja para aprovação.`
-                      : "As primeiras 50 lojas a serem aprovadas terão acesso totalmente gratuito e isenção da taxa de adesão. Garanta a sua vaga agora!"}
+                      ? `A partir da ${status.free_slots_total + 1}.ª loja é obrigatório pagar a Taxa de Adesão de ${formatAoa(status.fee_aoa)} (Referência Multicaixa ou IBAN). A loja só é aprovada depois da taxa confirmada. Prestadores de serviços continuam isentos.`
+                      : `As primeiras ${status.free_slots_total} lojas registadas ficam isentas da taxa de adesão. A sua posição será a n.º ${status.next_position}.`}
                   </p>
                 </div>
               </div>
@@ -110,8 +111,8 @@ function LojistaIndex() {
           </div>
         </section>
       )}
-      {!store && <StoreRegistration onCreated={refresh} feeRequired={!!status?.fee_required} feeAoa={status?.fee_aoa ?? 9600} />}
-      {store?.status === "pending" && <PendingState reason={null} />}
+      {!store && <StoreRegistration onCreated={refresh} feeRequired={!!status?.fee_required} feeAoa={status?.fee_aoa ?? 0} />}
+      {store?.status === "pending" && <PendingState reason={null} campaign={status} />}
       {store?.status === "rejected" && <PendingState reason={store.rejection_reason} rejected />}
       <PartnersFooter />
     </AppShell>
@@ -132,8 +133,9 @@ function PartnersFooter() {
   );
 }
 
-function PendingState({ reason, rejected }: { reason: string | null; rejected?: boolean }) {
+function PendingState({ reason, rejected, campaign }: { reason: string | null; rejected?: boolean; campaign?: SignupStatus | null }) {
   const { t } = useT();
+  const mine = campaign?.my_store ?? null;
   return (
     <div className="px-5 py-10 text-center">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent">
@@ -145,6 +147,21 @@ function PendingState({ reason, rejected }: { reason: string | null; rejected?: 
           ? reason || t("s_sua_loja_foi_rejeitada_entre_em_contato_com_o_su")
           : "Sua loja foi enviada para análise. Você receberá uma notificação assim que for aprovada."}
       </p>
+      {!rejected && mine && (
+        <div className="mx-auto mt-4 max-w-sm space-y-1 rounded-2xl bg-card p-4 text-left text-xs text-muted-foreground shadow-[var(--shadow-soft)]">
+          {mine.registration_position != null && (
+            <p>Posição de registo: <span className="font-semibold text-foreground">n.º {mine.registration_position}</span></p>
+          )}
+          <p>Estado da análise: <span className="font-semibold text-foreground">{REVIEW_STATE_LABEL[mine.review_state] ?? mine.review_state}</span></p>
+          <p>
+            Taxa de adesão:{" "}
+            <span className="font-semibold text-foreground">
+              {mine.signup_fee_aoa > 0 ? formatAoa(mine.signup_fee_aoa) : "Isento"}
+              {" — "}{FEE_STATUS_LABEL[mine.signup_fee_status] ?? mine.signup_fee_status}
+            </span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -205,7 +222,9 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
       return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
     if (!loc.province_id || !loc.municipality_id) return toast.error(t("s_selecione_provincia_e_municipio"));
-    if (feeRequired && !proofFile) return toast.error(t("s_anexe_o_comprovativo_da_taxa_de_inscricao"));
+    // Prestadores de serviços nunca pagam taxa de adesão.
+    const feeApplies = feeRequired && partnerType === "retail";
+    if (feeApplies && !proofFile) return toast.error(t("s_anexe_o_comprovativo_da_taxa_de_inscricao"));
     setSubmitting(true);
     try {
       let logo_url: string | null = null;
@@ -248,7 +267,14 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
           bank_holder: form.bank_holder || null,
         });
         if (privErr) throw privErr;
-        if (feeRequired) {
+        // O valor devido é sempre recalculado pelo servidor a partir da loja criada.
+        const { data: createdStore } = await supabase
+          .from("stores")
+          .select("signup_fee_aoa, signup_fee_status, registration_position")
+          .eq("id", created.id)
+          .maybeSingle();
+        const dueAoa = Number((createdStore as { signup_fee_aoa?: number } | null)?.signup_fee_aoa ?? 0);
+        if (dueAoa > 0) {
           let proof_url: string | null = null;
           if (proofFile) {
             const ext = proofFile.name.split(".").pop() || "png";
@@ -262,20 +288,17 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
               .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
             proof_url = signed?.signedUrl ?? null;
           }
-          const { error: subErr } = await supabase.from("store_subscriptions").insert({
+          const { error: feeErr } = await supabase.from("store_signup_fees").insert({
             store_id: created.id,
-            plan: "signup_fee",
-            status: "pending",
-            price_aoa: feeAoa,
-            payment_method: "manual",
+            method: "manual",
             proof_url,
           });
-          if (subErr) throw subErr;
+          if (feeErr) throw feeErr;
         }
       }
 
       await supabase.from("user_roles").insert({ user_id: user.id, role: "seller" });
-      toast.success(feeRequired ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
+      toast.success(feeApplies ? t("s_loja_e_comprovativo_enviados_para_aprovacao") : t("s_loja_enviada_para_aprovacao"));
       onCreated();
       if (partnerType === "service") {
         toast.info("Escolha o plano de serviços para concluir o registo.");
@@ -396,15 +419,21 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
         <p className="text-[11px] text-muted-foreground">Lat: {coords.lat.toFixed(5)} · Lng: {coords.lng.toFixed(5)}</p>
       )}
 
-      {feeRequired && (
+      {feeRequired && partnerType === "retail" && (
         <div className="space-y-3 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4">
           <div>
-            <h3 className="text-xs font-bold uppercase text-amber-700 dark:text-amber-300">Taxa de Inscrição — {feeAoa.toLocaleString("pt-AO")} AOA</h3>
+            <h3 className="text-xs font-bold uppercase text-amber-700 dark:text-amber-300">Taxa de adesão — {formatAoa(feeAoa)}</h3>
             <p className="mt-1 text-[11px] text-muted-foreground">
               Pague por Referência Multicaixa ou transferência IBAN e anexe o comprovativo. A sua loja só será enviada à administração após este passo.
             </p>
           </div>
           <FileField label={t("s_comprovativo_de_pagamento")} file={proofFile} setFile={setProofFile} icon={<Upload size={14} />} />
+        </div>
+      )}
+
+      {feeRequired && partnerType === "service" && (
+        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4 text-[11px] text-muted-foreground">
+          Prestadores de serviços estão isentos da taxa de adesão. O registo é livre, mas a publicação depende da aprovação da administração.
         </div>
       )}
 

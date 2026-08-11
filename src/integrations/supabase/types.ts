@@ -2094,6 +2094,86 @@ export type Database = {
         }
         Relationships: []
       }
+      service_requirements: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          input_type: string
+          is_active: boolean
+          is_required: boolean
+          key: string
+          label: string
+          service_category: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          input_type?: string
+          is_active?: boolean
+          is_required?: boolean
+          key: string
+          label: string
+          service_category?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          input_type?: string
+          is_active?: boolean
+          is_required?: boolean
+          key?: string
+          label?: string
+          service_category?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_submissions: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          requirement_key: string
+          store_id: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          requirement_key: string
+          store_id: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          requirement_key?: string
+          store_id?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_submissions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       short_comments: {
         Row: {
           created_at: string
@@ -2152,6 +2232,36 @@ export type Database = {
           },
         ]
       }
+      signup_campaign_config: {
+        Row: {
+          country_code: string
+          created_at: string
+          fee_aoa: number
+          free_slots: number
+          id: number
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          fee_aoa?: number
+          free_slots?: number
+          id?: number
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          fee_aoa?: number
+          free_slots?: number
+          id?: number
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_private: {
         Row: {
           bank_account: string | null
@@ -2185,6 +2295,59 @@ export type Database = {
             foreignKeyName: "store_private_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: true
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_signup_fees: {
+        Row: {
+          amount_aoa: number
+          created_at: string
+          id: string
+          method: string | null
+          proof_url: string | null
+          reference: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_aoa?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          proof_url?: string | null
+          reference?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_aoa?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          proof_url?: string | null
+          reference?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_signup_fees_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
             referencedRelation: "stores"
             referencedColumns: ["id"]
           },
@@ -2287,10 +2450,17 @@ export type Database = {
           phone: string | null
           province_id: string | null
           rating: number | null
+          registration_position: number | null
           rejection_reason: string | null
+          review_state: string
           service_category: string | null
           service_tags: string[]
+          signup_fee_aoa: number
           signup_fee_required: boolean
+          signup_fee_status: string
+          signup_fee_waived_at: string | null
+          signup_fee_waived_by: string | null
+          signup_fee_waived_reason: string | null
           slug: string | null
           status: Database["public"]["Enums"]["store_status"]
           updated_at: string
@@ -2318,10 +2488,17 @@ export type Database = {
           phone?: string | null
           province_id?: string | null
           rating?: number | null
+          registration_position?: number | null
           rejection_reason?: string | null
+          review_state?: string
           service_category?: string | null
           service_tags?: string[]
+          signup_fee_aoa?: number
           signup_fee_required?: boolean
+          signup_fee_status?: string
+          signup_fee_waived_at?: string | null
+          signup_fee_waived_by?: string | null
+          signup_fee_waived_reason?: string | null
           slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
@@ -2349,10 +2526,17 @@ export type Database = {
           phone?: string | null
           province_id?: string | null
           rating?: number | null
+          registration_position?: number | null
           rejection_reason?: string | null
+          review_state?: string
           service_category?: string | null
           service_tags?: string[]
+          signup_fee_aoa?: number
           signup_fee_required?: boolean
+          signup_fee_status?: string
+          signup_fee_waived_at?: string | null
+          signup_fee_waived_by?: string | null
+          signup_fee_waived_reason?: string | null
           slug?: string | null
           status?: Database["public"]["Enums"]["store_status"]
           updated_at?: string
@@ -2875,6 +3059,10 @@ export type Database = {
         Returns: undefined
       }
       admin_approve_store: { Args: { _store_id: string }; Returns: undefined }
+      admin_confirm_signup_fee: {
+        Args: { _fee_id: string }
+        Returns: undefined
+      }
       admin_create_store_for_email: {
         Args: {
           _activate?: boolean
@@ -2918,6 +3106,10 @@ export type Database = {
         Args: { _property_id: string; _reason: string }
         Returns: undefined
       }
+      admin_reject_signup_fee: {
+        Args: { _fee_id: string; _reason: string }
+        Returns: undefined
+      }
       admin_reject_store: {
         Args: { _reason: string; _store_id: string }
         Returns: undefined
@@ -2926,11 +3118,19 @@ export type Database = {
         Args: { _approve?: boolean; _reference: string }
         Returns: Json
       }
+      admin_set_store_review_state: {
+        Args: { _reason?: string; _state: string; _store_id: string }
+        Returns: undefined
+      }
       admin_settle_payout: {
         Args: { _note?: string; _payout_id: string; _status?: string }
         Returns: Json
       }
       admin_user_phone: { Args: { _user_id: string }; Returns: string }
+      admin_waive_signup_fee: {
+        Args: { _reason: string; _store_id: string }
+        Returns: undefined
+      }
       affiliate_dashboard: { Args: never; Returns: Json }
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
