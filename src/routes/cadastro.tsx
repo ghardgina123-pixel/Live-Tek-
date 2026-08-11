@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { signupSchema } from "@/lib/schemas";
 import { checkActionThrottle } from "@/lib/auth-throttle.functions";
 import cadastroHero from "@/assets/marketing/cadastro-hero.jpg";
+import type { SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({
@@ -27,12 +28,12 @@ function Signup() {
   const [f, setF] = useState({ name: "", email: "", phone: "", pwd: "" });
   const [busy, setBusy] = useState(false);
   const { t } = useT();
-  const [sellerStatus, setSellerStatus] = useState<{ approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number } | null>(null);
+  const [sellerStatus, setSellerStatus] = useState<SignupStatus | null>(null);
 
   useEffect(() => {
     let cancel = false;
     supabase.rpc("seller_signup_status").then(({ data }) => {
-      if (!cancel && data) setSellerStatus(data as { approved_count: number; slots_left: number; fee_required: boolean; fee_aoa: number });
+      if (!cancel && data) setSellerStatus(data as unknown as SignupStatus);
     });
     return () => { cancel = true; };
   }, []);
@@ -128,13 +129,13 @@ function Signup() {
                 <div>
                   <p className="font-bold">
                     {sellerStatus.fee_required
-                      ? "As 50 vagas gratuitas foram preenchidas."
-                      : `Restam ${sellerStatus.slots_left} de 50 vagas gratuitas.`}
+                      ? `As ${sellerStatus.free_slots_total} vagas gratuitas foram preenchidas.`
+                      : `Restam ${sellerStatus.slots_left} de ${sellerStatus.free_slots_total} vagas gratuitas.`}
                   </p>
                   <p className="mt-1 leading-relaxed">
                     {sellerStatus.fee_required
                       ? `Será cobrada a Taxa de Inscrição de ${sellerStatus.fee_aoa.toLocaleString("pt-AO")} AOA após criar a conta.`
-                      : "As primeiras 50 lojas aprovadas ficam isentas da taxa de adesão. Garanta a sua vaga!"}
+                      : `As primeiras ${sellerStatus.free_slots_total} lojas registadas ficam isentas da taxa de adesão. Prestadores de serviços nunca pagam taxa de adesão.`}
                   </p>
                 </div>
               </div>
