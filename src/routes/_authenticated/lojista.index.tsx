@@ -419,15 +419,21 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
         <p className="text-[11px] text-muted-foreground">Lat: {coords.lat.toFixed(5)} · Lng: {coords.lng.toFixed(5)}</p>
       )}
 
-      {feeRequired && (
+      {feeRequired && partnerType === "retail" && (
         <div className="space-y-3 rounded-2xl border border-amber-500/40 bg-amber-500/5 p-4">
           <div>
-            <h3 className="text-xs font-bold uppercase text-amber-700 dark:text-amber-300">Taxa de Inscrição — {feeAoa.toLocaleString("pt-AO")} AOA</h3>
+            <h3 className="text-xs font-bold uppercase text-amber-700 dark:text-amber-300">Taxa de adesão — {formatAoa(feeAoa)}</h3>
             <p className="mt-1 text-[11px] text-muted-foreground">
               Pague por Referência Multicaixa ou transferência IBAN e anexe o comprovativo. A sua loja só será enviada à administração após este passo.
             </p>
           </div>
           <FileField label={t("s_comprovativo_de_pagamento")} file={proofFile} setFile={setProofFile} icon={<Upload size={14} />} />
+        </div>
+      )}
+
+      {feeRequired && partnerType === "service" && (
+        <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-4 text-[11px] text-muted-foreground">
+          Prestadores de serviços estão isentos da taxa de adesão. O registo é livre, mas a publicação depende da aprovação da administração.
         </div>
       )}
 
