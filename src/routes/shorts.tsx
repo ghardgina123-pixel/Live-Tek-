@@ -80,6 +80,7 @@ function ShortsFeed() {
       <Link to="/home" className="fixed left-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur" aria-label="Voltar">
         <ArrowLeft size={18} />
       </Link>
+      <h1 className="sr-only">Shorts — vídeos curtos de produtos das lojas na Live Teká</h1>
       {items.map((s, i) => (
         <ShortCard
           key={s.id}
