@@ -10,27 +10,66 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { z } from "zod";
+import { absoluteUrl, clampDescription, loadPropertySeo, titleWithSite } from "@/lib/seo-meta";
 
 export const Route = createFileRoute("/imoveis/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Detalhes do imóvel — Live Teká` },
-      { name: "description", content: "Veja fotos, preço, localização e marque visita a este imóvel em Angola na Live Teká." },
-      { property: "og:title", content: `Detalhes do imóvel — Live Teká` },
-      { property: "og:description", content: "Veja fotos, preço e localização deste imóvel em Angola na Live Teká." },
-      { property: "og:url", content: `https://www.livemarketplece.live/imoveis/${params.id}` },
-    ],
-    links: [{ rel: "canonical", href: `https://www.livemarketplece.live/imoveis/${params.id}` }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "RealEstateListing",
-        "@id": `https://www.livemarketplece.live/imoveis/${params.id}`,
-        url: `https://www.livemarketplece.live/imoveis/${params.id}`,
-      }),
-    }],
-  }),
+  loader: ({ params }) => loadPropertySeo(params.id),
+  head: ({ params, loaderData }) => {
+    const url = absoluteUrl(`/imoveis/${params.id}`);
+    const p = loaderData ?? null;
+    const name = p?.title ?? "Detalhes do imóvel";
+    const title = titleWithSite(name);
+    const description = clampDescription(
+      p
+        ? `${p.property_type} para ${p.listing_type}${p.district ? ` em ${p.district}` : ""} por ${p.price_aoa.toLocaleString("pt-AO")} Kz. ${p.description ?? "Veja fotos, localização e marque visita na Live Teká."}`
+        : "Veja fotos, preço, localização e marque visita a este imóvel na Live Teká.",
+    );
+    const image = p?.cover_url ?? null;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            "@id": url,
+            url,
+            name,
+            description,
+            ...(image ? { image } : {}),
+            ...(p
+              ? {
+                  offers: { "@type": "Offer", url, price: p.price_aoa, priceCurrency: "AOA" },
+                  ...(p.district
+                    ? { address: { "@type": "PostalAddress", addressLocality: p.district, addressCountry: "AO" } }
+                    : { address: { "@type": "PostalAddress", addressCountry: "AO" } }),
+                  ...(p.bedrooms ? { numberOfRooms: p.bedrooms } : {}),
+                  ...(p.area_m2
+                    ? { floorSize: { "@type": "QuantitativeValue", value: p.area_m2, unitCode: "MTK" } }
+                    : {}),
+                }
+              : {}),
+          }),
+        },
+      ],
+    };
+  },
   component: ImovelDetailPage,
 });
 
