@@ -245,6 +245,9 @@ function LivePage() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-black text-white">
+      <h1 className="sr-only">
+        {live.store?.name ? `${live.store.name} ao vivo — ${live.title}` : `${live.title} — live na Live Teká`}
+      </h1>
       {/* Player area — LiveKit (lazy, isolado do chat) */}
       <div className="relative aspect-[9/16] w-full bg-gradient-to-br from-zinc-900 to-zinc-700">
         <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}>
