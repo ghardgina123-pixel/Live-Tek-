@@ -106,7 +106,7 @@ function ImoveisListPage() {
               </div>
               <div className="p-3">
                 <p className="text-xs text-muted-foreground capitalize">{p.property_type}</p>
-                <h3 className="line-clamp-1 text-sm font-bold">{p.title}</h3>
+                <h2 className="line-clamp-1 text-sm font-bold">{p.title}</h2>
                 {p.district && (
                   <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                     <MapPin size={11} /> {p.district}

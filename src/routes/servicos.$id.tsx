@@ -4,6 +4,8 @@ import { ArrowLeft, BadgeCheck, Clock, Loader2, MapPin, MessageCircle, Phone, Sh
 import { supabase } from "@/integrations/supabase/client";
 import { serviceCategoryEmoji, serviceCategoryLabel } from "@/lib/services";
 import { toast } from "sonner";
+import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
+import { serviceCategoryLabel as seoCategoryLabel } from "@/lib/services";
 
 type ServiceDetail = {
   id: string;
@@ -21,18 +23,55 @@ type ServiceDetail = {
 };
 
 export const Route = createFileRoute("/servicos/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: "Prestador de serviço — Live Teká" },
-      { name: "description", content: "Veja horários, contactos e serviços oferecidos por este prestador na Live Teká." },
-      { property: "og:title", content: "Prestador de serviço — Live Teká" },
-      { property: "og:description", content: "Horários, contactos e serviços oferecidos na Live Teká." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: `https://www.livemarketplece.live/servicos/${params.id}` },
-    ],
-    links: [{ rel: "canonical", href: `https://www.livemarketplece.live/servicos/${params.id}` }],
-  }),
+  loader: ({ params }) => loadStoreSeo(params.id),
+  head: ({ params, loaderData }) => {
+    const url = absoluteUrl(`/servicos/${params.id}`);
+    const s = loaderData ?? null;
+    const category = s?.service_category ? seoCategoryLabel(s.service_category) : null;
+    const name = s?.name ?? "Prestador de serviço";
+    const title = titleWithSite(category ? `${name} · ${category}` : name);
+    const description = clampDescription(
+      s?.description?.trim()
+        ? `${name}: ${s.description}`
+        : `${name}${category ? ` — ${category}` : ""}. Veja horários, contactos e serviços oferecidos na Live Teká.`,
+    );
+    const image = s?.cover_url ?? s?.logo_url ?? null;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "@id": url,
+            url,
+            name,
+            description,
+            ...(image ? { image } : {}),
+            ...(category ? { category } : {}),
+            ...(s?.phone ? { telephone: s.phone } : {}),
+            address: { "@type": "PostalAddress", addressCountry: "AO" },
+          }),
+        },
+      ],
+    };
+  },
   component: ServiceDetailPage,
 });
 

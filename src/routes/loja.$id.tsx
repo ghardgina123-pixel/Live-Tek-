@@ -3,27 +3,57 @@ import { ArrowLeft, Share2, Heart, BadgeCheck, Star, Radio, MessageCircle } from
 import { StoreCover } from "@/components/AppShell";
 import { findStore, productsByStore } from "@/lib/data";
 import { formatPrice, useCurrency } from "@/lib/currency";
+import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
 
 export const Route = createFileRoute("/loja/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: "Loja — Live Teká" },
-      { name: "description", content: "Conheça esta loja, veja produtos, lives e converse com o vendedor na Live Teká." },
-      { property: "og:title", content: "Loja — Live Teká" },
-      { property: "og:description", content: "Conheça esta loja, veja produtos e lives na Live Teká." },
-      { property: "og:url", content: `https://www.livemarketplece.live/loja/${params.id}` },
-    ],
-    links: [{ rel: "canonical", href: `https://www.livemarketplece.live/loja/${params.id}` }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Store",
-        "@id": `https://www.livemarketplece.live/loja/${params.id}`,
-        url: `https://www.livemarketplece.live/loja/${params.id}`,
-      }),
-    }],
-  }),
+  loader: ({ params }) => loadStoreSeo(params.id),
+  head: ({ params, loaderData }) => {
+    const url = absoluteUrl(`/loja/${params.id}`);
+    const s = loaderData ?? null;
+    const name = s?.name ?? "Loja";
+    const title = titleWithSite(name);
+    const description = clampDescription(
+      s?.description?.trim()
+        ? `${s.name}: ${s.description}`
+        : `Conheça a loja ${name} na Live Teká: produtos, lives e conversa direta com o vendedor.`,
+    );
+    const image = s?.cover_url ?? s?.logo_url ?? null;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "@id": url,
+            url,
+            name,
+            description,
+            ...(image ? { image } : {}),
+            ...(s?.phone ? { telephone: s.phone } : {}),
+            ...(s?.category ? { additionalType: s.category } : {}),
+            address: { "@type": "PostalAddress", addressCountry: "AO" },
+          }),
+        },
+      ],
+    };
+  },
   component: LojaPage,
 });
 
