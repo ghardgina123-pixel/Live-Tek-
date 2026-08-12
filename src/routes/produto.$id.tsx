@@ -4,28 +4,66 @@ import { findProduct, findStore } from "@/lib/data";
 import { cartStore } from "@/lib/cart-store";
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { toast } from "sonner";
+import { absoluteUrl, clampDescription, loadProductSeo, titleWithSite } from "@/lib/seo-meta";
 
 export const Route = createFileRoute("/produto/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: "Detalhes do produto — Live Teká" },
-      { name: "description", content: "Veja detalhes, preço e disponibilidade deste produto e compre direto da live na Live Teká." },
-      { property: "og:title", content: "Detalhes do produto — Live Teká" },
-      { property: "og:description", content: "Veja detalhes, preço e disponibilidade deste produto na Live Teká." },
-      { property: "og:type", content: "product" },
-      { property: "og:url", content: `https://www.livemarketplece.live/produto/${params.id}` },
-    ],
-    links: [{ rel: "canonical", href: `https://www.livemarketplece.live/produto/${params.id}` }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Product",
-        "@id": `https://www.livemarketplece.live/produto/${params.id}`,
-        url: `https://www.livemarketplece.live/produto/${params.id}`,
-      }),
-    }],
-  }),
+  loader: ({ params }) => loadProductSeo(params.id),
+  head: ({ params, loaderData }) => {
+    const url = absoluteUrl(`/produto/${params.id}`);
+    const p = loaderData ?? null;
+    const name = p?.name ?? "Detalhes do produto";
+    const title = titleWithSite(name);
+    const description = clampDescription(
+      p
+        ? `${p.name}${p.store ? ` na loja ${p.store.name}` : ""} por ${p.price_aoa.toLocaleString("pt-AO")} Kz. ${p.description ?? "Compre direto da live e receba em casa com a Live Teká."}`
+        : "Veja detalhes, preço e disponibilidade deste produto e compre direto da live na Live Teká.",
+    );
+    const image = p?.image_url ?? null;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
+        ...(image
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "@id": url,
+            url,
+            name,
+            ...(p?.description ? { description: p.description } : { description }),
+            ...(image ? { image } : {}),
+            ...(p?.store ? { brand: { "@type": "Organization", name: p.store.name } } : {}),
+            ...(p
+              ? {
+                  offers: {
+                    "@type": "Offer",
+                    url,
+                    price: p.price_aoa,
+                    priceCurrency: "AOA",
+                    availability: "https://schema.org/InStock",
+                  },
+                }
+              : {}),
+          }),
+        },
+      ],
+    };
+  },
   component: ProdutoPage,
 });
 
