@@ -68,7 +68,7 @@ function ShortsFeed() {
       <AppShell>
         <div className="flex h-[80vh] flex-col items-center justify-center gap-3 px-8 text-center">
           <Play size={40} className="text-primary" />
-          <h2 className="text-lg font-bold">Ainda não há shorts</h2>
+          <h1 className="text-lg font-bold">Shorts — ainda não há vídeos</h1>
           <p className="text-sm text-muted-foreground">Os lojistas em breve vão publicar vídeos curtos dos produtos aqui.</p>
           <Link to="/lojas" className="mt-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">Explorar lojas</Link>
         </div>
