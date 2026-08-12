@@ -40,7 +40,7 @@ export type SeoStore = {
   logo_url: string | null;
   cover_url: string | null;
   service_category: string | null;
-  city: string | null;
+  category: string | null;
   phone: string | null;
 };
 
@@ -48,7 +48,7 @@ export async function loadStoreSeo(id: string): Promise<SeoStore | null> {
   try {
     const { data } = await supabase
       .from("stores")
-      .select("id, name, description, logo_url, cover_url, service_category, city, phone")
+      .select("id, name, description, logo_url, cover_url, service_category, category, phone")
       .eq("id", id)
       .maybeSingle();
     return (data as unknown as SeoStore) ?? null;
