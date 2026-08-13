@@ -7,9 +7,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
-      { name: "description", content: "Bem-vindo à Live Teká: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
+      { name: "description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
       { property: "og:title", content: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
-      { property: "og:description", content: "Bem-vindo à Live Teká: o marketplace ao vivo de Angola. Entre como cliente ou lojista e comece em segundos." },
+      { property: "og:description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
       { property: "og:url", content: `${SITE_URL}/` },
     ],
     links: [
