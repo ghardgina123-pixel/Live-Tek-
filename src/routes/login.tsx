@@ -108,7 +108,7 @@ function Login() {
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/30">
           <Radio size={28} />
         </div>
-        <h1 className="mt-3 text-2xl font-bold">Live Teká</h1>
+        <h1 className="mt-3 text-2xl font-bold">Entrar na Live Teká</h1>
         <p className="text-xs text-white/80">Compre, Converse e Receba.</p>
       </div>
       <form onSubmit={onSubmit} className="-mt-6 flex-1 rounded-t-3xl bg-background px-6 pt-8">
