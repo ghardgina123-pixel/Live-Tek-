@@ -120,7 +120,7 @@ function Checkout() {
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-32">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-5 py-4">
-        <button onClick={() => history.back()}><ArrowLeft size={20} /></button>
+        <button aria-label="Voltar" onClick={() => history.back()}><ArrowLeft size={20} /></button>
         <h1 className="flex-1 text-lg font-bold">{t("s_finalizar_compra")}</h1>
         <div className="rounded-full bg-muted px-2 py-1 text-xs font-semibold">
           {currency.flag} {currency.code}

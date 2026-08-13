@@ -116,8 +116,8 @@ function LojaPage() {
 
       <div className="px-5 pt-6">
         <div className="flex border-b border-border text-sm">
-          <div className="border-b-2 border-primary pb-2 pr-4 font-semibold text-foreground">Produtos</div>
-          <div className="pb-2 pr-4 text-muted-foreground">Sobre</div>
+          <h2 className="border-b-2 border-primary pb-2 pr-4 text-sm font-semibold text-foreground">Produtos</h2>
+          <h2 className="pb-2 pr-4 text-sm font-normal text-muted-foreground">Sobre</h2>
           <div className="pb-2 text-muted-foreground">Avaliações</div>
         </div>
 

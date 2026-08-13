@@ -135,7 +135,7 @@ function ProdutoPage() {
           </div>
         </div>
 
-        <h3 className="mt-6 text-sm font-bold">Descrição</h3>
+        <h2 className="mt-6 text-sm font-bold">Descrição</h2>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
       </div>
 
