@@ -11,7 +11,7 @@ self.addEventListener("push", (event) => {
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     data: { url: data.url || "/" },
-    tag: data.kind || "livemarket",
+    tag: data.kind || "liveteka",
     renotify: true,
   };
   event.waitUntil(self.registration.showNotification(title, options));
