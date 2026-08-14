@@ -7,9 +7,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
-      { name: "description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
+      { name: "description", content: "Entre na Live Teká como cliente ou lojista: compre em lives, converse com a loja e receba em casa. Comece em segundos." },
       { property: "og:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
-      { property: "og:description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
+      { property: "og:description", content: "Entre na Live Teká como cliente ou lojista: compre em lives, converse com a loja e receba em casa. Comece em segundos." },
       { property: "og:url", content: `${SITE_URL}/` },
     ],
     links: [
@@ -37,11 +37,10 @@ function Splash() {
           decoding="async"
           fetchPriority="high"
         />
-        <h1 className="sr-only">Live Teká — Compre · Converse · Receba.</h1>
-        <p className="text-center text-sm font-bold tracking-[0.18em] text-primary">
+        <h1 className="text-center text-sm font-bold tracking-[0.18em] text-primary">
           COMPRE <span className="text-primary-glow">•</span> CONVERSE{" "}
           <span className="text-primary-glow">•</span> RECEBA
-        </p>
+        </h1>
       </div>
 
       <div className="w-full space-y-3">
