@@ -6,9 +6,9 @@ import bannerAsset from "@/assets/live-teka-banner.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
+      { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
       { name: "description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
-      { property: "og:title", content: "Live Teká — Bem-vindo · Compre, Converse, Receba" },
+      { property: "og:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
       { property: "og:description", content: "Bem-vindo a à Live Teká: A Plataforma de Vendas em Tempo Real. Entre como cliente ou Lojista e comece em segundos." },
       { property: "og:url", content: `${SITE_URL}/` },
     ],
