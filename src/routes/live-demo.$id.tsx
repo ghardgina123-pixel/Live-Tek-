@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { SITE_URL } from "@/lib/site";
 import { ArrowLeft, Radio, Users, ShoppingBag, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -6,8 +7,29 @@ import { toast } from "sonner";
 import modaAsset from "@/assets/sellers/moda.jpg.asset.json";
 import organicosAsset from "@/assets/sellers/organicos.jpg.asset.json";
 
+const DEMO_NAMES: Record<string, string> = {
+  "demo-kikolo-tenis": "Kikolo Sneakers",
+  "demo-kikolo-diversos": "Kikolo Diversos",
+};
+
 export const Route = createFileRoute("/live-demo/$id")({
-  head: () => ({ meta: [{ title: "Live demonstrativa — Live Teká" }] }),
+  head: ({ params }) => {
+    const name = DEMO_NAMES[params.id] ?? "Live Teká";
+    const url = `${SITE_URL}/live-demo/${params.id}`;
+    const title = `Live de demonstração — ${name} | Live Teká`;
+    const description = `Veja como funciona uma live de vendas da ${name} na Live Teká: produtos em destaque, chat com a loja e compra em tempo real.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: LiveDemo,
 });
 
@@ -83,7 +105,7 @@ function LiveDemo() {
           <Radio size={11} /> ao vivo · demo
         </div>
         <div className="absolute left-3 bottom-3 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">
-          <span className="font-semibold">{demo.name}</span>
+          <h1 className="text-xs font-semibold">Live de demonstração — {demo.name}</h1>
         </div>
         <div className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">
           <Users size={12} /> {viewers}
