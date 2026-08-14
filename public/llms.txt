@@ -1,12 +1,12 @@
 # Live Teká
 
-> Marketplace ao vivo de Angola: lojas, lives, imóveis e pagamentos locais (Express, e-Kwanza, Unitel Money, Afrimoney, Kwik, Multicaixa Referência).
+> Live Teká — A Plataforma de Venda em Tempo Real: lojas, lives, imóveis, serviços e pagamentos locais (Express, e-Kwanza, Unitel Money, Afrimoney, Kwik, Multicaixa Referência).
 
 Live Teká conecta clientes e lojas em tempo real — compre direto da live, converse com o vendedor e receba em casa.
 
 ## Pages
 
-- [Início](/home): descobrir lojas e lives ativas em Angola.
+- [Início](/home): descobrir lojas e lives ativas na Live Teká.
 - [Lojas](/lojas): catálogo de lojas e vendedores ao vivo.
 - [Imóveis](/imoveis): casas, apartamentos e terrenos para venda e arrendamento.
 - [Ajuda e suporte](/ajuda): contactos e perguntas frequentes.
