@@ -63,7 +63,7 @@ function ImoveisListPage() {
     <AppShell>
       <header className="px-5 pt-6 pb-4 text-white" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex items-center gap-3">
-          <Link to="/home" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><ArrowLeft size={18} /></Link>
+          <Link to="/home" aria-label="Voltar" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><ArrowLeft size={18} /></Link>
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Imóveis</h1>
             <p className="text-xs text-white/80">Casas, apartamentos, terrenos e mais</p>
