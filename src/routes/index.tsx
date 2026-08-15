@@ -38,9 +38,12 @@ function Splash() {
           fetchPriority="high"
         />
         <h1 className="text-center text-sm font-bold tracking-[0.18em] text-primary">
+          Live Teká — Venda em Tempo Real
+        </h1>
+        <p className="text-center text-xs font-bold tracking-[0.18em] text-primary">
           COMPRE <span className="text-primary-glow">•</span> CONVERSE{" "}
           <span className="text-primary-glow">•</span> RECEBA
-        </h1>
+        </p>
       </div>
 
       <div className="w-full space-y-3">

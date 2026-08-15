@@ -20,9 +20,9 @@ type FeedProduct = { id: string; name: string; price: number; oldPrice?: number;
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
-      { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
+      { title: "Explorar Lojas e Lives — Live Teká" },
       { name: "description", content: "Descubra lojas ao vivo, compre direto da live, converse com vendedores e receba em casa." },
-      { property: "og:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
+      { property: "og:title", content: "Explorar Lojas e Lives ao Vivo — Live Teká" },
       { property: "og:description", content: "Descubra lojas ao vivo, compre direto da live e receba em casa." },
       { property: "og:url", content: "https://www.livemarketplece.live/home" },
     ],
