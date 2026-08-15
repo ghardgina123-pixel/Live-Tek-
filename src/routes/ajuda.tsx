@@ -32,7 +32,7 @@ function Ajuda() {
   return (
     <AppShell>
       <header className="flex items-center gap-3 px-5 pt-6 pb-4 text-white" style={{ background: "var(--gradient-brand)" }}>
-        <Link to="/perfil" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><ArrowLeft size={18} /></Link>
+        <Link to="/perfil" aria-label="Voltar" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15"><ArrowLeft size={18} /></Link>
         <h1 className="text-lg font-semibold">Ajuda e suporte</h1>
       </header>
       <div className="space-y-3 px-5 py-5">
