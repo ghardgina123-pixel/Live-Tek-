@@ -39,6 +39,19 @@ export const Route = createFileRoute("/servicos/")({
       { property: "og:url", content: "https://www.livemarketplece.live/servicos" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/servicos" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Serviços na Live Teká",
+          description:
+            "Encontre salões, barbearias, hotéis, farmácias, restaurantes e outros prestadores de serviço na Live Teká.",
+          url: "https://www.livemarketplece.live/servicos",
+        }),
+      },
+    ],
   }),
   component: ServicosPage,
 });
