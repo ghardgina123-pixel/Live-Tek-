@@ -109,6 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "Live Teká" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "google", content: "notranslate" },
+      { name: "google-site-verification", content: "abId5BCp25HWM2mj9tJz3PLoxr4B358aQdin961nFbY" },
       { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
       { name: "description", content: SITE_DESCRIPTION },
       { name: "author", content: "Live Teká" },
