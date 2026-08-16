@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Share2, Heart, BadgeCheck, Star, Radio, MessageCircle } from "lucide-react";
-import { StoreCover } from "@/components/AppShell";
-import { findStore, productsByStore } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Share2, Heart, BadgeCheck, Radio, MessageCircle, Loader2 } from "lucide-react";
+import { fetchStore, fetchStoreProducts, toCartProduct, type CatalogProduct, type CatalogStore } from "@/lib/catalog";
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
 
