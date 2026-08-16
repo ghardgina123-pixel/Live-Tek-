@@ -22,6 +22,8 @@ export type Product = {
   rating: number;
   sold: string;
   description: string;
+  image?: string | null;
+  priceAoa?: number;
 };
 
 // Demo seed removed at user's request.

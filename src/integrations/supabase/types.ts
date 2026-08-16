@@ -1365,6 +1365,7 @@ export type Database = {
           currency_symbol: string
           description: string | null
           display_name: string
+          gateway_configured: boolean
           icon: string | null
           id: string
           is_active: boolean
@@ -1382,6 +1383,7 @@ export type Database = {
           currency_symbol: string
           description?: string | null
           display_name: string
+          gateway_configured?: boolean
           icon?: string | null
           id?: string
           is_active?: boolean
@@ -1399,6 +1401,7 @@ export type Database = {
           currency_symbol?: string
           description?: string | null
           display_name?: string
+          gateway_configured?: boolean
           icon?: string | null
           id?: string
           is_active?: boolean
