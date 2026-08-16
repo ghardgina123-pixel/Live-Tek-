@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
-import { formatPrice, useCurrency } from "@/lib/currency";
+import { formatPrice, fromAoa, useCurrency } from "@/lib/currency";
+import { GATEWAY_PENDING_MESSAGE } from "@/lib/commerce";
 import { regionStore, useRegion } from "@/lib/region";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ type PaymentMethod = {
   icon: string | null;
   requires_proof_upload: boolean;
   is_cash_on_delivery: boolean;
+  gateway_configured: boolean;
   sort_order: number;
 };
 
@@ -81,7 +83,7 @@ function Checkout() {
   useEffect(() => {
     setMethodsLoading(true);
     supabase.from("payment_methods")
-      .select("id, method_type, display_name, description, icon, requires_proof_upload, is_cash_on_delivery, sort_order")
+      .select("id, method_type, display_name, description, icon, requires_proof_upload, is_cash_on_delivery, gateway_configured, sort_order")
       .eq("country_code", countryCode)
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
@@ -95,11 +97,13 @@ function Checkout() {
 
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
   const selectedMethod = methods.find((m) => m.id === selectedMethodId) ?? null;
-  // Frete em AOA convertido para a moeda exibida (rates relativas a BRL: 1 BRL = 175 AOA)
+  // Frete oficial em AOA (tabela `municipalities`), convertido pela taxa em vigor.
   const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
-  const shippingBrl = Number(shippingAoa) / 175;
+  const shippingBrl = fromAoa(Number(shippingAoa));
   const totalBrl = subtotal + shippingBrl;
-  const isInstant = selectedMethod?.method_type === "multicaixa_express";
+  // Sem gateway real configurada o pagamento fica pendente; só o pagamento na
+  // entrega é operacional hoje.
+  const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
 
   if (done) {
     return (
@@ -110,6 +114,12 @@ function Checkout() {
         <h1 className="mt-5 text-2xl font-bold">{t("s_pedido_confirmado")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("s_voce_recebera_atualizacoes_pelo_chat_e_e_mail_ob")}</p>
         {orderId && <p className="mt-2 text-xs text-muted-foreground">Pedido nº <span className="font-mono">{orderId.slice(0, 8)}</span></p>}
+        {gatewayPending && (
+          <p className="mt-4 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200">
+            {GATEWAY_PENDING_MESSAGE} O pedido fica com o estado <b>Aguardando pagamento</b> até a
+            transação real ser confirmada.
+          </p>
+        )}
         <button onClick={() => nav({ to: "/home" })} className="mt-8 h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">
           Voltar para o início
         </button>
@@ -200,11 +210,17 @@ function Checkout() {
                 onClick={() => setSelectedMethodId(m.id)}
                 label={m.display_name}
                 desc={m.description ?? ""}
-                badge={m.is_cash_on_delivery ? "Pagar na entrega" : m.requires_proof_upload ? "Envia comprovativo" : null}
+                badge={m.is_cash_on_delivery ? "Pagar na entrega" : m.gateway_configured ? null : "Aguarda configuração"}
               />
             ))
           )}
         </div>
+        {gatewayPending && (
+          <p className="mt-2 rounded-xl bg-amber-500/10 p-3 text-[11px] text-amber-900 dark:text-amber-200">
+            {GATEWAY_PENDING_MESSAGE} Pode registar o pedido — o pagamento será confirmado assim que a
+            integração real estiver ativa.
+          </p>
+        )}
       </section>
 
       <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
@@ -213,9 +229,8 @@ function Checkout() {
           <span className="text-muted-foreground">{t("s_frete")}</span>
           <span>{selectedAddr ? formatPrice(shippingBrl, currency) : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}</span>
         </div>
-        {isInstant && <div className="flex justify-between"><span className="text-muted-foreground">{t("s_desconto_a_vista")}</span><span className="text-primary">- {formatPrice(totalBrl * 0.05, currency)}</span></div>}
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
-          <span>{t("s_total")}</span><span>{formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</span>
+          <span>{t("s_total")}</span><span>{formatPrice(totalBrl, currency)}</span>
         </div>
       </section>
 
@@ -248,7 +263,7 @@ function Checkout() {
           disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0}
           className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]"
         >
-          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : t("s_pagar")} {formatPrice(isInstant ? totalBrl * 0.95 : totalBrl, currency)}</>}
+          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : gatewayPending ? "Registar pedido" : t("s_pagar")} {formatPrice(totalBrl, currency)}</>}
         </button>
       </div>
     </div>
