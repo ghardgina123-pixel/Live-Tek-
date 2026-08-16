@@ -59,19 +59,40 @@ export const Route = createFileRoute("/loja/$id")({
 
 function LojaPage() {
   const { id } = useParams({ from: "/loja/$id" });
-  const store = findStore(id);
-  const items = productsByStore(id);
   const currency = useCurrency();
-  if (!store) return <div className="p-6">Loja não encontrada</div>;
+  const [loading, setLoading] = useState(true);
+  const [store, setStore] = useState<CatalogStore | null>(null);
+  const [items, setItems] = useState<CatalogProduct[]>([]);
 
-  if (typeof document !== "undefined") {
-    document.title = `${store.name} — Live Teká`;
+  useEffect(() => {
+    let cancel = false;
+    setLoading(true);
+    fetchStore(id).then(async (s) => {
+      if (cancel) return;
+      setStore(s);
+      setItems(s ? await fetchStoreProducts(s.id) : []);
+      if (!cancel) setLoading(false);
+    });
+    return () => { cancel = true; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="animate-spin text-primary" />
+      </div>
+    );
   }
+  if (!store) return <div className="p-6">Loja não encontrada</div>;
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-24">
       <div className="relative">
-        <StoreCover gradient={store.cover} emoji={store.emoji} className="h-56 w-full" />
+        {store.cover_url ? (
+          <img src={store.cover_url} alt={store.name} className="h-56 w-full object-cover" />
+        ) : (
+          <div className="h-56 w-full bg-accent" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
         <div className="absolute top-5 flex w-full items-center justify-between px-4 text-white">
           <Link to="/lojas" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur"><ArrowLeft size={18} /></Link>
@@ -80,11 +101,6 @@ function LojaPage() {
             <button aria-label="Partilhar loja" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur"><Share2 size={18} /></button>
           </div>
         </div>
-        {store.live && (
-          <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-[var(--live)] px-3 py-1.5 text-[11px] font-bold uppercase text-white shadow-lg">
-            <Radio size={12} /> ao vivo · {store.viewers?.toLocaleString("pt-BR")} assistindo
-          </div>
-        )}
       </div>
 
       <div className="px-5 pt-5">
@@ -92,17 +108,20 @@ function LojaPage() {
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="text-xl font-bold">{store.name}</h1>
-              <BadgeCheck size={18} className="text-primary" />
+              {store.status === "active" && <BadgeCheck size={18} className="text-primary" />}
             </div>
-            <p className="text-xs text-muted-foreground">{store.handle} · {store.category}</p>
+            <p className="text-xs text-muted-foreground">
+              {store.partner_type === "service" ? "Prestador de serviços" : "Loja"}
+              {store.category ? ` · ${store.category}` : ""}
+            </p>
           </div>
-          <button className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">Seguir</button>
         </div>
-        <div className="mt-3 flex gap-4 text-xs">
-          <div><span className="font-bold text-foreground">{store.followers}</span> <span className="text-muted-foreground">seguidores</span></div>
-          <div className="flex items-center gap-1"><Star size={12} className="fill-yellow-400 text-yellow-400" /><span className="font-bold">{store.rating}</span><span className="text-muted-foreground">(2.3k avaliações)</span></div>
-        </div>
-        <p className="mt-3 text-sm text-foreground">{store.tagline}. Qualidade garantida, entrega rápida e atendimento ao vivo todos os dias.</p>
+        {store.description && <p className="mt-3 text-sm text-foreground">{store.description}</p>}
+        {store.status !== "active" && (
+          <p className="mt-3 rounded-xl bg-muted p-3 text-xs text-muted-foreground">
+            Este negócio ainda está em análise pela gestão. As compras ficam disponíveis após a aprovação.
+          </p>
+        )}
 
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Link to="/live/$id" params={{ id: store.id }} className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-xs font-semibold text-secondary-foreground">
@@ -117,21 +136,29 @@ function LojaPage() {
       <div className="px-5 pt-6">
         <div className="flex border-b border-border text-sm">
           <h2 className="border-b-2 border-primary pb-2 pr-4 text-sm font-semibold text-foreground">Produtos</h2>
-          <h2 className="pb-2 pr-4 text-sm font-normal text-muted-foreground">Sobre</h2>
-          <div className="pb-2 text-muted-foreground">Avaliações</div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {items.map((p) => (
-            <Link key={p.id} to="/produto/$id" params={{ id: p.id }} className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
-              <div className="flex h-32 items-center justify-center bg-accent text-5xl">{p.emoji}</div>
-              <div className="p-2.5">
-                <p className="line-clamp-2 text-xs font-medium">{p.name}</p>
-                <p className="mt-1 text-sm font-bold text-primary">{formatPrice(p.price, currency)}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <p className="mt-4 rounded-2xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+            Esta loja ainda não tem produtos aprovados.
+          </p>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {items.map((p) => (
+              <Link key={p.id} to="/produto/$id" params={{ id: p.id }} className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.name} className="h-32 w-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="flex h-32 items-center justify-center bg-accent text-5xl">🛍️</div>
+                )}
+                <div className="p-2.5">
+                  <p className="line-clamp-2 text-xs font-medium">{p.name}</p>
+                  <p className="mt-1 text-sm font-bold text-primary">{formatPrice(toCartProduct(p).price, currency)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
