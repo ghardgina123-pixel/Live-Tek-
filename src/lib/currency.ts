@@ -137,3 +137,14 @@ export function formatPrice(amountBRL: number, currency?: Currency): string {
   const rate = c.rate > 0 ? c.rate : 1;
   return formatAmount(amountBRL * rate, c);
 }
+
+/**
+ * Converte um montante em AOA (valor oficial guardado na base de dados) para a
+ * base interna usada pelo carrinho/checkout. A taxa vem de `exchange_rates`;
+ * nenhum valor fixo é assumido no frontend.
+ */
+export function fromAoa(amountAoa: number): number {
+  const rate = getCurrency("AOA").rate;
+  const n = Number(amountAoa) || 0;
+  return rate > 0 ? n / rate : n;
+}
