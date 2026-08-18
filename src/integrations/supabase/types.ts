@@ -3045,7 +3045,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string | null
+          is_online: boolean | null
+          last_seen_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          last_seen_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          last_seen_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_subscription_by_reference: {
@@ -3076,6 +3099,32 @@ export type Database = {
         }
         Returns: string
       }
+      admin_financial_summary: { Args: never; Returns: Json }
+      admin_financial_transactions: {
+        Args: {
+          _from?: string
+          _limit?: number
+          _method?: string
+          _status?: string
+          _store_id?: string
+          _to?: string
+        }
+        Returns: {
+          commission_aoa: number
+          created_at: string
+          customer_name: string
+          gross_aoa: number
+          id: string
+          items: number
+          net_aoa: number
+          paid_at: string
+          payment_method: string
+          reference: string
+          status: string
+          store_id: string
+          store_name: string
+        }[]
+      }
       admin_list_subscriptions: {
         Args: { _status?: string }
         Returns: {
@@ -3095,6 +3144,21 @@ export type Database = {
           status: string
           store_id: string
           store_name: string
+        }[]
+      }
+      admin_payout_requests: {
+        Args: never
+        Returns: {
+          amount_aoa: number
+          created_at: string
+          due_at: string
+          id: string
+          kind: string
+          method: string
+          processed_at: string
+          status: string
+          user_id: string
+          user_name: string
         }[]
       }
       admin_reject_agency: {
@@ -3128,6 +3192,22 @@ export type Database = {
       admin_settle_payout: {
         Args: { _note?: string; _payout_id: string; _status?: string }
         Returns: Json
+      }
+      admin_signup_fees: {
+        Args: never
+        Returns: {
+          amount_aoa: number
+          created_at: string
+          first_50: boolean
+          id: string
+          method: string
+          reference: string
+          registration_index: number
+          reviewed_at: string
+          status: string
+          store_id: string
+          store_name: string
+        }[]
       }
       admin_user_phone: { Args: { _user_id: string }; Returns: string }
       admin_waive_signup_fee: {
