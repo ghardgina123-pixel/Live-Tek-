@@ -13,7 +13,9 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShortsRouteImport } from './routes/shorts'
+import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-password'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as NovaPasswordRouteImport } from './routes/nova-password'
 import { Route as LojasRouteImport } from './routes/lojas'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ImoveisRouteImport } from './routes/imoveis'
@@ -91,9 +93,19 @@ const ShortsRoute = ShortsRouteImport.update({
   path: '/shorts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecuperarPasswordRoute = RecuperarPasswordRouteImport.update({
+  id: '/recuperar-password',
+  path: '/recuperar-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NovaPasswordRoute = NovaPasswordRouteImport.update({
+  id: '/nova-password',
+  path: '/nova-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojasRoute = LojasRouteImport.update({
@@ -407,7 +419,9 @@ export interface FileRoutesByFullPath {
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
   '/lojas': typeof LojasRoute
+  '/nova-password': typeof NovaPasswordRoute
   '/perfil': typeof PerfilRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -469,7 +483,9 @@ export interface FileRoutesByTo {
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
   '/lojas': typeof LojasRoute
+  '/nova-password': typeof NovaPasswordRoute
   '/perfil': typeof PerfilRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -532,7 +548,9 @@ export interface FileRoutesById {
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
   '/lojas': typeof LojasRoute
+  '/nova-password': typeof NovaPasswordRoute
   '/perfil': typeof PerfilRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
@@ -596,7 +614,9 @@ export interface FileRouteTypes {
     | '/imoveis'
     | '/login'
     | '/lojas'
+    | '/nova-password'
     | '/perfil'
+    | '/recuperar-password'
     | '/shorts'
     | '/sitemap.xml'
     | '/sobre'
@@ -658,7 +678,9 @@ export interface FileRouteTypes {
     | '/imoveis'
     | '/login'
     | '/lojas'
+    | '/nova-password'
     | '/perfil'
+    | '/recuperar-password'
     | '/shorts'
     | '/sitemap.xml'
     | '/sobre'
@@ -720,7 +742,9 @@ export interface FileRouteTypes {
     | '/imoveis'
     | '/login'
     | '/lojas'
+    | '/nova-password'
     | '/perfil'
+    | '/recuperar-password'
     | '/shorts'
     | '/sitemap.xml'
     | '/sobre'
@@ -784,7 +808,9 @@ export interface RootRouteChildren {
   ImoveisRoute: typeof ImoveisRouteWithChildren
   LoginRoute: typeof LoginRoute
   LojasRoute: typeof LojasRoute
+  NovaPasswordRoute: typeof NovaPasswordRoute
   PerfilRoute: typeof PerfilRoute
+  RecuperarPasswordRoute: typeof RecuperarPasswordRoute
   ShortsRoute: typeof ShortsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
@@ -840,11 +866,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShortsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recuperar-password': {
+      id: '/recuperar-password'
+      path: '/recuperar-password'
+      fullPath: '/recuperar-password'
+      preLoaderRoute: typeof RecuperarPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nova-password': {
+      id: '/nova-password'
+      path: '/nova-password'
+      fullPath: '/nova-password'
+      preLoaderRoute: typeof NovaPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lojas': {
@@ -1334,7 +1374,9 @@ const rootRouteChildren: RootRouteChildren = {
   ImoveisRoute: ImoveisRouteWithChildren,
   LoginRoute: LoginRoute,
   LojasRoute: LojasRoute,
+  NovaPasswordRoute: NovaPasswordRoute,
   PerfilRoute: PerfilRoute,
+  RecuperarPasswordRoute: RecuperarPasswordRoute,
   ShortsRoute: ShortsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,

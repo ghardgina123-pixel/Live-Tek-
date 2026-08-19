@@ -158,7 +158,9 @@ function Login() {
             </button>
           </div>
           <div className="flex justify-end">
-            <button type="button" className="text-xs font-medium text-primary">{t("forgot_password")}</button>
+            <Link to="/recuperar-password" className="text-xs font-medium text-primary">
+              {t("forgot_password")}
+            </Link>
           </div>
         </div>
 
