@@ -35,7 +35,7 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
     pendingIds.current.clear();
     flushTimer.current = null;
     if (!ids.length) return;
-    supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids).then(({ data }) => {
+    supabase.from("public_profiles").select("id, display_name, avatar_url").in("id", ids).then(({ data }) => {
       if (!data?.length) return;
       setProfiles((prev) => {
         const next = { ...prev };
@@ -71,7 +71,7 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
       setMsgs(messages);
       const ids = Array.from(new Set(messages.map((x) => x.sender_id)));
       if (ids.length) {
-        const { data: ps } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids);
+        const { data: ps } = await supabase.from("public_profiles").select("id, display_name, avatar_url").in("id", ids);
         if (!cancelled) {
           const map: Record<string, Profile> = {};
           (ps ?? []).forEach((p) => { map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });

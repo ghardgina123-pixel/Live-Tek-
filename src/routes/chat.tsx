@@ -74,7 +74,7 @@ function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: str
     const rows = (data as unknown as Conversation[]) ?? [];
     const customerIds = Array.from(new Set(rows.map((r) => r.customer_id)));
     if (customerIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name, avatar_url").in("id", customerIds);
+      const { data: profs } = await supabase.from("public_profiles").select("id, display_name, avatar_url").in("id", customerIds);
       const map = new Map((profs ?? []).map((p) => [p.id, p]));
       rows.forEach((r) => { r.customer = (map.get(r.customer_id) as Conversation["customer"]) ?? null; });
     }
@@ -161,7 +161,7 @@ function ConversationView({ conversationId, userId, onBack }: { conversationId: 
         .maybeSingle();
       const conv = c as unknown as Conversation | null;
       if (conv) {
-        const { data: p } = await supabase.from("profiles").select("id, display_name, avatar_url").eq("id", conv.customer_id).maybeSingle();
+        const { data: p } = await supabase.from("public_profiles").select("id, display_name, avatar_url").eq("id", conv.customer_id).maybeSingle();
         conv.customer = (p as Conversation["customer"]) ?? null;
       }
       setConv(conv);

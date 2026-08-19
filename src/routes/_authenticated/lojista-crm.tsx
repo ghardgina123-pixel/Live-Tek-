@@ -158,7 +158,7 @@ function ActiveView({ expiresAt, storeId }: { expiresAt: string | null; storeId:
       const ids = Array.from(map.keys());
       if (ids.length) {
         const { data: profs } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id, display_name, avatar_url")
           .in("id", ids);
         for (const p of (profs ?? []) as { id: string; display_name: string | null; avatar_url: string | null }[]) {

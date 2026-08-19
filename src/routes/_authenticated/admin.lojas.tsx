@@ -97,7 +97,7 @@ function AdminLojas() {
     }
     if (owners.length) {
       const { data: profs } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, display_name")
         .in("id", owners);
       names = Object.fromEntries((profs ?? []).map((p) => [p.id, p.display_name]));
