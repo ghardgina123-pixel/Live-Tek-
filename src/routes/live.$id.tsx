@@ -61,7 +61,7 @@ function LivePage() {
       if (!data?.length) return;
       setProfiles((prev) => {
         const next = { ...prev };
-        data.forEach((p) => { next[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
+        data.forEach((p) => { if (p.id) next[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
         return next;
       });
     });
@@ -90,7 +90,7 @@ function LivePage() {
       if (ids.length) {
         const { data: ps } = await supabase.from("public_profiles").select("id, display_name, avatar_url").in("id", ids);
         const map: typeof profiles = {};
-        (ps ?? []).forEach((p) => { map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
+        (ps ?? []).forEach((p) => { if (p.id) map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
         setProfiles(map);
       }
     })();
