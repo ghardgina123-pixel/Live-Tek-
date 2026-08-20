@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
@@ -236,7 +237,7 @@ function PropertiesTab({ agencyId }: { agencyId: string }) {
           {items.map((p) => (
             <div key={p.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
               <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-accent">
-                {p.cover_url ? <img loading="lazy" decoding="async" src={p.cover_url} alt={p.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-2xl">🏠</div>}
+                {p.cover_url ? <StorageImage bucket="property-images" path={p.cover_url} alt={p.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-2xl">🏠</div>}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-semibold">{p.title}</p>
@@ -291,9 +292,7 @@ function NewPropertyForm({ agencyId, onCreated }: { agencyId: string; onCreated:
       const path = `${user.id}/${agencyId}/${Date.now()}.${ext}`;
       const up = await supabase.storage.from("property-images").upload(path, coverFile, { upsert: true, contentType: coverFile.type });
       if (up.error) { setBusy(false); return toast.error(up.error.message); }
-      const signed = await supabase.storage.from("property-images").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-      if (signed.error) { setBusy(false); return toast.error(signed.error.message); }
-      coverUrl = signed.data.signedUrl;
+      coverUrl = path;
     }
     const { error } = await (supabase as any).from("properties").insert({
       agency_id: agencyId,
@@ -449,11 +448,10 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
     const path = `${user.id}/${agencyId}/live-${Date.now()}.${ext}`;
     const up = await supabase.storage.from("subscription-proofs").upload(path, proofFile, { upsert: true, contentType: proofFile.type });
     if (up.error) { setBusy(false); return toast.error(up.error.message); }
-    const signed = await supabase.storage.from("subscription-proofs").createSignedUrl(path, 60 * 60 * 24 * 365);
     const { error } = await (supabase as any).from("agency_live_fees").insert({
       agency_id: agencyId, amount_aoa: LIVE_FEE_AOA,
       status: "paid", payment_method: method,
-      proof_url: signed.data?.signedUrl ?? path,
+      proof_url: path,
     });
     setBusy(false);
     if (error) return toast.error(error.message);

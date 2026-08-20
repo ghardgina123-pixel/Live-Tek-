@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { AppShell } from "@/components/AppShell";
 import { BackButton } from "@/components/BackButton";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/lib/i18n";
 
@@ -118,7 +119,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
           <h1 className="truncate text-lg font-semibold">{title}</h1>
         </div>
         {store.logo_url && (
-          <img loading="lazy" decoding="async" src={store.logo_url} alt={t("s_logo")} className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
+          <StorageImage bucket="store-assets" path={store.logo_url} alt={t("s_logo")} className="h-9 w-9 shrink-0 rounded-full border-2 border-white/50 object-cover" />
         )}
       </header>
       <div className="px-5 py-5">{children}</div>

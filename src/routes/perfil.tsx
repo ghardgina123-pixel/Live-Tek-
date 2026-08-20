@@ -8,6 +8,7 @@ import { CountrySelect } from "@/components/LocationCascade";
 import { SettingsSheet } from "@/components/SettingsSheet";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { signStorageUrl, uploadToBucket } from "@/lib/storage";
 import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/perfil")({
@@ -42,7 +43,8 @@ function Perfil() {
       .then(({ data }) => setIsAdmin(!!data));
     supabase.from("profiles").select("avatar_url, country_id").eq("id", user.id).maybeSingle()
       .then(({ data }) => {
-        setAvatarUrl(data?.avatar_url ?? null);
+        // A coluna guarda apenas o caminho: assinamos no momento da leitura.
+        signStorageUrl("avatars", data?.avatar_url).then(setAvatarUrl);
         setCountryId((data as { country_id?: string | null } | null)?.country_id ?? null);
       });
   }, [user?.id]);
@@ -64,15 +66,11 @@ function Perfil() {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
-        upsert: true, contentType: file.type,
-      });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = pub.publicUrl;
-      const { error: profErr } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      await uploadToBucket("avatars", path, file);
+      // Guardamos o caminho — nunca uma URL assinada expirável.
+      const { error: profErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
       if (profErr) throw profErr;
-      setAvatarUrl(url);
+      setAvatarUrl(await signStorageUrl("avatars", path));
       toast.success("Foto de perfil atualizada");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Falha ao carregar foto");

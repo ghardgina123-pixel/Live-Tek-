@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToBucket } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
@@ -169,11 +170,9 @@ function PendingState({ reason, rejected, campaign }: { reason: string | null; r
 async function uploadStoreAsset(userId: string, file: File, kind: "logo" | "cover") {
   const ext = file.name.split(".").pop() || "png";
   const path = `${userId}/${kind}-${Date.now()}.${ext}`;
-  const { error: upErr } = await supabase.storage.from("store-assets").upload(path, file, { upsert: true, contentType: file.type });
-  if (upErr) throw upErr;
-  const { data, error } = await supabase.storage.from("store-assets").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-  if (error) throw error;
-  return data.signedUrl;
+  await uploadToBucket("store-assets", path, file);
+  // Guardamos o caminho — a URL assinada é gerada no momento da leitura.
+  return path;
 }
 
 function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () => void; feeRequired: boolean; feeAoa: number }) {
@@ -279,14 +278,8 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
           if (proofFile) {
             const ext = proofFile.name.split(".").pop() || "png";
             const path = `${user.id}/signup-fee-${Date.now()}.${ext}`;
-            const { error: upErr } = await supabase.storage
-              .from("subscription-proofs")
-              .upload(path, proofFile, { upsert: true, contentType: proofFile.type });
-            if (upErr) throw upErr;
-            const { data: signed } = await supabase.storage
-              .from("subscription-proofs")
-              .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-            proof_url = signed?.signedUrl ?? null;
+            await uploadToBucket("subscription-proofs", path, proofFile);
+            proof_url = path;
           }
           const { error: feeErr } = await supabase.from("store_signup_fees").insert({
             store_id: created.id,

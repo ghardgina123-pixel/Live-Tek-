@@ -2,6 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, BadgeCheck, Clock, Loader2, MapPin, MessageCircle, Phone, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { serviceCategoryEmoji, serviceCategoryLabel } from "@/lib/services";
 import { toast } from "sonner";
 import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
@@ -122,7 +123,7 @@ function ServiceDetailPage() {
     <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-background pb-24">
       <div className="relative h-52 w-full overflow-hidden">
         {row.cover_url ? (
-          <img loading="lazy" decoding="async" src={row.cover_url} alt={`Imagem de ${row.name}`} className="h-full w-full object-cover" />
+          <StorageImage bucket="store-assets" path={row.cover_url} alt={`Imagem de ${row.name}`} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-accent text-7xl">
             {serviceCategoryEmoji(row.service_category)}

@@ -4,6 +4,7 @@ import { Search, MapPin, Phone, Loader2, BadgeCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { SERVICE_CATEGORIES, serviceCategoryEmoji, serviceCategoryLabel } from "@/lib/services";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -137,7 +138,7 @@ function ServicosPage() {
             <li key={s.id}>
               <Link to="/servicos/$id" params={{ id: s.id }} className="flex gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
                 {s.logo_url ? (
-                  <img src={s.logo_url} alt={s.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" loading="lazy" />
+                  <StorageImage bucket="store-assets" path={s.logo_url} alt={s.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-accent text-4xl">
                     {serviceCategoryEmoji(s.service_category)}

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Heart, MessageCircle, Share2, ShoppingBag, Loader2, ArrowLeft, Play, Volume2, VolumeX } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage, useStorageUrl } from "@/lib/storage";
 import { cartStore } from "@/lib/cart-store";
 import { useAuth } from "@/hooks/use-auth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -236,7 +237,7 @@ function ShortCard({
     <section className="relative h-screen w-full snap-start">
       <video
         ref={videoRef}
-        src={short.video_url}
+        src={videoSrc ?? undefined}
         poster={short.thumbnail_url ?? undefined}
         loop
         muted={muted}
@@ -253,7 +254,7 @@ function ShortCard({
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pb-8 text-white">
         <div className="flex items-center gap-2">
           {short.product?.stores?.logo_url ? (
-            <img loading="lazy" decoding="async" src={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
+            <StorageImage bucket="store-assets" path={short.product.stores.logo_url} alt="" className="h-8 w-8 rounded-full border border-white/40 object-cover" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-white/20" />
           )}

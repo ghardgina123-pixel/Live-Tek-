@@ -89,7 +89,7 @@ function LojaPage() {
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-24">
       <div className="relative">
         {store.cover_url ? (
-          <img src={store.cover_url} alt={store.name} className="h-56 w-full object-cover" />
+          <StorageImage bucket="store-assets" path={store.cover_url} alt={store.name} className="h-56 w-full object-cover" />
         ) : (
           <div className="h-56 w-full bg-accent" />
         )}
@@ -147,7 +147,7 @@ function LojaPage() {
             {items.map((p) => (
               <Link key={p.id} to="/produto/$id" params={{ id: p.id }} className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} className="h-32 w-full object-cover" loading="lazy" />
+                  <StorageImage bucket="product-images" path={p.image_url} alt={p.name} className="h-32 w-full object-cover" />
                 ) : (
                   <div className="flex h-32 items-center justify-center bg-accent text-5xl">🛍️</div>
                 )}

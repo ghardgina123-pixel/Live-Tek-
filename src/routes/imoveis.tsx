@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Home as HomeIcon, MapPin, BedDouble, Bath, Maximize2, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/imoveis")({
   head: () => ({
@@ -91,7 +92,7 @@ function ImoveisListPage() {
               className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
               <div className="relative h-44 w-full bg-accent">
                 {p.cover_url ? (
-                  <img src={p.cover_url} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
+                  <StorageImage bucket="property-images" path={p.cover_url} alt={p.title} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-5xl">🏠</div>
                 )}

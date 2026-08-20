@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { isStoragePath, useStorageUrl } from "@/lib/storage";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
@@ -17,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/lojista/videos")({
 });
 
 const BUCKET = "product-videos";
-const SIGNED_TTL = 60 * 60 * 24 * 365; // 1 ano
 const MAX_SIZE = 100 * 1024 * 1024; // 100 MB
 const ACCEPT = ["video/mp4", "video/quicktime"]; // .mp4, .mov
 
@@ -90,14 +90,12 @@ function VideosManager() {
       if (upErr) throw upErr;
       setProgress(60);
 
-      const { data: signed, error: sErr } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
-      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Falha ao gerar URL");
       setProgress(85);
 
       const { error: insErr } = await supabase.from("product_videos").insert({
         store_id: storeId,
         product_id: productId || null,
-        video_url: signed.signedUrl,
+        video_url: path,
         caption: caption.trim().slice(0, 280) || null,
       });
       if (insErr) throw insErr;
@@ -127,7 +125,7 @@ function VideosManager() {
     if (!confirm("Apagar este vídeo? A ação não pode ser desfeita.")) return;
     // Extrai o path do storage a partir da signed URL (…/object/sign/<bucket>/<path>?token=…)
     const match = v.video_url.match(/\/object\/(?:sign|public)\/product-videos\/([^?]+)/);
-    const path = match?.[1] ? decodeURIComponent(match[1]) : null;
+    const path = match?.[1] ? decodeURIComponent(match[1]) : (isStoragePath(v.video_url) ? v.video_url : null);
     if (path) await supabase.storage.from(BUCKET).remove([path]);
     const { error } = await supabase.from("product_videos").delete().eq("id", v.id);
     if (error) return toast.error(error.message);
@@ -223,7 +221,7 @@ function VideosManager() {
             {videos.map((v) => (
               <li key={v.id} className="overflow-hidden rounded-xl border border-border bg-card">
                 <div className="relative aspect-[9/16] bg-black">
-                  <video
+                  <VideoTile
                     src={v.video_url}
                     poster={v.thumbnail_url ?? undefined}
                     className="h-full w-full object-cover"
