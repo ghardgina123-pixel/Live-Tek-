@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage, uploadToBucket } from "@/lib/storage";
 import { toast } from "sonner";
 import { productSchema } from "@/lib/schemas";
 import { useT } from "@/lib/i18n";
@@ -132,11 +133,9 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         if (!u.user) throw new Error("Não autenticado");
         const ext = imageFile.name.split(".").pop() || "png";
         const path = `${u.user.id}/${storeId}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("product-images").upload(path, imageFile, { upsert: true, contentType: imageFile.type });
-        if (upErr) throw upErr;
-        const { data: signed, error: sErr } = await supabase.storage.from("product-images").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-        if (sErr) throw sErr;
-        image_url = signed.signedUrl;
+        // Guardamos apenas o caminho; a URL assinada é gerada na leitura.
+        await uploadToBucket("product-images", path, imageFile);
+        image_url = path;
       }
       const payload = {
         name: parsed.data.name,

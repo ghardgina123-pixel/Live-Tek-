@@ -291,9 +291,7 @@ function NewPropertyForm({ agencyId, onCreated }: { agencyId: string; onCreated:
       const path = `${user.id}/${agencyId}/${Date.now()}.${ext}`;
       const up = await supabase.storage.from("property-images").upload(path, coverFile, { upsert: true, contentType: coverFile.type });
       if (up.error) { setBusy(false); return toast.error(up.error.message); }
-      const signed = await supabase.storage.from("property-images").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-      if (signed.error) { setBusy(false); return toast.error(signed.error.message); }
-      coverUrl = signed.data.signedUrl;
+      coverUrl = path;
     }
     const { error } = await (supabase as any).from("properties").insert({
       agency_id: agencyId,
@@ -449,11 +447,10 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
     const path = `${user.id}/${agencyId}/live-${Date.now()}.${ext}`;
     const up = await supabase.storage.from("subscription-proofs").upload(path, proofFile, { upsert: true, contentType: proofFile.type });
     if (up.error) { setBusy(false); return toast.error(up.error.message); }
-    const signed = await supabase.storage.from("subscription-proofs").createSignedUrl(path, 60 * 60 * 24 * 365);
     const { error } = await (supabase as any).from("agency_live_fees").insert({
       agency_id: agencyId, amount_aoa: LIVE_FEE_AOA,
       status: "paid", payment_method: method,
-      proof_url: signed.data?.signedUrl ?? path,
+      proof_url: path,
     });
     setBusy(false);
     if (error) return toast.error(error.message);

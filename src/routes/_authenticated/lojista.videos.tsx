@@ -90,14 +90,12 @@ function VideosManager() {
       if (upErr) throw upErr;
       setProgress(60);
 
-      const { data: signed, error: sErr } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
-      if (sErr || !signed?.signedUrl) throw sErr ?? new Error("Falha ao gerar URL");
       setProgress(85);
 
       const { error: insErr } = await supabase.from("product_videos").insert({
         store_id: storeId,
         product_id: productId || null,
-        video_url: signed.signedUrl,
+        video_url: path,
         caption: caption.trim().slice(0, 280) || null,
       });
       if (insErr) throw insErr;
