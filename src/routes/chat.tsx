@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -116,11 +117,12 @@ function ConversationList({ userId, onOpen }: { userId: string; onOpen: (id: str
             const asSeller = c.store?.owner_id === userId;
             const name = asSeller ? (c.customer?.display_name ?? "Cliente") : (c.store?.name ?? "Loja");
             const avatar = asSeller ? c.customer?.avatar_url : c.store?.logo_url;
+            const avatarBucket = asSeller ? "avatars" : "store-assets";
             return (
               <li key={c.id}>
                 <button onClick={() => onOpen(c.id)} className="flex w-full items-center gap-3 px-5 py-3 text-left">
                   <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-accent text-xl">
-                    {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
+                    {avatar ? <StorageImage bucket={avatarBucket} path={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -240,13 +242,14 @@ function ConversationView({ conversationId, userId, onBack }: { conversationId: 
   const asSeller = conv?.store?.owner_id === userId;
   const name = asSeller ? (conv?.customer?.display_name ?? "Cliente") : (conv?.store?.name ?? "Loja");
   const avatar = asSeller ? conv?.customer?.avatar_url : conv?.store?.logo_url;
+  const avatarBucket = asSeller ? "avatars" : "store-assets";
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-background">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-4 py-3">
         <button onClick={onBack} aria-label="Voltar"><ArrowLeft size={20} /></button>
         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-accent text-xl">
-          {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
+          {avatar ? <StorageImage bucket={avatarBucket} path={avatar} alt="" className="h-full w-full object-cover" /> : "🛍️"}
         </div>
         <div className="flex-1 min-w-0">
           <p className="truncate text-sm font-semibold">{name}</p>
