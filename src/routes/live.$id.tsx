@@ -3,6 +3,7 @@ import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState
 import { ArrowLeft, Radio, Send, Users, ShoppingBag, Loader2, Heart, Share2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { cartStore } from "@/lib/cart-store";
@@ -258,7 +259,7 @@ function LivePage() {
           <Radio size={11} /> {live.status}
         </div>
         <div className="absolute left-3 bottom-3 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">
-          {live.store?.logo_url && <img loading="lazy" decoding="async" src={live.store.logo_url} className="h-5 w-5 rounded-full object-cover" alt="" />}
+          {live.store?.logo_url && <StorageImage bucket="store-assets" path={live.store.logo_url} className="h-5 w-5 rounded-full object-cover" alt="" />}
           <span className="font-semibold">{live.store?.name}</span>
         </div>
         <div className="absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-black/50 px-3 py-1 text-xs backdrop-blur">
@@ -333,7 +334,7 @@ const ProductCard = memo(function ProductCard({ product, onBuy }: { product: Non
   return (
     <button onClick={() => onBuy(product)} className="flex w-40 shrink-0 items-center gap-2 rounded-xl bg-white/10 p-2 text-left backdrop-blur">
       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white/10">
-        {product.image_url ? <img src={product.image_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-lg">🛍️</div>}
+        {product.image_url ? <StorageImage bucket="product-images" path={product.image_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-lg">🛍️</div>}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[11px] font-semibold">{product.name}</p>
@@ -349,7 +350,7 @@ const ChatRow = memo(function ChatRow({ msg, profile }: { msg: LiveMsg; profile?
   return (
     <div className="flex items-start gap-2 text-sm">
       <div className="mt-0.5 h-6 w-6 shrink-0 overflow-hidden rounded-full bg-white/20">
-        {profile?.avatar_url && <img src={profile.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+        {profile?.avatar_url && <StorageImage bucket="avatars" path={profile.avatar_url} alt="" className="h-full w-full object-cover" />}
       </div>
       <div className="min-w-0">
         <span className="mr-1.5 text-[11px] font-bold text-primary">{profile?.display_name ?? t("s_usuario")}</span>

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -160,7 +161,7 @@ function ImovelDetailPage() {
 
       <div className="relative h-64 w-full bg-accent">
         {p.cover_url ? (
-          <img loading="lazy" decoding="async" src={p.cover_url} alt={p.title} className="h-full w-full object-cover" />
+          <StorageImage bucket="property-images" path={p.cover_url} alt={p.title} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-7xl">🏠</div>
         )}
@@ -168,7 +169,7 @@ function ImovelDetailPage() {
       {images.length > 0 && (
         <div className="flex gap-2 overflow-x-auto px-5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {images.map((i) => (
-            <img key={i.id} src={i.image_url} alt="" className="h-20 w-28 shrink-0 rounded-lg object-cover" loading="lazy" />
+            <StorageImage key={i.id} bucket="property-images" path={i.image_url} alt="" className="h-20 w-28 shrink-0 rounded-lg object-cover" />
           ))}
         </div>
       )}

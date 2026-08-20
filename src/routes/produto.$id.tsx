@@ -129,7 +129,7 @@ function ProdutoPage() {
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-28">
       <div className="relative">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name} className="h-80 w-full object-cover" loading="eager" />
+          <StorageImage bucket="product-images" path={p.image_url} alt={p.name} className="h-80 w-full object-cover" />
         ) : (
           <div className="flex h-80 items-center justify-center bg-accent text-9xl">🛍️</div>
         )}
@@ -155,7 +155,7 @@ function ProdutoPage() {
         {store && (
           <Link to="/loja/$id" params={{ id: store.id }} className="mt-4 flex items-center gap-3 rounded-2xl border border-border p-3">
             <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-accent text-xl">
-              {store.logo_url ? <img src={store.logo_url} alt={store.name} className="h-full w-full object-cover" /> : "🏬"}
+              {store.logo_url ? <StorageImage bucket="store-assets" path={store.logo_url} alt={store.name} className="h-full w-full object-cover" /> : "🏬"}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold">{store.name}</p>

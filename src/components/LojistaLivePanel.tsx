@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Send, Users, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -172,7 +173,7 @@ const Row = memo(function Row({ msg, profile }: { msg: Msg; profile?: Profile })
   return (
     <div className="flex items-start gap-2">
       <div className="mt-0.5 h-6 w-6 shrink-0 overflow-hidden rounded-full bg-muted">
-        {profile?.avatar_url && <img src={profile.avatar_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+        {profile?.avatar_url && <StorageImage bucket="avatars" path={profile.avatar_url} alt="" className="h-full w-full object-cover" />}
       </div>
       <div className="min-w-0">
         <span className="mr-1.5 text-[11px] font-bold text-primary">{profile?.display_name ?? t("s_cliente")}</span>

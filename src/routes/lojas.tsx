@@ -4,6 +4,7 @@ import { AppShell, StoreCover } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageImage } from "@/lib/storage";
 import { useT } from "@/lib/i18n";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -127,7 +128,7 @@ function Lojas() {
           <li key={s.id}>
             <Link to="/loja/$id" params={{ id: s.id }} className="flex gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
               {s.logo_url ? (
-                <img src={s.logo_url} alt={s.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" loading="lazy" />
+                <StorageImage bucket="store-assets" path={s.logo_url} alt={s.name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
               ) : (
                 <StoreCover gradient={gradients[i % gradients.length]} emoji={emojis[i % emojis.length]} className="h-20 w-20 shrink-0 rounded-xl" />
               )}
