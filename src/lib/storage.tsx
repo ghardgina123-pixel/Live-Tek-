@@ -33,22 +33,31 @@ export async function signStorageUrl(
   ttl = SIGNED_URL_TTL,
 ): Promise<string | null> {
   if (!value) return null;
-  if (!isStoragePath(value)) return value; // legado: URL absoluta já guardada
-  const key = `${bucket}:${value}`;
+  let path = value;
+  if (!isStoragePath(value)) {
+    const legacy = extractStoragePath(bucket, value);
+    if (!legacy) return value; // legado: URL externa
+    path = legacy; // legado: URL assinada guardada — voltamos a assinar
+  }
+  const key = `${bucket}:${path}`;
   const hit = cache.get(key);
   if (hit && hit.exp > Date.now()) return hit.url;
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(value, ttl);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, ttl);
   if (error || !data?.signedUrl) return null;
   cache.set(key, { url: data.signedUrl, exp: Date.now() + (ttl - 60) * 1000 });
   return data.signedUrl;
 }
 
+function isExternalUrl(bucket: string, value: string | null | undefined) {
+  return !!value && !isStoragePath(value) && !extractStoragePath(bucket, value);
+}
+
 export function useStorageUrl(bucket: string, value: string | null | undefined) {
-  const [url, setUrl] = useState<string | null>(isStoragePath(value) ? null : (value ?? null));
+  const [url, setUrl] = useState<string | null>(isExternalUrl(bucket, value) ? (value ?? null) : null);
   useEffect(() => {
     let active = true;
     if (!value) { setUrl(null); return; }
-    if (!isStoragePath(value)) { setUrl(value); return; }
+    if (isExternalUrl(bucket, value)) { setUrl(value); return; }
     signStorageUrl(bucket, value).then((u) => { if (active) setUrl(u); });
     return () => { active = false; };
   }, [bucket, value]);
