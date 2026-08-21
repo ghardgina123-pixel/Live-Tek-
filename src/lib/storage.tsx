@@ -13,6 +13,18 @@ export function isStoragePath(value: string | null | undefined): value is string
   return !/^(https?:|data:|blob:)/i.test(value);
 }
 
+/**
+ * URLs assinadas antigas guardadas na BD expiram. Extraímos o caminho para
+ * podermos voltar a assinar na leitura.
+ */
+export function extractStoragePath(bucket: string, value: string): string | null {
+  const m = value.match(
+    new RegExp(`/object/(?:sign|public|authenticated)/${bucket}/([^?]+)`),
+  );
+  return m?.[1] ? decodeURIComponent(m[1]) : null;
+}
+
+
 const cache = new Map<string, { url: string; exp: number }>();
 
 export async function signStorageUrl(
