@@ -107,6 +107,9 @@ function ShortCard({
   onToggleMute: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // URLs assinadas geradas na leitura (buckets privados).
+  const videoSrc = useStorageUrl("product-videos", short.video_url);
+  const posterSrc = useStorageUrl("product-videos", short.thumbnail_url);
   const [playing, setPlaying] = useState(false);
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
