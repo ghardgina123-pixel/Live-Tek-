@@ -260,6 +260,23 @@ function VideosManager() {
   );
 }
 
+/** <video> com URL assinada gerada na leitura (bucket privado). */
+function VideoTile({
+  src,
+  poster,
+  ...rest
+}: Omit<React.VideoHTMLAttributes<HTMLVideoElement>, "src" | "poster"> & {
+  src: string;
+  poster?: string | undefined;
+}) {
+  const signed = useStorageUrl(BUCKET, src);
+  const signedPoster = useStorageUrl(BUCKET, poster ?? null);
+  if (!signed) {
+    return <div className="flex h-full w-full items-center justify-center bg-muted"><Loader2 className="animate-spin text-primary" size={18} /></div>;
+  }
+  return <video src={signed} poster={signedPoster ?? undefined} {...rest} />;
+}
+
 function ShellPage() {
   const { t } = useT();
   return (
