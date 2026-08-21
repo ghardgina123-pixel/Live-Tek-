@@ -4,6 +4,7 @@ import { ArrowLeft, Share2, Heart, BadgeCheck, Radio, MessageCircle, Loader2 } f
 import { fetchStore, fetchStoreProducts, toCartProduct, type CatalogProduct, type CatalogStore } from "@/lib/catalog";
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
+import { StorageImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/loja/$id")({
   loader: ({ params }) => loadStoreSeo(params.id),

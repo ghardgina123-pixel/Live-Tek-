@@ -13,6 +13,7 @@ import {
   type CatalogStore,
 } from "@/lib/catalog";
 import { absoluteUrl, clampDescription, loadProductSeo, titleWithSite } from "@/lib/seo-meta";
+import { StorageImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/produto/$id")({
   loader: ({ params }) => loadProductSeo(params.id),

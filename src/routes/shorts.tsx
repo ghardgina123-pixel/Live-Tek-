@@ -241,7 +241,7 @@ function ShortCard({
       <video
         ref={videoRef}
         src={videoSrc ?? undefined}
-        poster={short.thumbnail_url ?? undefined}
+        poster={posterSrc ?? undefined}
         loop
         muted={muted}
         preload={index < 2 ? "auto" : "metadata"}
