@@ -67,6 +67,7 @@ import { Route as AuthenticatedEntregadorDeliveryIdRouteImport } from './routes/
 import { Route as AuthenticatedAdminSubscricoesRouteImport } from './routes/_authenticated/admin.subscricoes'
 import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
 import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
+import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin.financeiro'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -379,6 +380,12 @@ const AuthenticatedAdminImobiliariasRoute =
     path: '/admin/imobiliarias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminFinanceiroRoute =
+  AuthenticatedAdminFinanceiroRouteImport.update({
+    id: '/admin/financeiro',
+    path: '/admin/financeiro',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -449,6 +456,7 @@ export interface FileRoutesByFullPath {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos/': typeof ServicosIndexRoute
+  '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -512,6 +520,7 @@ export interface FileRoutesByTo {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos': typeof ServicosIndexRoute
+  '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -578,6 +587,7 @@ export interface FileRoutesById {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos/': typeof ServicosIndexRoute
+  '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/_authenticated/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/_authenticated/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
@@ -644,6 +654,7 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos/'
+    | '/admin/financeiro'
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
@@ -707,6 +718,7 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos'
+    | '/admin/financeiro'
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
@@ -772,6 +784,7 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos/'
+    | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/imobiliarias'
     | '/_authenticated/admin/lojas'
     | '/_authenticated/admin/subscricoes'
@@ -1244,6 +1257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminImobiliariasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/financeiro': {
+      id: '/_authenticated/admin/financeiro'
+      path: '/admin/financeiro'
+      fullPath: '/admin/financeiro'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -1320,6 +1340,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPagamentosRoute: typeof AuthenticatedPagamentosRoute
   AuthenticatedSegurancaRoute: typeof AuthenticatedSegurancaRoute
   AuthenticatedTransportadorRoute: typeof AuthenticatedTransportadorRoute
+  AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminImobiliariasRoute: typeof AuthenticatedAdminImobiliariasRoute
   AuthenticatedAdminLojasRoute: typeof AuthenticatedAdminLojasRoute
   AuthenticatedAdminSubscricoesRoute: typeof AuthenticatedAdminSubscricoesRoute
@@ -1341,6 +1362,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPagamentosRoute: AuthenticatedPagamentosRoute,
   AuthenticatedSegurancaRoute: AuthenticatedSegurancaRoute,
   AuthenticatedTransportadorRoute: AuthenticatedTransportadorRoute,
+  AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminImobiliariasRoute: AuthenticatedAdminImobiliariasRoute,
   AuthenticatedAdminLojasRoute: AuthenticatedAdminLojasRoute,
   AuthenticatedAdminSubscricoesRoute: AuthenticatedAdminSubscricoesRoute,

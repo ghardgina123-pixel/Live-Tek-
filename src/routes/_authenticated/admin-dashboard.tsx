@@ -64,6 +64,14 @@ function AdminHub() {
             <p className="text-xs text-muted-foreground">Estados, referências Multicaixa e reprocessamento</p>
           </div>
         </Link>
+        <Link to="/admin/financeiro" className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+          <Wallet className="text-primary" />
+          <div className="flex-1">
+            <p className="font-semibold">Financeiro</p>
+            <p className="text-xs text-muted-foreground">Vendas, comissões, taxas, subscrições e saques</p>
+          </div>
+        </Link>
+
       </div>
 
       <PendingApprovals />
