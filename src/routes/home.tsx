@@ -112,8 +112,9 @@ function Home() {
           image: sellerImages[i % sellerImages.length],
           viewers: 0,
       }));
-      // Prioridade: lives reais > lojas ativas > demo Kikolo.
-      setLives(liveStores.length > 0 ? liveStores : real.length > 0 ? real : DEMO_LIVES);
+      // Prioridade: lives reais > lojas ativas. Sem conteúdo fictício.
+      setLives(liveStores.length > 0 ? liveStores : real);
+
 
       const { data: productsData } = await supabase
         .from("products")
