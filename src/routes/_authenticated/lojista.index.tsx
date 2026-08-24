@@ -251,6 +251,14 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     if (!user) return;
     if (!form.name.trim()) return toast.error(t("s_nome_da_loja_e_obrigatorio"));
     if (partnerType === "service" && !form.service_category) return toast.error("Selecione a categoria de serviço");
+    if (partnerType === "service") {
+      for (const r of reqs) {
+        if (!r.is_required) continue;
+        const filled = r.input_type === "file" ? !!reqFiles[r.key] : !!(reqValues[r.key] ?? "").trim();
+        if (!filled) return toast.error(`Requisito obrigatório em falta: ${r.label}`);
+      }
+    }
+
     if (!form.nif.trim()) return toast.error(t("s_nif_e_obrigatorio"));
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
       return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
