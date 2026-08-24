@@ -14,7 +14,7 @@ import techAsset from "@/assets/sellers/tech.jpg.asset.json";
 import modaAsset from "@/assets/sellers/moda.jpg.asset.json";
 import belezaAsset from "@/assets/sellers/beleza.jpg.asset.json";
 
-type LiveStore = { id: string; liveId?: string; name: string; tagline: string; cover: string; emoji: string; image: string; viewers: number; demo?: boolean };
+type LiveStore = { id: string; liveId?: string; name: string; tagline: string; cover: string; emoji: string; image: string; viewers: number };
 type FeedProduct = { id: string; name: string; price: number; oldPrice?: number; emoji: string; rating: number; sold: string };
 
 export const Route = createFileRoute("/home")({
@@ -44,31 +44,8 @@ const categories = [
 
 const sellerImages = [organicosAsset.url, techAsset.url, modaAsset.url, belezaAsset.url];
 
-// Lojas demonstrativas (Kikolo Shopping) — exibidas apenas enquanto não houver
-// lojas reais ativas no banco. Assim que vendedores reais ficarem ativos, estas
-// desaparecem automaticamente.
-const DEMO_LIVES: LiveStore[] = [
-  {
-    id: "demo-kikolo-tenis",
-    name: "Kikolo Sneakers",
-    tagline: "Ténis originais · Kikolo Shopping",
-    cover: "from-zinc-700 to-zinc-900",
-    emoji: "👟",
-    image: modaAsset.url,
-    viewers: 142,
-    demo: true,
-  },
-  {
-    id: "demo-kikolo-diversos",
-    name: "Kikolo Diversos",
-    tagline: "Casa, moda e tecnologia · Kikolo Shopping",
-    cover: "from-amber-500 to-rose-600",
-    emoji: "🛍️",
-    image: organicosAsset.url,
-    viewers: 87,
-    demo: true,
-  },
-];
+
+
 
 function Home() {
   const { t } = useT();
@@ -135,8 +112,9 @@ function Home() {
           image: sellerImages[i % sellerImages.length],
           viewers: 0,
       }));
-      // Prioridade: lives reais > lojas ativas > demo Kikolo.
-      setLives(liveStores.length > 0 ? liveStores : real.length > 0 ? real : DEMO_LIVES);
+      // Prioridade: lives reais > lojas ativas. Sem conteúdo fictício.
+      setLives(liveStores.length > 0 ? liveStores : real);
+
 
       const { data: productsData } = await supabase
         .from("products")
@@ -274,7 +252,7 @@ function Home() {
           <div className="smooth-scroll mt-3 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {lives.map((s) => (
               <div key={s.id} className="gpu w-40 shrink-0 overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
-                <Link to={s.demo ? "/live-demo/$id" : "/loja/$id"} params={{ id: s.id }} className="block">
+                <Link to="/loja/$id" params={{ id: s.id }} className="block">
                   <div className="relative">
                     <img src={s.image} alt={s.name} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
                     <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[var(--live)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
@@ -286,15 +264,8 @@ function Home() {
                     <p className="truncate text-[11px] text-muted-foreground">{s.tagline}</p>
                   </div>
                 </Link>
-                {s.demo ? (
-                  <Link
-                    to="/live-demo/$id"
-                    params={{ id: s.id }}
-                    className="m-2 flex items-center justify-center gap-1 rounded-full bg-[var(--live)] px-2 py-1.5 text-[11px] font-bold text-white"
-                  >
-                    <PlayCircle size={13} /> Entrar na Live
-                  </Link>
-                ) : s.liveId ? (
+                {s.liveId ? (
+
                   <Link
                     to="/live/$id"
                     params={{ id: s.liveId }}

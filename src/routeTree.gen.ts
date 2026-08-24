@@ -33,7 +33,6 @@ import { Route as RastreioOrderIdRouteImport } from './routes/rastreio.$orderId'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as LojaIdRouteImport } from './routes/loja.$id'
 import { Route as LiveIdRouteImport } from './routes/live.$id'
-import { Route as LiveDemoIdRouteImport } from './routes/live-demo.$id'
 import { Route as ImoveisIdRouteImport } from './routes/imoveis.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthenticatedTransportadorRouteImport } from './routes/_authenticated/transportador'
@@ -191,11 +190,6 @@ const LojaIdRoute = LojaIdRouteImport.update({
 const LiveIdRoute = LiveIdRouteImport.update({
   id: '/live/$id',
   path: '/live/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LiveDemoIdRoute = LiveDemoIdRouteImport.update({
-  id: '/live-demo/$id',
-  path: '/live-demo/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImoveisIdRoute = ImoveisIdRouteImport.update({
@@ -449,7 +443,6 @@ export interface FileRoutesByFullPath {
   '/transportador': typeof AuthenticatedTransportadorRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
-  '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -513,7 +506,6 @@ export interface FileRoutesByTo {
   '/transportador': typeof AuthenticatedTransportadorRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
-  '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -580,7 +572,6 @@ export interface FileRoutesById {
   '/_authenticated/transportador': typeof AuthenticatedTransportadorRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/imoveis/$id': typeof ImoveisIdRoute
-  '/live-demo/$id': typeof LiveDemoIdRoute
   '/live/$id': typeof LiveIdRoute
   '/loja/$id': typeof LojaIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -647,7 +638,6 @@ export interface FileRouteTypes {
     | '/transportador'
     | '/email/unsubscribe'
     | '/imoveis/$id'
-    | '/live-demo/$id'
     | '/live/$id'
     | '/loja/$id'
     | '/produto/$id'
@@ -711,7 +701,6 @@ export interface FileRouteTypes {
     | '/transportador'
     | '/email/unsubscribe'
     | '/imoveis/$id'
-    | '/live-demo/$id'
     | '/live/$id'
     | '/loja/$id'
     | '/produto/$id'
@@ -777,7 +766,6 @@ export interface FileRouteTypes {
     | '/_authenticated/transportador'
     | '/email/unsubscribe'
     | '/imoveis/$id'
-    | '/live-demo/$id'
     | '/live/$id'
     | '/loja/$id'
     | '/produto/$id'
@@ -829,7 +817,6 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
-  LiveDemoIdRoute: typeof LiveDemoIdRoute
   LiveIdRoute: typeof LiveIdRoute
   LojaIdRoute: typeof LojaIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
@@ -1017,13 +1004,6 @@ declare module '@tanstack/react-router' {
       path: '/live/$id'
       fullPath: '/live/$id'
       preLoaderRoute: typeof LiveIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/live-demo/$id': {
-      id: '/live-demo/$id'
-      path: '/live-demo/$id'
-      fullPath: '/live-demo/$id'
-      preLoaderRoute: typeof LiveDemoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/imoveis/$id': {
@@ -1404,7 +1384,6 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
-  LiveDemoIdRoute: LiveDemoIdRoute,
   LiveIdRoute: LiveIdRoute,
   LojaIdRoute: LojaIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,

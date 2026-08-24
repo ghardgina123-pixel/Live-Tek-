@@ -20,7 +20,18 @@ export const Route = createFileRoute("/_authenticated/lojista/")({
   component: LojistaIndex,
 });
 
+type ServiceRequirement = {
+  key: string;
+  label: string;
+  description: string | null;
+  input_type: string;
+  is_required: boolean;
+  service_category: string | null;
+  sort_order: number | null;
+};
+
 type Store = {
+
   id: string;
   name: string;
   status: "pending" | "active" | "rejected";
@@ -202,7 +213,30 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     bank_holder: "",
   });
 
+  const [reqs, setReqs] = useState<ServiceRequirement[]>([]);
+  const [reqValues, setReqValues] = useState<Record<string, string>>({});
+  const [reqFiles, setReqFiles] = useState<Record<string, File>>({});
+
+  useEffect(() => {
+    if (partnerType !== "service") { setReqs([]); return; }
+    let cancel = false;
+    supabase
+      .from("service_requirements")
+      .select("key, label, description, input_type, is_required, service_category, sort_order")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (cancel) return;
+        const list = (data ?? []).filter(
+          (r) => !r.service_category || r.service_category === form.service_category,
+        ) as ServiceRequirement[];
+        setReqs(list);
+      });
+    return () => { cancel = true; };
+  }, [partnerType, form.service_category]);
+
   const captureLocation = () => {
+
     if (!navigator.geolocation) return toast.error(t("s_geolocalizacao_nao_suportada"));
     setGeoBusy(true);
     navigator.geolocation.getCurrentPosition(
@@ -217,6 +251,14 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     if (!user) return;
     if (!form.name.trim()) return toast.error(t("s_nome_da_loja_e_obrigatorio"));
     if (partnerType === "service" && !form.service_category) return toast.error("Selecione a categoria de serviço");
+    if (partnerType === "service") {
+      for (const r of reqs) {
+        if (!r.is_required) continue;
+        const filled = r.input_type === "file" ? !!reqFiles[r.key] : !!(reqValues[r.key] ?? "").trim();
+        if (!filled) return toast.error(`Requisito obrigatório em falta: ${r.label}`);
+      }
+    }
+
     if (!form.nif.trim()) return toast.error(t("s_nif_e_obrigatorio"));
     if (!form.bank_name.trim() || !form.bank_account.trim() || !form.bank_holder.trim())
       return toast.error(t("s_dados_bancarios_completos_sao_obrigatorios"));
@@ -266,6 +308,30 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
           bank_holder: form.bank_holder || null,
         });
         if (privErr) throw privErr;
+
+        // Requisitos obrigatórios dos prestadores de serviço.
+        if (partnerType === "service" && reqs.length > 0) {
+          const rows: { store_id: string; requirement_key: string; value: string | null; file_url: string | null }[] = [];
+          for (const r of reqs) {
+            if (r.input_type === "file") {
+              const f = reqFiles[r.key];
+              if (!f) continue;
+              const ext = f.name.split(".").pop() || "bin";
+              const path = `${user.id}/servico-${r.key}-${Date.now()}.${ext}`;
+              await uploadToBucket("store-assets", path, f);
+              rows.push({ store_id: created.id, requirement_key: r.key, value: null, file_url: path });
+            } else {
+              const v = (reqValues[r.key] ?? "").trim();
+              if (!v) continue;
+              rows.push({ store_id: created.id, requirement_key: r.key, value: v, file_url: null });
+            }
+          }
+          if (rows.length > 0) {
+            const { error: subErr } = await supabase.from("service_submissions").insert(rows);
+            if (subErr) throw subErr;
+          }
+        }
+
         // O valor devido é sempre recalculado pelo servidor a partir da loja criada.
         const { data: createdStore } = await supabase
           .from("stores")
@@ -376,7 +442,55 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
               placeholder="Corte de cabelo, Manicure, Massagem"
             />
           </Field>
+
+          {reqs.length > 0 && (
+            <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">Requisitos da categoria</h3>
+              <p className="text-[11px] text-muted-foreground">
+                Documentos e informações exigidos para aprovação. Prestadores de serviço não pagam comissão sobre vendas.
+              </p>
+              {reqs.map((r) => (
+                <div key={r.key} className="space-y-1.5">
+                  <Label className="text-xs">
+                    {r.label}{r.is_required ? " *" : ""}
+                  </Label>
+                  {r.description && <p className="text-[11px] text-muted-foreground">{r.description}</p>}
+                  {r.input_type === "file" ? (
+                    <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border bg-background text-center text-[11px] text-muted-foreground hover:bg-muted/50">
+                      {reqFiles[r.key] ? (
+                        <span className="max-w-full truncate px-2">{reqFiles[r.key].name}</span>
+                      ) : (
+                        <><Upload size={14} /><span className="mt-1">Anexar ficheiro</span></>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) setReqFiles((prev) => ({ ...prev, [r.key]: f }));
+                        }}
+                      />
+                    </label>
+                  ) : r.input_type === "textarea" ? (
+                    <Textarea
+                      rows={2}
+                      value={reqValues[r.key] ?? ""}
+                      onChange={(e) => setReqValues((p) => ({ ...p, [r.key]: e.target.value }))}
+                    />
+                  ) : (
+                    <Input
+                      type={r.input_type === "phone" ? "tel" : "text"}
+                      value={reqValues[r.key] ?? ""}
+                      onChange={(e) => setReqValues((p) => ({ ...p, [r.key]: e.target.value }))}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </>
+
       )}
 
       <div className="grid grid-cols-2 gap-3">
