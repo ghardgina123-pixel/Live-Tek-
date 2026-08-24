@@ -286,15 +286,8 @@ function Home() {
                     <p className="truncate text-[11px] text-muted-foreground">{s.tagline}</p>
                   </div>
                 </Link>
-                {s.demo ? (
-                  <Link
-                    to="/live-demo/$id"
-                    params={{ id: s.id }}
-                    className="m-2 flex items-center justify-center gap-1 rounded-full bg-[var(--live)] px-2 py-1.5 text-[11px] font-bold text-white"
-                  >
-                    <PlayCircle size={13} /> Entrar na Live
-                  </Link>
-                ) : s.liveId ? (
+                {s.liveId ? (
+
                   <Link
                     to="/live/$id"
                     params={{ id: s.liveId }}
