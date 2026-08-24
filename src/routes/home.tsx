@@ -274,7 +274,7 @@ function Home() {
           <div className="smooth-scroll mt-3 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {lives.map((s) => (
               <div key={s.id} className="gpu w-40 shrink-0 overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
-                <Link to={s.demo ? "/live-demo/$id" : "/loja/$id"} params={{ id: s.id }} className="block">
+                <Link to="/loja/$id" params={{ id: s.id }} className="block">
                   <div className="relative">
                     <img src={s.image} alt={s.name} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
                     <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[var(--live)] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
