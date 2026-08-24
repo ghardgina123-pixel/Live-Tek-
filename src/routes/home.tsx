@@ -44,31 +44,8 @@ const categories = [
 
 const sellerImages = [organicosAsset.url, techAsset.url, modaAsset.url, belezaAsset.url];
 
-// Lojas demonstrativas (Kikolo Shopping) — exibidas apenas enquanto não houver
-// lojas reais ativas no banco. Assim que vendedores reais ficarem ativos, estas
-// desaparecem automaticamente.
-const DEMO_LIVES: LiveStore[] = [
-  {
-    id: "demo-kikolo-tenis",
-    name: "Kikolo Sneakers",
-    tagline: "Ténis originais · Kikolo Shopping",
-    cover: "from-zinc-700 to-zinc-900",
-    emoji: "👟",
-    image: modaAsset.url,
-    viewers: 142,
-    demo: true,
-  },
-  {
-    id: "demo-kikolo-diversos",
-    name: "Kikolo Diversos",
-    tagline: "Casa, moda e tecnologia · Kikolo Shopping",
-    cover: "from-amber-500 to-rose-600",
-    emoji: "🛍️",
-    image: organicosAsset.url,
-    viewers: 87,
-    demo: true,
-  },
-];
+
+
 
 function Home() {
   const { t } = useT();
