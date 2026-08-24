@@ -308,6 +308,30 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
           bank_holder: form.bank_holder || null,
         });
         if (privErr) throw privErr;
+
+        // Requisitos obrigatórios dos prestadores de serviço.
+        if (partnerType === "service" && reqs.length > 0) {
+          const rows: { store_id: string; requirement_key: string; value: string | null; file_url: string | null }[] = [];
+          for (const r of reqs) {
+            if (r.input_type === "file") {
+              const f = reqFiles[r.key];
+              if (!f) continue;
+              const ext = f.name.split(".").pop() || "bin";
+              const path = `${user.id}/servico-${r.key}-${Date.now()}.${ext}`;
+              await uploadToBucket("store-assets", path, f);
+              rows.push({ store_id: created.id, requirement_key: r.key, value: null, file_url: path });
+            } else {
+              const v = (reqValues[r.key] ?? "").trim();
+              if (!v) continue;
+              rows.push({ store_id: created.id, requirement_key: r.key, value: v, file_url: null });
+            }
+          }
+          if (rows.length > 0) {
+            const { error: subErr } = await supabase.from("service_submissions").insert(rows);
+            if (subErr) throw subErr;
+          }
+        }
+
         // O valor devido é sempre recalculado pelo servidor a partir da loja criada.
         const { data: createdStore } = await supabase
           .from("stores")
