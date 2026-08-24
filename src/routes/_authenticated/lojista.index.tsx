@@ -442,7 +442,55 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
               placeholder="Corte de cabelo, Manicure, Massagem"
             />
           </Field>
+
+          {reqs.length > 0 && (
+            <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">Requisitos da categoria</h3>
+              <p className="text-[11px] text-muted-foreground">
+                Documentos e informações exigidos para aprovação. Prestadores de serviço não pagam comissão sobre vendas.
+              </p>
+              {reqs.map((r) => (
+                <div key={r.key} className="space-y-1.5">
+                  <Label className="text-xs">
+                    {r.label}{r.is_required ? " *" : ""}
+                  </Label>
+                  {r.description && <p className="text-[11px] text-muted-foreground">{r.description}</p>}
+                  {r.input_type === "file" ? (
+                    <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border bg-background text-center text-[11px] text-muted-foreground hover:bg-muted/50">
+                      {reqFiles[r.key] ? (
+                        <span className="max-w-full truncate px-2">{reqFiles[r.key].name}</span>
+                      ) : (
+                        <><Upload size={14} /><span className="mt-1">Anexar ficheiro</span></>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) setReqFiles((prev) => ({ ...prev, [r.key]: f }));
+                        }}
+                      />
+                    </label>
+                  ) : r.input_type === "textarea" ? (
+                    <Textarea
+                      rows={2}
+                      value={reqValues[r.key] ?? ""}
+                      onChange={(e) => setReqValues((p) => ({ ...p, [r.key]: e.target.value }))}
+                    />
+                  ) : (
+                    <Input
+                      type={r.input_type === "phone" ? "tel" : "text"}
+                      value={reqValues[r.key] ?? ""}
+                      onChange={(e) => setReqValues((p) => ({ ...p, [r.key]: e.target.value }))}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </>
+
       )}
 
       <div className="grid grid-cols-2 gap-3">
