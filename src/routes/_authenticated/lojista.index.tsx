@@ -20,7 +20,18 @@ export const Route = createFileRoute("/_authenticated/lojista/")({
   component: LojistaIndex,
 });
 
+type ServiceRequirement = {
+  key: string;
+  label: string;
+  description: string | null;
+  input_type: string;
+  is_required: boolean;
+  service_category: string | null;
+  sort_order: number | null;
+};
+
 type Store = {
+
   id: string;
   name: string;
   status: "pending" | "active" | "rejected";
