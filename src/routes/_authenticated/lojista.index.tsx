@@ -202,7 +202,30 @@ function StoreRegistration({ onCreated, feeRequired, feeAoa }: { onCreated: () =
     bank_holder: "",
   });
 
+  const [reqs, setReqs] = useState<ServiceRequirement[]>([]);
+  const [reqValues, setReqValues] = useState<Record<string, string>>({});
+  const [reqFiles, setReqFiles] = useState<Record<string, File>>({});
+
+  useEffect(() => {
+    if (partnerType !== "service") { setReqs([]); return; }
+    let cancel = false;
+    supabase
+      .from("service_requirements")
+      .select("key, label, description, input_type, is_required, service_category, sort_order")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (cancel) return;
+        const list = (data ?? []).filter(
+          (r) => !r.service_category || r.service_category === form.service_category,
+        ) as ServiceRequirement[];
+        setReqs(list);
+      });
+    return () => { cancel = true; };
+  }, [partnerType, form.service_category]);
+
   const captureLocation = () => {
+
     if (!navigator.geolocation) return toast.error(t("s_geolocalizacao_nao_suportada"));
     setGeoBusy(true);
     navigator.geolocation.getCurrentPosition(
