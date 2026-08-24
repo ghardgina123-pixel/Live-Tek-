@@ -14,7 +14,7 @@ import techAsset from "@/assets/sellers/tech.jpg.asset.json";
 import modaAsset from "@/assets/sellers/moda.jpg.asset.json";
 import belezaAsset from "@/assets/sellers/beleza.jpg.asset.json";
 
-type LiveStore = { id: string; liveId?: string; name: string; tagline: string; cover: string; emoji: string; image: string; viewers: number; demo?: boolean };
+type LiveStore = { id: string; liveId?: string; name: string; tagline: string; cover: string; emoji: string; image: string; viewers: number };
 type FeedProduct = { id: string; name: string; price: number; oldPrice?: number; emoji: string; rating: number; sold: string };
 
 export const Route = createFileRoute("/home")({
