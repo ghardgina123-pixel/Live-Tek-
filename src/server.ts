@@ -68,6 +68,7 @@ function buildContentSecurityPolicy(): string {
       "https://maps.gstatic.com",
       "https://*.googleapis.com",
       "https://*.ggpht.com",
+      "https://lh3.googleusercontent.com",
     ),
     "media-src": list("'self'", "data:", "blob:", supabaseOrigin),
     "connect-src": list(
