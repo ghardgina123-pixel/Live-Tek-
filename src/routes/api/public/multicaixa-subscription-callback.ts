@@ -55,6 +55,7 @@ export const Route = createFileRoute("/api/public/multicaixa-subscription-callba
           _reference: payload.reference,
           _external_id: payload.external_id ?? undefined,
           _payload: payload as never,
+          _verified_source: "multicaixa_express_subscription_webhook",
         });
         if (error) return new Response(error.message, { status: 500 });
         const result = data as { ok?: boolean; reason?: string; subscription_id?: string; idempotent?: boolean } | null;

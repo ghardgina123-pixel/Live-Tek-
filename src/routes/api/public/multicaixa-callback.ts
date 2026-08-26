@@ -39,25 +39,33 @@ export const Route = createFileRoute("/api/public/multicaixa-callback")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { data: intent, error } = await supabaseAdmin
-          .from("payment_intents")
-          .select("id, order_id, amount_aoa, status")
-          .eq("reference", payload.reference)
-          .maybeSingle();
-        if (error) return new Response(error.message, { status: 500 });
-        if (!intent) return new Response("not_found", { status: 404 });
-
-        const nextStatus = payload.status === "approved" ? "paid" : payload.status;
-        await supabaseAdmin.from("payment_intents").update({
-          status: nextStatus,
-          external_id: payload.external_id ?? null,
-          raw_payload: payload,
-        }).eq("id", intent.id);
-
-        if (nextStatus === "paid") {
-          await supabaseAdmin.from("orders").update({ status: "paid" }).eq("id", intent.order_id);
+        if (payload.status !== "approved") {
+          const { data: intent, error } = await supabaseAdmin
+            .from("payment_intents")
+            .select("id, order_id")
+            .eq("reference", payload.reference)
+            .maybeSingle();
+          if (error) return new Response(error.message, { status: 500 });
+          if (!intent) return new Response("not_found", { status: 404 });
+          await supabaseAdmin.from("payment_intents").update({
+            status: payload.status,
+            external_id: payload.external_id ?? null,
+            raw_payload: payload,
+          }).eq("id", intent.id);
+          return Response.json({ ok: true, status: payload.status });
         }
-        return Response.json({ ok: true });
+
+        // Só o webhook validado pode marcar a intenção e a encomenda como pagas.
+        const { data, error } = await supabaseAdmin.rpc("confirm_payment_intent_by_reference", {
+          _reference: payload.reference,
+          _verified_source: "multicaixa_express_webhook",
+          _external_id: payload.external_id ?? undefined,
+          _payload: payload as never,
+        });
+        if (error) return new Response(error.message, { status: 500 });
+        const result = data as { ok?: boolean; reason?: string; idempotent?: boolean } | null;
+        if (!result?.ok) return new Response(result?.reason ?? "not_found", { status: 404 });
+        return Response.json({ ok: true, status: "paid", idempotent: result.idempotent ?? false });
       },
     },
   },
