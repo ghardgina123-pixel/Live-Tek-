@@ -1315,6 +1315,8 @@ export type Database = {
           status: string
           store_amount_aoa: number
           updated_at: string
+          verified_at: string | null
+          verified_source: string | null
         }
         Insert: {
           amount_aoa: number
@@ -1330,6 +1332,8 @@ export type Database = {
           status?: string
           store_amount_aoa: number
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Update: {
           amount_aoa?: number
@@ -1345,6 +1349,8 @@ export type Database = {
           status?: string
           store_amount_aoa?: number
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Relationships: [
           {
@@ -2377,6 +2383,8 @@ export type Database = {
           status: string
           store_id: string
           updated_at: string
+          verified_at: string | null
+          verified_source: string | null
         }
         Insert: {
           cancel_reason?: string | null
@@ -2398,6 +2406,8 @@ export type Database = {
           status?: string
           store_id: string
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Update: {
           cancel_reason?: string | null
@@ -2419,6 +2429,8 @@ export type Database = {
           status?: string
           store_id?: string
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Relationships: [
           {
@@ -3072,7 +3084,12 @@ export type Database = {
     }
     Functions: {
       activate_subscription_by_reference: {
-        Args: { _external_id?: string; _payload?: Json; _reference: string }
+        Args: {
+          _external_id?: string
+          _payload?: Json
+          _reference: string
+          _verified_source?: string
+        }
         Returns: Json
       }
       admin_approve_agency: { Args: { _agency_id: string }; Returns: undefined }
@@ -3123,6 +3140,8 @@ export type Database = {
           status: string
           store_id: string
           store_name: string
+          verified: boolean
+          verified_source: string
         }[]
       }
       admin_list_subscriptions: {
@@ -3231,6 +3250,15 @@ export type Database = {
       }
       check_login_throttle: { Args: { _keys: string[] }; Returns: Json }
       clear_login_attempts: { Args: { _keys: string[] }; Returns: undefined }
+      confirm_payment_intent_by_reference: {
+        Args: {
+          _external_id?: string
+          _payload?: Json
+          _reference: string
+          _verified_source: string
+        }
+        Returns: Json
+      }
       courier_withdrawable: { Args: never; Returns: Json }
       create_order_with_items: {
         Args: {
@@ -3279,6 +3307,7 @@ export type Database = {
         Args: { _delivery_id: string; _user: string }
         Returns: boolean
       }
+      is_trusted_payment_source: { Args: { _source: string }; Returns: boolean }
       log_security_event: {
         Args: {
           _actor?: string

@@ -38,6 +38,9 @@ type Summary = {
   gross_aoa: number;
   commission_aoa: number;
   net_sellers_aoa: number;
+  gross_unverified_aoa: number;
+  orders_unverified: number;
+  subscriptions_unverified_aoa: number;
   signup_fees_paid_aoa: number;
   signup_fees_pending_aoa: number;
   subscriptions_active: number;
@@ -62,6 +65,8 @@ type Tx = {
   payment_method: string | null;
   reference: string | null;
   items: number;
+  verified: boolean;
+  verified_source: string | null;
 };
 
 type PayoutReq = {
@@ -187,7 +192,8 @@ function AdminFinance() {
           <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" /></div>
         ) : (
           <section className="grid grid-cols-2 gap-3">
-            <Stat icon={<TrendingUp size={14} />} label="Receita bruta" value={kz(summary.gross_aoa)} hint={`${summary.orders_paid} pedidos pagos`} />
+            <Stat icon={<TrendingUp size={14} />} label="Receita bruta verificada" value={kz(summary.gross_aoa)} hint={`${summary.orders_paid} pedidos confirmados pelo gateway`} />
+            <Stat icon={<Receipt size={14} />} label="Não verificado" value={kz(summary.gross_unverified_aoa)} hint={`${summary.orders_unverified} pedidos · subscrições ${kz(summary.subscriptions_unverified_aoa)}`} />
             <Stat icon={<Receipt size={14} />} label="Comissões plataforma" value={kz(summary.commission_aoa)} hint="5% retalho · 0% serviços" />
             <Stat icon={<Banknote size={14} />} label="Líquido lojistas" value={kz(summary.net_sellers_aoa)} />
             <Stat icon={<Wallet size={14} />} label="Saques pendentes" value={kz(summary.payouts_pending_aoa)} hint={`Pagos: ${kz(summary.payouts_paid_aoa)}`} />
@@ -255,7 +261,12 @@ function AdminFinance() {
                       <p className="truncate text-sm font-semibold">{r.store_name ?? "—"}</p>
                       <p className="truncate text-[11px] text-muted-foreground">{r.customer_name ?? "Cliente"} · {r.items} item(s)</p>
                     </div>
-                    <Badge className="shrink-0 border-0 bg-muted text-muted-foreground">{r.status}</Badge>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge className="border-0 bg-muted text-muted-foreground">{r.status}</Badge>
+                      <Badge className={`border-0 ${r.verified ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                        {r.verified ? "verificado" : "não verificado"}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
                     <p>Bruto: <span className="font-medium text-foreground">{kz(r.gross_aoa)}</span></p>

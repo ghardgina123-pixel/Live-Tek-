@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.activate_subscription_by_reference(text, text, jsonb);
