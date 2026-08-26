@@ -38,6 +38,9 @@ type Summary = {
   gross_aoa: number;
   commission_aoa: number;
   net_sellers_aoa: number;
+  gross_unverified_aoa: number;
+  orders_unverified: number;
+  subscriptions_unverified_aoa: number;
   signup_fees_paid_aoa: number;
   signup_fees_pending_aoa: number;
   subscriptions_active: number;
@@ -62,6 +65,8 @@ type Tx = {
   payment_method: string | null;
   reference: string | null;
   items: number;
+  verified: boolean;
+  verified_source: string | null;
 };
 
 type PayoutReq = {
