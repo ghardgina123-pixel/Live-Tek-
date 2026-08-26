@@ -3083,20 +3083,15 @@ export type Database = {
       }
     }
     Functions: {
-      activate_subscription_by_reference:
-        | {
-            Args: { _external_id?: string; _payload?: Json; _reference: string }
-            Returns: Json
-          }
-        | {
-            Args: {
-              _external_id?: string
-              _payload?: Json
-              _reference: string
-              _verified_source?: string
-            }
-            Returns: Json
-          }
+      activate_subscription_by_reference: {
+        Args: {
+          _external_id?: string
+          _payload?: Json
+          _reference: string
+          _verified_source?: string
+        }
+        Returns: Json
+      }
       admin_approve_agency: { Args: { _agency_id: string }; Returns: undefined }
       admin_approve_agency_live_fee: {
         Args: { _fee_id: string }
