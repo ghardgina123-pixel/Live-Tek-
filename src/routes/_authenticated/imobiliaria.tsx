@@ -450,12 +450,12 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
     if (up.error) { setBusy(false); return toast.error(up.error.message); }
     const { error } = await (supabase as any).from("agency_live_fees").insert({
       agency_id: agencyId, amount_aoa: LIVE_FEE_AOA,
-      status: "paid", payment_method: method,
+      status: "pending", payment_method: method,
       proof_url: path,
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Comprovativo enviado");
+    toast.success("Comprovativo enviado — aguarda validação");
     setProofFile(null);
     load();
   };
