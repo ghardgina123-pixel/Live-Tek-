@@ -296,6 +296,8 @@ export type Database = {
           rejection_reason: string | null
           status: Database["public"]["Enums"]["agency_live_fee_status"]
           updated_at: string
+          verified_at: string | null
+          verified_source: string | null
         }
         Insert: {
           agency_id: string
@@ -310,6 +312,8 @@ export type Database = {
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["agency_live_fee_status"]
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Update: {
           agency_id?: string
@@ -324,6 +328,8 @@ export type Database = {
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["agency_live_fee_status"]
           updated_at?: string
+          verified_at?: string | null
+          verified_source?: string | null
         }
         Relationships: [
           {
