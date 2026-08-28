@@ -9,6 +9,7 @@ Live Teká conecta clientes e lojas em tempo real — compre direto da live, con
 - [Início](/home): descobrir lojas e lives ativas na Live Teká.
 - [Lojas](/lojas): catálogo de lojas e vendedores ao vivo.
 - [Imóveis](/imoveis): casas, apartamentos e terrenos para venda e arrendamento.
+- [Como vender](/como-vender): guia de lojas, serviços, comissões, pagamentos e afiliados.
 - [Ajuda e suporte](/ajuda): contactos e perguntas frequentes.
 - [Sobre](/sobre): a missão e a equipa por trás da Live Teká.
 - [Termos](/termos): termos de uso e política da plataforma.
