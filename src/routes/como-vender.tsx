@@ -92,7 +92,7 @@ function ComoVender() {
       ]);
       if (!alive) return;
       setStatus((st.data as unknown as SignupStatus) ?? null);
-      setPlans(((pl.data ?? []) as unknown as PlanRow[]) ?? []);
+      setPlans((pl.data ?? []) as unknown as PlanRow[]);
       setLoading(false);
     })();
     return () => { alive = false; };
