@@ -48,6 +48,10 @@ function Ajuda() {
           <Phone size={18} className="text-primary" />
           <div><p className="text-sm font-semibold">Telefone</p><p className="text-xs text-muted-foreground">+244 927 046 161</p></div>
         </a>
+        <Link to="/como-vender" className="flex items-center gap-3 rounded-xl border border-border p-3">
+          <MessageCircle size={18} className="text-primary" />
+          <div><p className="text-sm font-semibold">Como vender no Live Teká</p><p className="text-xs text-muted-foreground">Lojas, serviços, comissões, pagamentos e afiliados</p></div>
+        </Link>
         <section className="rounded-2xl border border-border p-4">
           <h2 className="mb-2 text-sm font-bold">Perguntas frequentes</h2>
           <ul className="space-y-2 text-sm text-muted-foreground">
