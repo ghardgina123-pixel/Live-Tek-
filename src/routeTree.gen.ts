@@ -20,6 +20,7 @@ import { Route as LojasRouteImport } from './routes/lojas'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ImoveisRouteImport } from './routes/imoveis'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as ComoVenderRouteImport } from './routes/como-vender'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
@@ -126,6 +127,11 @@ const ImoveisRoute = ImoveisRouteImport.update({
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoVenderRoute = ComoVenderRouteImport.update({
+  id: '/como-vender',
+  path: '/como-vender',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/como-vender': typeof ComoVenderRoute
   '/home': typeof HomeRoute
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
@@ -480,6 +487,7 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/como-vender': typeof ComoVenderRoute
   '/home': typeof HomeRoute
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
@@ -545,6 +553,7 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/chat': typeof ChatRoute
   '/checkout': typeof CheckoutRoute
+  '/como-vender': typeof ComoVenderRoute
   '/home': typeof HomeRoute
   '/imoveis': typeof ImoveisRouteWithChildren
   '/login': typeof LoginRoute
@@ -611,6 +620,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/chat'
     | '/checkout'
+    | '/como-vender'
     | '/home'
     | '/imoveis'
     | '/login'
@@ -675,6 +685,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/chat'
     | '/checkout'
+    | '/como-vender'
     | '/home'
     | '/imoveis'
     | '/login'
@@ -739,6 +750,7 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/chat'
     | '/checkout'
+    | '/como-vender'
     | '/home'
     | '/imoveis'
     | '/login'
@@ -805,6 +817,7 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   ChatRoute: typeof ChatRoute
   CheckoutRoute: typeof CheckoutRoute
+  ComoVenderRoute: typeof ComoVenderRoute
   HomeRoute: typeof HomeRoute
   ImoveisRoute: typeof ImoveisRouteWithChildren
   LoginRoute: typeof LoginRoute
@@ -913,6 +926,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-vender': {
+      id: '/como-vender'
+      path: '/como-vender'
+      fullPath: '/como-vender'
+      preLoaderRoute: typeof ComoVenderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -1372,6 +1392,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   ChatRoute: ChatRoute,
   CheckoutRoute: CheckoutRoute,
+  ComoVenderRoute: ComoVenderRoute,
   HomeRoute: HomeRoute,
   ImoveisRoute: ImoveisRouteWithChildren,
   LoginRoute: LoginRoute,
