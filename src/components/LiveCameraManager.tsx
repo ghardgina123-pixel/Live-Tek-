@@ -264,7 +264,9 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       </ul>
 
       {cameras?.length === 0 && (
-        <p className="py-2 text-center text-xs text-muted-foreground">{t("s_nenhuma_camara_registada")}</p>
+        <p className="py-2 text-center text-xs text-muted-foreground">
+          {t("s_nenhuma_camara_registada")}
+        </p>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -272,8 +274,8 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           <DialogHeader>
             <DialogTitle>Adicionar fonte externa</DialogTitle>
             <DialogDescription>
-              Ligue um encoder ou câmara profissional. O sistema gera automaticamente o endereço e
-              a chave temporária — não precisa de abrir portas do router nem de expor a câmara à
+              Ligue um encoder ou câmara profissional. O sistema gera automaticamente o endereço e a
+              chave temporária — não precisa de abrir portas do router nem de expor a câmara à
               internet.
             </DialogDescription>
           </DialogHeader>
