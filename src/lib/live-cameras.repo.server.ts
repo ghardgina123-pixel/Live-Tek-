@@ -6,7 +6,6 @@ import {
   ingressTelemetry,
   inputTypeFor,
   livekitConfig,
-  normalizeSourceUrl,
   roomClient,
 } from "@/lib/live-cameras.server";
 
@@ -22,7 +21,6 @@ type CameraRow = {
   id: string;
   label: string;
   source_type: string;
-  source_url: string | null;
   ingress_id: string | null;
   ingress_url: string | null;
   stream_key: string | null;
@@ -43,7 +41,6 @@ function toDTO(row: CameraRow, activeCameraId: string | null): LiveCameraDTO {
     id: row.id,
     label: row.label,
     sourceType: row.source_type as LiveCameraDTO["sourceType"],
-    sourceUrl: row.source_url,
     ingressId: row.ingress_id,
     ingressUrl: row.ingress_url,
     streamKey: row.stream_key,
@@ -264,14 +261,17 @@ export async function saveCameraTelemetry(
   return { ok: true as const };
 }
 
-/** Regista uma nova fonte de vídeo externa (câmara IP RTSP/ONVIF, RTMP ou WHIP). */
+/**
+ * Regista uma nova fonte externa (encoder RTMPS ou WHIP). O servidor nunca
+ * recebe uma URL de origem: é o LiveKit que emite o destino de ingestão e a
+ * chave temporária, pelo que não existe superfície de SSRF nem credenciais
+ * de câmara guardadas.
+ */
 export async function addCamera(
   live: OwnedLive,
-  input: { label: string; sourceType: "rtsp" | "rtmp" | "whip"; sourceUrl?: string },
+  input: { label: string; sourceType: "rtmp" | "whip" },
 ) {
   const db = await admin();
-  const sourceUrl = normalizeSourceUrl(input.sourceType, input.sourceUrl);
-  if (input.sourceType === "rtsp" && !sourceUrl) throw new Error("URL RTSP em falta");
 
   const { data: inserted, error } = await db
     .from("live_cameras")
@@ -280,7 +280,6 @@ export async function addCamera(
       store_id: live.storeId,
       label: input.label,
       source_type: input.sourceType,
-      source_url: sourceUrl ?? null,
       participant_identity: "pending",
       status: "idle",
     })
@@ -317,7 +316,6 @@ async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCa
       participantIdentity: row.participant_identity,
       participantName: row.label,
       enableTranscoding: row.source_type !== "whip",
-      ...(row.source_type === "rtsp" ? { url: row.source_url ?? undefined } : {}),
       audio,
       video,
     });
@@ -326,7 +324,7 @@ async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCa
       ingress_id: info.ingressId,
       ingress_url: info.url ?? null,
       stream_key: info.streamKey ?? null,
-      status: row.source_type === "rtsp" ? "connecting" : state.status,
+      status: state.status,
       last_error: state.error,
     };
     await db.from("live_cameras").update(patch).eq("id", row.id);
@@ -442,4 +440,56 @@ export async function switchCamera(live: OwnedLive, cameraId: string, userId?: s
     metadata: { previous: live.activeCameraId, next: cameraId },
   });
   return { activeCameraId: cameraId, activeIdentity: identity };
+}
+
+/**
+ * Encerra a live: apaga os ingresses (revoga as chaves de ingestão), desliga
+ * a sala LiveKit (invalidando as sessões dos participantes) e marca o estado
+ * final na base de dados.
+ */
+export async function endLiveSession(live: OwnedLive, userId: string) {
+  const db = await admin();
+  const { data: cams } = await db
+    .from("live_cameras")
+    .select("id, ingress_id")
+    .eq("live_id", live.id);
+  let cfg: ReturnType<typeof livekitConfig> | null = null;
+  try {
+    cfg = livekitConfig();
+  } catch {
+    cfg = null;
+  }
+  if (cfg) {
+    for (const cam of cams ?? []) {
+      if (!cam.ingress_id) continue;
+      try {
+        await ingressClient(cfg).deleteIngress(cam.ingress_id);
+      } catch {
+        // já removido
+      }
+    }
+    try {
+      await roomClient(cfg).deleteRoom(live.room);
+    } catch {
+      // sala já encerrada
+    }
+  }
+  await db
+    .from("live_cameras")
+    .update({ ingress_id: null, ingress_url: null, stream_key: null, status: "idle" })
+    .eq("live_id", live.id);
+  await db
+    .from("lives")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("id", live.id);
+  await logLiveEvent({
+    liveId: live.id,
+    storeId: live.storeId,
+    actorId: userId,
+    kind: "live_end",
+    level: "warn",
+    message: "Live encerrada: sala LiveKit destruída e chaves de ingestão revogadas",
+    metadata: { revokedIngresses: (cams ?? []).filter((c) => c.ingress_id).length },
+  });
+  return { ok: true as const };
 }

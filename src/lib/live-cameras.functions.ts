@@ -20,8 +20,7 @@ export type LiveCameraStats = {
 export type LiveCameraDTO = {
   id: string;
   label: string;
-  sourceType: "phone" | "rtsp" | "rtmp" | "whip";
-  sourceUrl: string | null;
+  sourceType: "phone" | "rtmp" | "whip";
   ingressId: string | null;
   ingressUrl: string | null;
   streamKey: string | null;
@@ -57,13 +56,15 @@ export const createLiveCamera = createServerFn({ method: "POST" })
       .object({
         liveId: z.string().uuid(),
         label: z.string().trim().min(1).max(60),
-        sourceType: z.enum(["rtsp", "rtmp", "whip"]),
-        sourceUrl: z.string().trim().max(500).optional(),
+        sourceType: z.enum(["rtmp", "whip"]),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<LiveCameraDTO> => {
     const { addCamera, requireLiveOwner } = await import("@/lib/live-cameras.repo.server");
+    const { limitByKey } = await import("@/lib/rate-limit.server");
+    const rl = await limitByKey(`livecam-add:${context.userId}`, 10, 10, 10);
+    if (rl.blocked) throw new Error(`Demasiados pedidos. Tente em ${rl.retryAfterSeconds}s.`);
     const live = await requireLiveOwner(data.liveId, context.userId);
     return addCamera(live, data);
   });
@@ -73,6 +74,9 @@ export const startLiveCamera = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => cameraIdSchema.parse(d))
   .handler(async ({ data, context }): Promise<LiveCameraDTO> => {
     const { startCamera } = await import("@/lib/live-cameras.repo.server");
+    const { limitByKey } = await import("@/lib/rate-limit.server");
+    const rl = await limitByKey(`livecam-start:${context.userId}`, 20, 10, 5);
+    if (rl.blocked) throw new Error(`Demasiados pedidos. Tente em ${rl.retryAfterSeconds}s.`);
     return startCamera(data.cameraId, context.userId);
   });
 
@@ -155,5 +159,15 @@ export const logLiveAuditEvent = createServerFn({ method: "POST" })
       message: data.message,
       metadata: data.metadata ?? {},
     });
+    return { ok: true };
+  });
+
+export const endLive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => liveIdSchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { requireLiveOwner, endLiveSession } = await import("@/lib/live-cameras.repo.server");
+    const live = await requireLiveOwner(data.liveId, context.userId);
+    await endLiveSession(live, context.userId);
     return { ok: true };
   });
