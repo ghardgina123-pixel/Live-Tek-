@@ -17,6 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { useServerFn } from "@tanstack/react-start";
+import { endLive as endLiveFn } from "@/lib/live-cameras.functions";
 
 const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
 const LojistaLivePanel = lazy(() => import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })));
@@ -46,6 +48,7 @@ type Live = {
 
 function LivesManager() {
   const { t } = useT();
+  const endLiveRemote = useServerFn(endLiveFn);
   const { store } = useLojistaStore();
   const [lives, setLives] = useState<Live[] | null>(null);
   const [title, setTitle] = useState("");
@@ -154,9 +157,19 @@ function LivesManager() {
     toast.error(reason || t("s_nao_foi_possivel_iniciar_a_transmissao"));
   };
 
+  // Encerrar passa pelo servidor: destrói a sala LiveKit e revoga as chaves
+  // de ingestão antes de marcar a live como terminada.
   const endLive = async (id: string) => {
-    const { error } = await supabase.from("lives").update({ status: "ended", ended_at: new Date().toISOString() }).eq("id", id);
-    if (error) return toast.error(error.message);
+    try {
+      await endLiveRemote({ data: { liveId: id } });
+    } catch (e) {
+      const { error } = await supabase
+        .from("lives")
+        .update({ status: "ended", ended_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) return toast.error(error.message);
+      console.error("endLive fallback", e);
+    }
     if (activeId === id) setActiveId(null);
   };
 
