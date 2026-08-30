@@ -47,10 +47,14 @@ export function ingressStatus(info: IngressInfo | undefined | null): {
   }
 }
 
+/**
+ * Apenas ingestão "push" autenticada é suportada: o encoder liga-se ao
+ * LiveKit com uma chave temporária. Não existe modo "pull" (URL arbitrária
+ * fornecida pelo utilizador), pelo que o servidor nunca é usado como proxy.
+ */
 export function inputTypeFor(sourceType: string): IngressInput {
   if (sourceType === "whip") return IngressInput.WHIP_INPUT;
-  if (sourceType === "rtmp") return IngressInput.RTMP_INPUT;
-  return IngressInput.URL_INPUT; // RTSP / HLS / HTTP pull (gstreamer uridecodebin)
+  return IngressInput.RTMP_INPUT;
 }
 
 export type CameraTelemetry = {
@@ -110,17 +114,4 @@ export function ingressEncoding() {
       },
     }),
   };
-}
-
-/** Normaliza e valida a URL de uma câmara IP na rede da loja. */
-export function normalizeSourceUrl(
-  sourceType: string,
-  raw: string | undefined,
-): string | undefined {
-  if (sourceType !== "rtsp") return undefined;
-  const url = (raw ?? "").trim();
-  if (!/^(rtsp|rtsps|http|https):\/\//i.test(url)) {
-    throw new Error("URL inválida: use rtsp://utilizador:senha@ip:554/stream");
-  }
-  return url;
 }

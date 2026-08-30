@@ -17,15 +17,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { useServerFn } from "@tanstack/react-start";
+import { endLive as endLiveFn } from "@/lib/live-cameras.functions";
 
-const LivePublisher = lazy(() => import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })));
-const LojistaLivePanel = lazy(() => import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })));
-const LiveCameraManager = lazy(() => import("@/components/LiveCameraManager").then((m) => ({ default: m.LiveCameraManager })));
-const LiveAuditLog = lazy(() => import("@/components/LiveAuditLog").then((m) => ({ default: m.LiveAuditLog })));
+const LivePublisher = lazy(() =>
+  import("@/components/LivePublisher").then((m) => ({ default: m.LivePublisher })),
+);
+const LojistaLivePanel = lazy(() =>
+  import("@/components/LojistaLivePanel").then((m) => ({ default: m.LojistaLivePanel })),
+);
+const LiveCameraManager = lazy(() =>
+  import("@/components/LiveCameraManager").then((m) => ({ default: m.LiveCameraManager })),
+);
+const LiveAuditLog = lazy(() =>
+  import("@/components/LiveAuditLog").then((m) => ({ default: m.LiveAuditLog })),
+);
 
 function liveErrorMessage(msg: string) {
-  if (msg.includes("live_limit_reached")) return "Atingiu o limite de lives do seu plano este mês. Faça upgrade para continuar.";
-  if (msg.includes("subscription_inactive")) return "Subscrição inativa. Ative um plano para transmitir em direto.";
+  if (msg.includes("live_limit_reached"))
+    return "Atingiu o limite de lives do seu plano este mês. Faça upgrade para continuar.";
+  if (msg.includes("subscription_inactive"))
+    return "Subscrição inativa. Ative um plano para transmitir em direto.";
   return msg;
 }
 
@@ -46,6 +58,7 @@ type Live = {
 
 function LivesManager() {
   const { t } = useT();
+  const endLiveRemote = useServerFn(endLiveFn);
   const { store } = useLojistaStore();
   const [lives, setLives] = useState<Live[] | null>(null);
   const [title, setTitle] = useState("");
@@ -57,7 +70,8 @@ function LivesManager() {
 
   const storeId = store?.id;
   const { status: subStatus, usage, reload: reloadSub } = useSubscriptionStatus(storeId);
-  const limitReached = !!usage && !usage.unlimited && usage.limit !== null && usage.used >= usage.limit;
+  const limitReached =
+    !!usage && !usage.unlimited && usage.limit !== null && usage.used >= usage.limit;
   const canGoLive = (subStatus ? subStatus.can_go_live : true) && !limitReached;
   const blocked = subStatus ? !subStatus.can_go_live : false;
 
@@ -76,9 +90,15 @@ function LivesManager() {
     load(storeId);
     const ch = supabase
       .channel(`lojista-lives-${storeId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "lives", filter: `store_id=eq.${storeId}` }, () => load(storeId))
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lives", filter: `store_id=eq.${storeId}` },
+        () => load(storeId),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [storeId]);
 
   const makeRoom = () => `store-${storeId!.slice(0, 8)}-${Date.now().toString(36)}`;
@@ -91,7 +111,12 @@ function LivesManager() {
     setCreating(true);
     const { data, error } = await supabase
       .from("lives")
-      .insert({ store_id: storeId, title: title.trim(), livekit_room: makeRoom(), status: "scheduled" })
+      .insert({
+        store_id: storeId,
+        title: title.trim(),
+        livekit_room: makeRoom(),
+        status: "scheduled",
+      })
       .select("id")
       .single();
     setCreating(false);
@@ -115,7 +140,12 @@ function LivesManager() {
     const defaultTitle = `Live de ${store?.name ?? "loja"}`;
     const { data, error } = await supabase
       .from("lives")
-      .insert({ store_id: storeId, title: defaultTitle, livekit_room: makeRoom(), status: "scheduled" })
+      .insert({
+        store_id: storeId,
+        title: defaultTitle,
+        livekit_room: makeRoom(),
+        status: "scheduled",
+      })
       .select("id")
       .single();
     setCreating(false);
@@ -147,16 +177,23 @@ function LivesManager() {
   };
 
   const rollbackLive = async (id: string, reason: string) => {
-    await supabase
-      .from("lives")
-      .update({ status: "scheduled", started_at: null })
-      .eq("id", id);
+    await supabase.from("lives").update({ status: "scheduled", started_at: null }).eq("id", id);
     toast.error(reason || t("s_nao_foi_possivel_iniciar_a_transmissao"));
   };
 
+  // Encerrar passa pelo servidor: destrói a sala LiveKit e revoga as chaves
+  // de ingestão antes de marcar a live como terminada.
   const endLive = async (id: string) => {
-    const { error } = await supabase.from("lives").update({ status: "ended", ended_at: new Date().toISOString() }).eq("id", id);
-    if (error) return toast.error(error.message);
+    try {
+      await endLiveRemote({ data: { liveId: id } });
+    } catch (e) {
+      const { error } = await supabase
+        .from("lives")
+        .update({ status: "ended", ended_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) return toast.error(error.message);
+      console.error("endLive fallback", e);
+    }
     if (activeId === id) setActiveId(null);
   };
 
@@ -184,7 +221,9 @@ function LivesManager() {
         {blocked && (
           <div className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground">
             A sua subscrição está inativa. Ative um plano para iniciar lives.{" "}
-            <Link to="/lojista/subscricao" className="font-semibold text-primary underline">{t("s_ver_planos")}</Link>
+            <Link to="/lojista/subscricao" className="font-semibold text-primary underline">
+              {t("s_ver_planos")}
+            </Link>
           </div>
         )}
         {usage && !blocked && (
@@ -205,17 +244,20 @@ function LivesManager() {
             )}
           </div>
         )}
-        <Button
-          onClick={quickCreate}
-          disabled={creating || blocked}
-          className="w-full"
-          size="lg"
-        >
-          {creating ? <Loader2 className="animate-spin" size={18} /> : <><Radio size={18} className="mr-2" /> {t("s_criar_live")}</>}
+        <Button onClick={quickCreate} disabled={creating || blocked} className="w-full" size="lg">
+          {creating ? (
+            <Loader2 className="animate-spin" size={18} />
+          ) : (
+            <>
+              <Radio size={18} className="mr-2" /> {t("s_criar_live")}
+            </>
+          )}
         </Button>
         <form onSubmit={create} className="mt-4 space-y-3 border-t border-border pt-4">
           <div>
-            <Label htmlFor="live-title" className="text-xs">{t("s_titulo_personalizado_opcional")}</Label>
+            <Label htmlFor="live-title" className="text-xs">
+              {t("s_titulo_personalizado_opcional")}
+            </Label>
             <Input
               id="live-title"
               value={title}
@@ -225,7 +267,12 @@ function LivesManager() {
               className="mt-1"
             />
           </div>
-          <Button type="submit" disabled={!title.trim() || creating || blocked} variant="outline" className="w-full">
+          <Button
+            type="submit"
+            disabled={!title.trim() || creating || blocked}
+            variant="outline"
+            className="w-full"
+          >
             {creating ? <Loader2 className="animate-spin" size={16} /> : "Criar live com título"}
           </Button>
         </form>
@@ -237,17 +284,27 @@ function LivesManager() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold">{activeLive.title}</h2>
-              <p className="text-[11px] text-muted-foreground">Estado: {statusLabel(activeLive.status)}</p>
+              <p className="text-[11px] text-muted-foreground">
+                Estado: {statusLabel(activeLive.status)}
+              </p>
             </div>
             {activeLive.status !== "live" ? (
-              <span className="text-[11px] text-muted-foreground">{t("s_clique_em_iniciar_camara_abaixo")}</span>
+              <span className="text-[11px] text-muted-foreground">
+                {t("s_clique_em_iniciar_camara_abaixo")}
+              </span>
             ) : (
               <Button size="sm" variant="destructive" onClick={() => endLive(activeLive.id)}>
                 <Square size={14} className="mr-1" /> {t("s_encerrar")}
               </Button>
             )}
           </div>
-          <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" /></div>}>
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-8">
+                <Loader2 className="animate-spin text-primary" />
+              </div>
+            }
+          >
             <LivePublisher
               liveId={activeLive.id}
               onConnected={() => markLive(activeLive.id)}
@@ -257,14 +314,30 @@ function LivesManager() {
               onError={(msg) => rollbackLive(activeLive.id, msg)}
             />
           </Suspense>
-          <Suspense fallback={<div className="mt-3 flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={16} /></div>}>
+          <Suspense
+            fallback={
+              <div className="mt-3 flex justify-center py-6">
+                <Loader2 className="animate-spin text-primary" size={16} />
+              </div>
+            }
+          >
             <LiveCameraManager liveId={activeLive.id} />
             <LiveAuditLog liveId={activeLive.id} />
           </Suspense>
-          <Suspense fallback={<div className="mt-3 flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={16} /></div>}>
+          <Suspense
+            fallback={
+              <div className="mt-3 flex justify-center py-6">
+                <Loader2 className="animate-spin text-primary" size={16} />
+              </div>
+            }
+          >
             <LojistaLivePanel liveId={activeLive.id} />
           </Suspense>
-          <Link to="/live/$id" params={{ id: activeLive.id }} className="mt-3 inline-flex items-center gap-1 text-xs text-primary underline">
+          <Link
+            to="/live/$id"
+            params={{ id: activeLive.id }}
+            className="mt-3 inline-flex items-center gap-1 text-xs text-primary underline"
+          >
             Ver como espetador <ExternalLink size={11} />
           </Link>
         </section>
@@ -277,7 +350,9 @@ function LivesManager() {
           <span className="text-xs text-muted-foreground">{lives?.length ?? 0} sessão(ões)</span>
         </div>
         {lives === null ? (
-          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
+          <div className="flex justify-center py-10">
+            <Loader2 className="animate-spin text-primary" />
+          </div>
         ) : lives.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Nenhuma live criada. Crie a sua primeira transmissão acima.
@@ -285,15 +360,27 @@ function LivesManager() {
         ) : (
           <ul className="space-y-2">
             {lives.map((l) => (
-              <li key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${l.status === "live" ? "bg-red-500 text-white" : "bg-muted text-muted-foreground"}`}>
+              <li
+                key={l.id}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+              >
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${l.status === "live" ? "bg-red-500 text-white" : "bg-muted text-muted-foreground"}`}
+                >
                   <Radio size={16} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{l.title}</p>
                   <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
                     <span>{statusLabel(l.status)}</span>
-                    {l.status === "live" && <><span>·</span><span className="flex items-center gap-1"><Users size={10} /> {l.viewer_count}</span></>}
+                    {l.status === "live" && (
+                      <>
+                        <span>·</span>
+                        <span className="flex items-center gap-1">
+                          <Users size={10} /> {l.viewer_count}
+                        </span>
+                      </>
+                    )}
                   </p>
                 </div>
                 <div className="flex gap-1.5">
@@ -302,7 +389,12 @@ function LivesManager() {
                       <Button size="sm" onClick={() => prepareLive(l.id)}>
                         <Play size={12} className="mr-1" /> {t("s_iniciar")}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label={t("s_apagar_live")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDeleteId(l.id)}
+                        aria-label={t("s_apagar_live")}
+                      >
                         <Trash2 size={12} />
                       </Button>
                     </>
@@ -318,7 +410,12 @@ function LivesManager() {
                     </>
                   )}
                   {l.status === "ended" && (
-                    <Button size="sm" variant="outline" onClick={() => setDeleteId(l.id)} aria-label={t("s_apagar_live")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDeleteId(l.id)}
+                      aria-label={t("s_apagar_live")}
+                    >
                       <Trash2 size={12} />
                     </Button>
                   )}
@@ -329,16 +426,24 @@ function LivesManager() {
         )}
       </section>
 
-      <Dialog open={!!confirmId} onOpenChange={(open) => { if (!open) setConfirmId(null); }}>
+      <Dialog
+        open={!!confirmId}
+        onOpenChange={(open) => {
+          if (!open) setConfirmId(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("s_preparar_transmissao_ao_vivo")}</DialogTitle>
             <DialogDescription>
-              Vamos abrir o painel de câmara. A live só ficará pública depois de a câmara ligar com sucesso — se falhar, o estado é revertido automaticamente.
+              Vamos abrir o painel de câmara. A live só ficará pública depois de a câmara ligar com
+              sucesso — se falhar, o estado é revertido automaticamente.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmId(null)}>{t("s_cancelar")}</Button>
+            <Button variant="outline" onClick={() => setConfirmId(null)}>
+              {t("s_cancelar")}
+            </Button>
             <Button onClick={() => confirmId && prepareLive(confirmId)}>
               <Radio size={14} className="mr-2" /> {t("s_preparar_camara")}
             </Button>
@@ -346,18 +451,36 @@ function LivesManager() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+      <Dialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("s_apagar_esta_live")}</DialogTitle>
             <DialogDescription>
-              A live e todo o histórico associado (mensagens, produtos destacados) serão removidos definitivamente. Esta ação não pode ser desfeita.
+              A live e todo o histórico associado (mensagens, produtos destacados) serão removidos
+              definitivamente. Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>{t("s_cancelar")}</Button>
-            <Button variant="destructive" onClick={() => deleteId && deleteLive(deleteId)} disabled={deleting}>
-              {deleting ? <Loader2 className="animate-spin" size={14} /> : <><Trash2 size={14} className="mr-2" /> {t("s_apagar")}</>}
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>
+              {t("s_cancelar")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteId && deleteLive(deleteId)}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className="animate-spin" size={14} />
+              ) : (
+                <>
+                  <Trash2 size={14} className="mr-2" /> {t("s_apagar")}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

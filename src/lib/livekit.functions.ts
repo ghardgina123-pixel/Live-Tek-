@@ -25,14 +25,20 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
     const identity = context.userId;
     // Resolve room and owner server-side via privileged client so internal
     // livekit_room identifiers never need to be exposed to the browser.
+    // Limite anti-abuso na emissão de tokens (por utilizador).
+    const { limitByKey } = await import("./rate-limit.server");
+    const rl = await limitByKey(`livekit-token:${context.userId}`, 30, 5, 5);
+    if (rl.blocked) throw new Error(`RATE_LIMITED:${rl.retryAfterSeconds}`);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: live } = await supabaseAdmin
       .from("lives")
-      .select("livekit_room, stores:store_id(owner_id)")
+      .select("livekit_room, status, stores:store_id(owner_id)")
       .eq("id", data.liveId)
       .maybeSingle();
     const room = (live as { livekit_room?: string } | null)?.livekit_room;
     if (!room) throw new Error("LIVE_NOT_FOUND");
+    // Live encerrada: nenhuma credencial nova é emitida.
+    if ((live as { status?: string } | null)?.status === "ended") throw new Error("LIVE_ENDED");
     const ownerId = (live as { stores?: { owner_id?: string } } | null)?.stores?.owner_id;
     const canPublish = !!data.canPublish && !!ownerId && ownerId === context.userId;
     const { recordSecurityEvent, requestAuditMeta } = await import("./audit.server");
