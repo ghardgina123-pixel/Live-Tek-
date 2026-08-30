@@ -829,7 +829,6 @@ export type Database = {
           live_id: string | null
           participant_identity: string
           source_type: string
-          source_url: string | null
           status: string
           store_id: string
           stream_key: string | null
@@ -847,7 +846,6 @@ export type Database = {
           live_id?: string | null
           participant_identity: string
           source_type: string
-          source_url?: string | null
           status?: string
           store_id: string
           stream_key?: string | null
@@ -865,7 +863,6 @@ export type Database = {
           live_id?: string | null
           participant_identity?: string
           source_type?: string
-          source_url?: string | null
           status?: string
           store_id?: string
           stream_key?: string | null
