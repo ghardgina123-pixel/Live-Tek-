@@ -41,9 +41,10 @@ const statusTone: Record<string, string> = {
 };
 
 /**
- * Multi-cam da live: regista câmaras IP reais da loja (RTSP/ONVIF via Wi-Fi,
- * RTMP ou WHIP) como ingresses LiveKit na mesma sala do telemóvel e permite
- * alternar a fonte apresentada aos espetadores com um clique.
+ * Multi-cam da live: regista fontes externas (encoder RTMPS autenticado ou
+ * WHIP/WebRTC) como ingresses LiveKit na mesma sala do telemóvel. O destino e
+ * a chave são gerados pelo servidor — o lojista nunca expõe a rede da loja
+ * nem introduz credenciais de câmaras.
  */
 export function LiveCameraManager({ liveId }: { liveId: string }) {
   const { t } = useT();
@@ -58,8 +59,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
-  const [sourceType, setSourceType] = useState<"rtsp" | "rtmp" | "whip">("rtsp");
-  const [sourceUrl, setSourceUrl] = useState("");
+  const [sourceType, setSourceType] = useState<"rtmp" | "whip">("rtmp");
   const [saving, setSaving] = useState(false);
 
   const reload = useCallback(async () => {
@@ -81,17 +81,12 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 
   const add = async () => {
     if (!label.trim()) return toast.error(t("s_de_um_nome_a_camara"));
-    if (sourceType === "rtsp" && !sourceUrl.trim())
-      return toast.error(t("s_indique_a_url_rtsp_da_camara"));
     setSaving(true);
     try {
-      await create({
-        data: { liveId, label: label.trim(), sourceType, sourceUrl: sourceUrl.trim() || undefined },
-      });
+      await create({ data: { liveId, label: label.trim(), sourceType } });
       toast.success(t("s_camara_ligada_a_live"));
       setOpen(false);
       setLabel("");
-      setSourceUrl("");
       await reload();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao adicionar câmara");
@@ -129,7 +124,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
             <RefreshCw size={14} />
           </Button>
           <Button size="sm" onClick={() => setOpen(true)}>
-            <Plus size={14} className="mr-1" /> {t("s_camara_ip")}
+            <Plus size={14} className="mr-1" /> Adicionar fonte
           </Button>
         </div>
       </div>
@@ -153,7 +148,9 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 <p className="truncate text-[11px] text-muted-foreground">
                   {cam.sourceType === "phone"
                     ? "Câmara do telemóvel"
-                    : (cam.sourceUrl ?? cam.sourceType.toUpperCase())}
+                    : cam.sourceType === "rtmp"
+                      ? "Encoder RTMPS seguro"
+                      : "Encoder WHIP (WebRTC)"}
                 </p>
               </div>
               <span
@@ -184,7 +181,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
               </div>
             )}
 
-            {(cam.ingressUrl || cam.streamKey) && cam.sourceType !== "rtsp" && (
+            {(cam.ingressUrl || cam.streamKey) && (
               <div className="mt-2 space-y-1 rounded-lg bg-muted/50 p-2 text-[11px]">
                 {cam.ingressUrl && <CopyRow label={t("s_url")} value={cam.ingressUrl} />}
                 {cam.streamKey && <CopyRow label={t("s_chave")} value={cam.streamKey} />}
@@ -273,9 +270,11 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("s_ligar_camara_externa")}</DialogTitle>
+            <DialogTitle>Adicionar fonte externa</DialogTitle>
             <DialogDescription>
-              Câmaras IP da loja (RTSP/ONVIF) na mesma rede, ou encoders RTMP/WHIP.
+              Ligue um encoder ou câmara profissional. O sistema gera automaticamente o endereço e
+              a chave temporária — não precisa de abrir portas do router nem de expor a câmara à
+              internet.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -296,27 +295,10 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 onChange={(e) => setSourceType(e.target.value as typeof sourceType)}
                 className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
               >
-                <option value="rtsp">{t("s_camara_ip_onvif_rtsp")}</option>
-                <option value="rtmp">{t("s_encoder_rtmp")}</option>
-                <option value="whip">{t("s_encoder_whip_webrtc")}</option>
+                <option value="rtmp">Encoder / câmara profissional (RTMPS)</option>
+                <option value="whip">Encoder WHIP (WebRTC)</option>
               </select>
             </div>
-            {sourceType === "rtsp" && (
-              <div>
-                <Label htmlFor="cam-url">{t("s_url_rtsp")}</Label>
-                <Input
-                  id="cam-url"
-                  value={sourceUrl}
-                  onChange={(e) => setSourceUrl(e.target.value)}
-                  placeholder="rtsp://utilizador:senha@192.168.1.50:554/stream1"
-                  autoComplete="off"
-                />
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  A câmara tem de estar acessível a partir da internet (encaminhamento de porta ou
-                  DDNS) para o servidor de streaming a poder captar.
-                </p>
-              </div>
-            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>
