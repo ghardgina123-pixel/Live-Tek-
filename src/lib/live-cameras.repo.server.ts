@@ -193,6 +193,23 @@ export async function loadCameras(live: OwnedLive, userId: string) {
     }
   }
 
+  // Auto-recuperação: fontes externas que ficaram em erro sem ingress (por
+  // exemplo por configuração inválida de transcoding) são reprovisionadas.
+  for (const row of rows) {
+    if (row.source_type === "phone") continue;
+    if (row.ingress_id || row.status !== "error") continue;
+    try {
+      const dto = await provisionIngress(live, row);
+      row.ingress_id = dto.ingressId;
+      row.ingress_url = dto.ingressUrl;
+      row.stream_key = dto.streamKey;
+      row.status = dto.status;
+      row.last_error = dto.lastError;
+    } catch {
+      // mantém o estado de erro actual
+    }
+  }
+
   let activeCameraId = live.activeCameraId;
   if (!activeCameraId && rows.length) {
     const phone = rows.find((r) => r.source_type === "phone") ?? rows[0];
