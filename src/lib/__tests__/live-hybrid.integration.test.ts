@@ -295,3 +295,20 @@ describe("failover automático", () => {
     expect(state.events.some((e) => e["kind"] === "camera_failover")).toBe(false);
   });
 });
+
+describe("ingressOptionsFor (bypass de transcoding)", () => {
+  it("WHIP não envia encodingOptions", async () => {
+    const { ingressOptionsFor } = await import("@/lib/live-cameras.server");
+    const o = ingressOptionsFor("whip");
+    expect(o.enableTranscoding).toBe(false);
+    expect(o.audio).toBeUndefined();
+    expect(o.video).toBeUndefined();
+  });
+  it("RTMP envia encodingOptions com transcoding activo", async () => {
+    const { ingressOptionsFor } = await import("@/lib/live-cameras.server");
+    const o = ingressOptionsFor("rtmp");
+    expect(o.enableTranscoding).toBe(true);
+    expect(o.audio).toBeDefined();
+    expect(o.video).toBeDefined();
+  });
+});

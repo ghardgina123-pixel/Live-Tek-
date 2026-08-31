@@ -1,7 +1,7 @@
 import type { LiveCameraDTO } from "@/lib/live-cameras.functions";
 import {
   ingressClient,
-  ingressEncoding,
+  ingressOptionsFor,
   ingressStatus,
   ingressTelemetry,
   inputTypeFor,
@@ -193,6 +193,23 @@ export async function loadCameras(live: OwnedLive, userId: string) {
     }
   }
 
+  // Auto-recuperação: fontes externas que ficaram em erro sem ingress (por
+  // exemplo por configuração inválida de transcoding) são reprovisionadas.
+  for (const row of rows) {
+    if (row.source_type === "phone") continue;
+    if (row.ingress_id || row.status !== "error") continue;
+    try {
+      const dto = await provisionIngress(live, row);
+      row.ingress_id = dto.ingressId;
+      row.ingress_url = dto.ingressUrl;
+      row.stream_key = dto.streamKey;
+      row.status = dto.status;
+      row.last_error = dto.lastError;
+    } catch {
+      // mantém o estado de erro actual
+    }
+  }
+
   let activeCameraId = live.activeCameraId;
   if (!activeCameraId && rows.length) {
     const phone = rows.find((r) => r.source_type === "phone") ?? rows[0];
@@ -309,15 +326,14 @@ async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCa
   }
 
   try {
-    const { audio, video } = ingressEncoding();
+    // WHIP corre em bypass de transcoding: nesse modo o LiveKit rejeita
+    // qualquer encodingOptions. A combinação é validada em ingressOptionsFor.
     const info = await client.createIngress(inputTypeFor(row.source_type), {
       name: row.label,
       roomName: live.room,
       participantIdentity: row.participant_identity,
       participantName: row.label,
-      enableTranscoding: row.source_type !== "whip",
-      audio,
-      video,
+      ...ingressOptionsFor(row.source_type),
     });
     const state = ingressStatus(info);
     const patch = {
