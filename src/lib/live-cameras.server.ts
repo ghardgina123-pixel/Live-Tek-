@@ -100,6 +100,22 @@ export function ingressTelemetry(info: IngressInfo | undefined | null): CameraTe
  * locutor, por isso o áudio fica em estéreo 96k e o vídeo em 720p 30fps
  * (o LiveKit degrada automaticamente para os espetadores em rede fraca).
  */
+/**
+ * Regra do LiveKit: em bypass de transcoding (WHIP) as opções de encoding
+ * têm de estar vazias. Esta função é a única fonte de verdade dessa
+ * combinação, validada antes de qualquer chamada ao LiveKit.
+ */
+export function ingressOptionsFor(sourceType: string): {
+  enableTranscoding: boolean;
+  audio?: IngressAudioOptions;
+  video?: IngressVideoOptions;
+} {
+  const enableTranscoding = sourceType !== "whip";
+  if (!enableTranscoding) return { enableTranscoding: false };
+  const { audio, video } = ingressEncoding();
+  return { enableTranscoding: true, audio, video };
+}
+
 export function ingressEncoding() {
   return {
     audio: new IngressAudioOptions({
