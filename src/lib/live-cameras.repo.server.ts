@@ -309,17 +309,14 @@ async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCa
   }
 
   try {
-    // WHIP passa em bypass de transcoding: nesse modo o LiveKit rejeita
-    // qualquer encodingOptions. Só enviamos perfis quando há transcoding.
-    const enableTranscoding = row.source_type !== "whip";
-    const encoding = enableTranscoding ? ingressEncoding() : null;
+    // WHIP corre em bypass de transcoding: nesse modo o LiveKit rejeita
+    // qualquer encodingOptions. A combinação é validada em ingressOptionsFor.
     const info = await client.createIngress(inputTypeFor(row.source_type), {
       name: row.label,
       roomName: live.room,
       participantIdentity: row.participant_identity,
       participantName: row.label,
-      enableTranscoding,
-      ...(encoding ? { audio: encoding.audio, video: encoding.video } : {}),
+      ...ingressOptionsFor(row.source_type),
     });
     const state = ingressStatus(info);
     const patch = {
