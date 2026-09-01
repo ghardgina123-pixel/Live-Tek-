@@ -16,10 +16,17 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout — Live Teká" },
+      { name: "description", content: "Finalize a sua compra na Live Teká: escolha o endereço de entrega, o método de pagamento e confirme o pedido em segurança." },
+      { property: "og:title", content: "Checkout — Live Teká" },
+      { property: "og:description", content: "Escolha endereço e pagamento e confirme o seu pedido na Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://www.livemarketplece.live/checkout" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/checkout" }],
   }),
+
   component: Checkout,
 });
 

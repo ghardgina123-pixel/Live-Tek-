@@ -15,10 +15,16 @@ export const Route = createFileRoute("/cadastro")({
   head: () => ({
     meta: [
       { title: "Criar conta — Live Teká" },
+      { name: "description", content: "Crie a sua conta na Live Teká em segundos: registe-se como cliente para comprar em lives ou como lojista para vender e receber pedidos em Angola." },
+      { property: "og:title", content: "Criar conta — Live Teká" },
+      { property: "og:description", content: "Registe-se como cliente para comprar em lives ou como lojista para vender na Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/cadastro" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/cadastro" }],
   }),
+
   component: Signup,
 });
 

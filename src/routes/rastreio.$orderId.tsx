@@ -8,7 +8,18 @@ import { useMapDefaults } from "@/lib/region";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/rastreio/$orderId")({
-  head: () => ({ meta: [{ title: "Rastreio de encomenda — Live Teká" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [
+      { title: "Rastreio de encomenda — Live Teká" },
+      { name: "description", content: "Acompanhe em tempo real o estado e a localização da sua encomenda Live Teká, desde a recolha na loja até à entrega." },
+      { property: "og:title", content: "Rastreio de encomenda — Live Teká" },
+      { property: "og:description", content: "Siga em tempo real a localização e o estado da sua encomenda Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+
   component: RastreioPage,
 });
 

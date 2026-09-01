@@ -3,7 +3,19 @@ import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/termos")({
-  head: () => ({ meta: [{ title: "Termos e privacidade — Live Teká" }] }),
+  head: () => ({
+    meta: [
+      { title: "Termos e privacidade — Live Teká" },
+      { name: "description", content: "Consulte os termos de uso e a política de privacidade da Live Teká: regras para clientes e lojistas, tratamento de dados pessoais e condições de pagamento." },
+      { property: "og:title", content: "Termos e privacidade — Live Teká" },
+      { property: "og:description", content: "Termos de uso, privacidade, responsabilidades do lojista e condições de pagamento da Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: "https://www.livemarketplece.live/termos" },
+    ],
+    links: [{ rel: "canonical", href: "https://www.livemarketplece.live/termos" }],
+  }),
+
   component: Termos,
 });
 
