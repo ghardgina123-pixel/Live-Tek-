@@ -15,10 +15,17 @@ export const Route = createFileRoute("/perfil")({
   head: () => ({
     meta: [
       { title: "Perfil — Live Teká" },
+      { name: "description", content: "Gira o seu perfil Live Teká: dados pessoais, endereços de entrega, pedidos, favoritos e definições da conta." },
+      { property: "og:title", content: "Perfil — Live Teká" },
+      { property: "og:description", content: "Gira dados pessoais, endereços, pedidos e definições da sua conta Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://www.livemarketplece.live/perfil" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/perfil" }],
   }),
+
   component: Perfil,
 });
 

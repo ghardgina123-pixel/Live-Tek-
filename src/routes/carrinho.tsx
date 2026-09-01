@@ -10,10 +10,16 @@ export const Route = createFileRoute("/carrinho")({
   head: () => ({
     meta: [
       { title: "Carrinho — Live Teká" },
+      { name: "description", content: "Reveja os produtos do seu carrinho na Live Teká, confirme quantidades e avance para o checkout com entrega em Angola." },
+      { property: "og:title", content: "Carrinho — Live Teká" },
+      { property: "og:description", content: "Reveja os produtos do seu carrinho e avance para o checkout na Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/carrinho" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/carrinho" }],
   }),
+
   component: Cart,
 });
 

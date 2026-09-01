@@ -18,10 +18,16 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Entrar — Live Teká" },
+      { name: "description", content: "Entre na sua conta Live Teká para acompanhar lives, falar com as lojas, seguir pedidos e gerir a sua loja em Angola." },
+      { property: "og:title", content: "Entrar — Live Teká" },
+      { property: "og:description", content: "Aceda à sua conta Live Teká para comprar em lives, seguir pedidos e gerir a sua loja." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/login" },
     ],
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/login" }],
   }),
+
   component: Login,
 });
 
