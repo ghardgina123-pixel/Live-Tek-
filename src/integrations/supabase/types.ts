@@ -1315,6 +1315,7 @@ export type Database = {
           provider: string
           raw_payload: Json | null
           reference: string | null
+          shipping_aoa: number
           status: string
           store_amount_aoa: number
           updated_at: string
@@ -1332,6 +1333,7 @@ export type Database = {
           provider?: string
           raw_payload?: Json | null
           reference?: string | null
+          shipping_aoa?: number
           status?: string
           store_amount_aoa: number
           updated_at?: string
@@ -1349,6 +1351,7 @@ export type Database = {
           provider?: string
           raw_payload?: Json | null
           reference?: string | null
+          shipping_aoa?: number
           status?: string
           store_amount_aoa?: number
           updated_at?: string
@@ -1480,6 +1483,7 @@ export type Database = {
           platform_fee_aoa: number
           release_at: string
           released_at: string | null
+          shipping_aoa: number
           status: Database["public"]["Enums"]["payout_status"]
           store_id: string
         }
@@ -1495,6 +1499,7 @@ export type Database = {
           platform_fee_aoa?: number
           release_at: string
           released_at?: string | null
+          shipping_aoa?: number
           status?: Database["public"]["Enums"]["payout_status"]
           store_id: string
         }
@@ -1510,6 +1515,7 @@ export type Database = {
           platform_fee_aoa?: number
           release_at?: string
           released_at?: string | null
+          shipping_aoa?: number
           status?: Database["public"]["Enums"]["payout_status"]
           store_id?: string
         }
@@ -3241,6 +3247,10 @@ export type Database = {
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
       affiliate_withdrawable: { Args: never; Returns: Json }
       approved_stores_count: { Args: never; Returns: number }
+      assign_delivery_courier: {
+        Args: { _courier_id: string; _delivery_id: string }
+        Returns: string
+      }
       calc_transaction_split: {
         Args: { _amount_aoa: number; _store_id: string }
         Returns: Json
@@ -3261,6 +3271,38 @@ export type Database = {
           _verified_source: string
         }
         Returns: Json
+      }
+      courier_accept_delivery: {
+        Args: { _delivery_id: string }
+        Returns: string
+      }
+      courier_delivery_detail: { Args: { _delivery_id: string }; Returns: Json }
+      courier_my_deliveries: {
+        Args: never
+        Returns: {
+          assigned_at: string
+          delivered_at: string
+          delivery_id: string
+          municipality: string
+          order_id: string
+          order_status: string
+          shipping_aoa: number
+          status: string
+          store_name: string
+          street: string
+        }[]
+      }
+      courier_open_deliveries: {
+        Args: never
+        Returns: {
+          created_at: string
+          delivery_id: string
+          municipality: string
+          order_id: string
+          shipping_aoa: number
+          status: string
+          store_name: string
+        }[]
       }
       courier_withdrawable: { Args: never; Returns: Json }
       create_order_with_items: {
