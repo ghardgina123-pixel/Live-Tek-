@@ -3,7 +3,7 @@ import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-rea
 import { useEffect, useState } from "react";
 import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
 import { formatPrice, fromAoa, useCurrency } from "@/lib/currency";
-import { GATEWAY_PENDING_MESSAGE } from "@/lib/commerce";
+import { GATEWAY_PENDING_MESSAGE, formatAoa } from "@/lib/commerce";
 import { regionStore, useRegion } from "@/lib/region";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { toast } from "sonner";
@@ -97,20 +97,24 @@ function Checkout() {
       .then(({ data }) => {
         const list = (data as PaymentMethod[]) ?? [];
         setMethods(list);
-        setSelectedMethodId((prev) => prev && list.some((m) => m.id === prev) ? prev : list[0]?.id ?? null);
+        const usable = list.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
+        setSelectedMethodId((prev) => (prev && usable.some((m) => m.id === prev) ? prev : usable[0]?.id ?? null));
         setMethodsLoading(false);
       });
   }, [countryCode]);
 
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
-  const selectedMethod = methods.find((m) => m.id === selectedMethodId) ?? null;
+  // Só métodos com gateway realmente configurado (ou pagamento na entrega) são operacionais.
+  const availableMethods = methods.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
+  const pendingMethods = methods.filter((m) => !m.gateway_configured && !m.is_cash_on_delivery);
+  const selectedMethod = availableMethods.find((m) => m.id === selectedMethodId) ?? null;
   // Frete oficial em AOA (tabela `municipalities`), convertido pela taxa em vigor.
   const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
   const shippingBrl = fromAoa(Number(shippingAoa));
   const totalBrl = subtotal + shippingBrl;
-  // Sem gateway real configurada o pagamento fica pendente; só o pagamento na
-  // entrega é operacional hoje.
+  // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
   const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
+  
 
   if (done) {
     return (
@@ -204,12 +208,12 @@ function Checkout() {
         <div className="mt-2 space-y-2">
           {methodsLoading ? (
             <div className="flex justify-center py-4"><Loader2 className="animate-spin text-primary" size={18} /></div>
-          ) : methods.length === 0 ? (
+          ) : availableMethods.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
               Nenhum método de pagamento disponível para {countryCode}.
             </p>
           ) : (
-            methods.map((m) => (
+            availableMethods.map((m) => (
               <PayOption
                 key={m.id}
                 methodType={m.method_type}
@@ -217,28 +221,36 @@ function Checkout() {
                 onClick={() => setSelectedMethodId(m.id)}
                 label={m.display_name}
                 desc={m.description ?? ""}
-                badge={m.is_cash_on_delivery ? "Pagar na entrega" : m.gateway_configured ? null : "Aguarda configuração"}
+                badge={m.is_cash_on_delivery ? "Pagar na entrega" : null}
               />
             ))
           )}
         </div>
-        {gatewayPending && (
-          <p className="mt-2 rounded-xl bg-amber-500/10 p-3 text-[11px] text-amber-900 dark:text-amber-200">
-            {GATEWAY_PENDING_MESSAGE} Pode registar o pedido — o pagamento será confirmado assim que a
-            integração real estiver ativa.
-          </p>
+        {pendingMethods.length > 0 && (
+          <div className="mt-2 rounded-xl bg-muted p-3 text-[11px] text-muted-foreground">
+            {GATEWAY_PENDING_MESSAGE} Indisponíveis até a integração real do gateway:{" "}
+            {pendingMethods.map((m) => m.display_name).join(", ")}.
+          </div>
         )}
       </section>
 
       <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">{t("s_subtotal")}</span><span>{formatPrice(subtotal, currency)}</span></div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{t("s_frete")}</span>
-          <span>{selectedAddr ? formatPrice(shippingBrl, currency) : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}</span>
+          <span className="text-muted-foreground">Produtos ({t("s_subtotal")})</span>
+          <span>{formatPrice(subtotal, currency)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Taxa de entrega ({t("s_frete")})</span>
+          <span>
+            {selectedAddr
+              ? <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
+              : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}
+          </span>
         </div>
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
           <span>{t("s_total")}</span><span>{formatPrice(totalBrl, currency)}</span>
         </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega. É este valor que é usado no pagamento.</p>
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">

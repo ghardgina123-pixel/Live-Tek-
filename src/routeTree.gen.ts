@@ -51,6 +51,7 @@ import { Route as AuthenticatedAfiliadosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
 import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
+import { Route as AuthenticatedEntregadorIndexRouteImport } from './routes/_authenticated/entregador.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicSubscriptionCronRouteImport } from './routes/api/public/subscription-cron'
 import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
@@ -288,6 +289,12 @@ const AuthenticatedLojistaIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedLojistaRoute,
   } as any)
+const AuthenticatedEntregadorIndexRoute =
+  AuthenticatedEntregadorIndexRouteImport.update({
+    id: '/entregador/',
+    path: '/entregador/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -473,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/entregador/': typeof AuthenticatedEntregadorIndexRoute
   '/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -537,6 +545,7 @@ export interface FileRoutesByTo {
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/entregador': typeof AuthenticatedEntregadorIndexRoute
   '/lojista': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -604,6 +613,7 @@ export interface FileRoutesById {
   '/api/public/push-dispatch': typeof ApiPublicPushDispatchRoute
   '/api/public/subscription-cron': typeof ApiPublicSubscriptionCronRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/entregador/': typeof AuthenticatedEntregadorIndexRoute
   '/_authenticated/lojista/': typeof AuthenticatedLojistaIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -671,6 +681,7 @@ export interface FileRouteTypes {
     | '/api/public/push-dispatch'
     | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
+    | '/entregador/'
     | '/lojista/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -735,6 +746,7 @@ export interface FileRouteTypes {
     | '/api/public/push-dispatch'
     | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
+    | '/entregador'
     | '/lojista'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -801,6 +813,7 @@ export interface FileRouteTypes {
     | '/api/public/push-dispatch'
     | '/api/public/subscription-cron'
     | '/lovable/email/suppression'
+    | '/_authenticated/entregador/'
     | '/_authenticated/lojista/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1145,6 +1158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLojistaIndexRouteImport
       parentRoute: typeof AuthenticatedLojistaRoute
     }
+    '/_authenticated/entregador/': {
+      id: '/_authenticated/entregador/'
+      path: '/entregador'
+      fullPath: '/entregador/'
+      preLoaderRoute: typeof AuthenticatedEntregadorIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1345,6 +1365,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminLojasRoute: typeof AuthenticatedAdminLojasRoute
   AuthenticatedAdminSubscricoesRoute: typeof AuthenticatedAdminSubscricoesRoute
   AuthenticatedEntregadorDeliveryIdRoute: typeof AuthenticatedEntregadorDeliveryIdRoute
+  AuthenticatedEntregadorIndexRoute: typeof AuthenticatedEntregadorIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1368,6 +1389,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSubscricoesRoute: AuthenticatedAdminSubscricoesRoute,
   AuthenticatedEntregadorDeliveryIdRoute:
     AuthenticatedEntregadorDeliveryIdRoute,
+  AuthenticatedEntregadorIndexRoute: AuthenticatedEntregadorIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

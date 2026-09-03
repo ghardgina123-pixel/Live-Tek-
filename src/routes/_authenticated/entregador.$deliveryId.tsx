@@ -3,13 +3,26 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, MapPin, Loader2, Power, Truck, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatAoa } from "@/lib/commerce";
 
 export const Route = createFileRoute("/_authenticated/entregador/$deliveryId")({
   head: () => ({ meta: [{ title: "Entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
   component: EntregadorPage,
 });
 
-type Delivery = { id: string; order_id: string; status: string };
+type Delivery = {
+  delivery_id: string;
+  order_id: string;
+  status: string;
+  order_status: string;
+  shipping_aoa: number;
+  subtotal_aoa: number;
+  total_aoa: number;
+  courier_earning_aoa: number;
+  store_name: string | null;
+  street: string | null;
+  municipality: string | null;
+};
 
 function EntregadorPage() {
   const { deliveryId } = Route.useParams();
@@ -22,14 +35,10 @@ function EntregadorPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("deliveries")
-        .select("id, order_id, status")
-        .eq("id", deliveryId)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("courier_delivery_detail", { _delivery_id: deliveryId });
       if (cancelled) return;
       if (error) setError(error.message);
-      setDelivery(data as Delivery | null);
+      setDelivery((data as unknown as Delivery) ?? null);
     })();
     return () => { cancelled = true; };
   }, [deliveryId]);
@@ -87,6 +96,25 @@ function EntregadorPage() {
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" aria-label="Carregando" /></div>
         ) : (
           <>
+            <div className="rounded-2xl border border-border p-4 text-sm">
+              <p className="font-semibold">Pedido #{delivery.order_id.slice(0, 8)}</p>
+              <p className="text-xs text-muted-foreground">
+                {delivery.store_name ?? "Loja"} · {delivery.street ?? ""} {delivery.municipality ? `· ${delivery.municipality}` : ""}
+              </p>
+              <dl className="mt-3 space-y-1 text-xs">
+                <div className="flex justify-between"><dt className="text-muted-foreground">Estado da entrega</dt><dd className="font-semibold">{delivery.status}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">Estado do pedido</dt><dd className="font-semibold">{delivery.order_status}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted-foreground">Taxa de entrega</dt><dd className="font-semibold">{formatAoa(Number(delivery.shipping_aoa))}</dd></div>
+                <div className="flex justify-between border-t border-border pt-1">
+                  <dt className="text-muted-foreground">Valor a receber</dt>
+                  <dd className="font-bold text-primary">{formatAoa(Number(delivery.courier_earning_aoa))}</dd>
+                </div>
+              </dl>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Liquidação manual através do pedido de saque, após a entrega concluída.
+              </p>
+            </div>
+
             <div className="rounded-2xl border border-border p-4 text-sm">
               <p className="flex items-center gap-2 font-semibold"><MapPin size={16} /> Transmissão GPS</p>
               <p className="mt-1 text-xs text-muted-foreground">
