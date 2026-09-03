@@ -103,7 +103,10 @@ function Checkout() {
   }, [countryCode]);
 
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
-  const selectedMethod = methods.find((m) => m.id === selectedMethodId) ?? null;
+  // Só métodos com gateway realmente configurado (ou pagamento na entrega) são operacionais.
+  const availableMethods = methods.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
+  const pendingMethods = methods.filter((m) => !m.gateway_configured && !m.is_cash_on_delivery);
+  const selectedMethod = availableMethods.find((m) => m.id === selectedMethodId) ?? null;
   // Frete oficial em AOA (tabela `municipalities`), convertido pela taxa em vigor.
   const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
   const shippingBrl = fromAoa(Number(shippingAoa));
