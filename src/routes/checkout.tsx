@@ -235,14 +235,22 @@ function Checkout() {
       </section>
 
       <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">{t("s_subtotal")}</span><span>{formatPrice(subtotal, currency)}</span></div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{t("s_frete")}</span>
-          <span>{selectedAddr ? formatPrice(shippingBrl, currency) : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}</span>
+          <span className="text-muted-foreground">Produtos ({t("s_subtotal")})</span>
+          <span>{formatPrice(subtotal, currency)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Taxa de entrega ({t("s_frete")})</span>
+          <span>
+            {selectedAddr
+              ? <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
+              : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}
+          </span>
         </div>
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
           <span>{t("s_total")}</span><span>{formatPrice(totalBrl, currency)}</span>
         </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega. É este valor que é usado no pagamento.</p>
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
