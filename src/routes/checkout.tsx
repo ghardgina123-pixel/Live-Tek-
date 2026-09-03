@@ -112,9 +112,9 @@ function Checkout() {
   const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
   const shippingBrl = fromAoa(Number(shippingAoa));
   const totalBrl = subtotal + shippingBrl;
-  // Sem gateway real configurada o pagamento fica pendente; só o pagamento na
-  // entrega é operacional hoje.
+  // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
   const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
+  const totalAoa = Math.round(subtotal / (fromAoa(1) || 1)) + Number(shippingAoa);
 
   if (done) {
     return (
