@@ -114,7 +114,7 @@ function Checkout() {
   const totalBrl = subtotal + shippingBrl;
   // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
   const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
-  const totalAoa = Math.round(subtotal / (fromAoa(1) || 1)) + Number(shippingAoa);
+  
 
   if (done) {
     return (
