@@ -9,7 +9,19 @@ export const Route = createFileRoute("/_authenticated/entregador/$deliveryId")({
   component: EntregadorPage,
 });
 
-type Delivery = { id: string; order_id: string; status: string };
+type Delivery = {
+  delivery_id: string;
+  order_id: string;
+  status: string;
+  order_status: string;
+  shipping_aoa: number;
+  subtotal_aoa: number;
+  total_aoa: number;
+  courier_earning_aoa: number;
+  store_name: string | null;
+  street: string | null;
+  municipality: string | null;
+};
 
 function EntregadorPage() {
   const { deliveryId } = Route.useParams();
@@ -22,14 +34,10 @@ function EntregadorPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("deliveries")
-        .select("id, order_id, status")
-        .eq("id", deliveryId)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("courier_delivery_detail", { _delivery_id: deliveryId });
       if (cancelled) return;
       if (error) setError(error.message);
-      setDelivery(data as Delivery | null);
+      setDelivery((data as unknown as Delivery) ?? null);
     })();
     return () => { cancelled = true; };
   }, [deliveryId]);
