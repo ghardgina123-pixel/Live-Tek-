@@ -79,9 +79,15 @@ function Cart() {
       </ul>
 
       <div className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
-        <div className="flex justify-between"><span className="text-muted-foreground">{t("subtotal")}</span><span>{formatPrice(total, currency)}</span></div>
-        <div className="flex justify-between"><span className="text-muted-foreground">{t("delivery_fee")}</span><span className="font-semibold text-primary">Grátis</span></div>
-        <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold"><span>{t("total")}</span><span>{formatPrice(total, currency)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Produtos ({t("subtotal")})</span><span>{formatPrice(total, currency)}</span></div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">{t("delivery_fee")}</span>
+          <span className="text-xs text-muted-foreground">Calculada no checkout pelo município</span>
+        </div>
+        <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
+          <span>{t("total")}</span>
+          <span>{formatPrice(total, currency)} <span className="text-xs font-normal text-muted-foreground">+ entrega</span></span>
+        </div>
       </div>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
