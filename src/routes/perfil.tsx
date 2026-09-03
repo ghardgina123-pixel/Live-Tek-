@@ -176,6 +176,15 @@ function Perfil() {
         )}
         {user && (
           <li>
+            <Link to="/entregador" className="flex w-full items-center gap-3 px-3 py-4 text-left">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-secondary-foreground"><Truck size={18} /></div>
+              <span className="flex-1 text-sm font-semibold text-foreground">Minhas entregas</span>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+          </li>
+        )}
+        {user && (
+          <li>
             <Link to="/imobiliaria" className="flex w-full items-center gap-3 px-3 py-4 text-left">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary"><HomeIcon size={18} /></div>
               <span className="flex-1 text-sm font-semibold text-foreground">{t("realestate_panel")}</span>
