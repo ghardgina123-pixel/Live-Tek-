@@ -97,7 +97,8 @@ function Checkout() {
       .then(({ data }) => {
         const list = (data as PaymentMethod[]) ?? [];
         setMethods(list);
-        setSelectedMethodId((prev) => prev && list.some((m) => m.id === prev) ? prev : list[0]?.id ?? null);
+        const usable = list.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
+        setSelectedMethodId((prev) => (prev && usable.some((m) => m.id === prev) ? prev : usable[0]?.id ?? null));
         setMethodsLoading(false);
       });
   }, [countryCode]);
