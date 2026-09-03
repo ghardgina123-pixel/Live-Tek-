@@ -204,12 +204,12 @@ function Checkout() {
         <div className="mt-2 space-y-2">
           {methodsLoading ? (
             <div className="flex justify-center py-4"><Loader2 className="animate-spin text-primary" size={18} /></div>
-          ) : methods.length === 0 ? (
+          ) : availableMethods.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
               Nenhum método de pagamento disponível para {countryCode}.
             </p>
           ) : (
-            methods.map((m) => (
+            availableMethods.map((m) => (
               <PayOption
                 key={m.id}
                 methodType={m.method_type}
@@ -217,16 +217,16 @@ function Checkout() {
                 onClick={() => setSelectedMethodId(m.id)}
                 label={m.display_name}
                 desc={m.description ?? ""}
-                badge={m.is_cash_on_delivery ? "Pagar na entrega" : m.gateway_configured ? null : "Aguarda configuração"}
+                badge={m.is_cash_on_delivery ? "Pagar na entrega" : null}
               />
             ))
           )}
         </div>
-        {gatewayPending && (
-          <p className="mt-2 rounded-xl bg-amber-500/10 p-3 text-[11px] text-amber-900 dark:text-amber-200">
-            {GATEWAY_PENDING_MESSAGE} Pode registar o pedido — o pagamento será confirmado assim que a
-            integração real estiver ativa.
-          </p>
+        {pendingMethods.length > 0 && (
+          <div className="mt-2 rounded-xl bg-muted p-3 text-[11px] text-muted-foreground">
+            {GATEWAY_PENDING_MESSAGE} Indisponíveis até a integração real do gateway:{" "}
+            {pendingMethods.map((m) => m.display_name).join(", ")}.
+          </div>
         )}
       </section>
 
