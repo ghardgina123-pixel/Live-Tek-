@@ -1,69 +1,57 @@
-# Módulo de Imóveis (Imobiliárias)
+# Nova arquitetura de faturação — plano por fases
 
-Adiciona ao app um novo tipo de "vendedor": **imobiliárias**, com fluxo paralelo ao das lojas — cadastro, aprovação pelo admin, publicação de imóveis, lives com taxa por sessão e contato pelos clientes.
+Objetivo global: separar claramente a **factura de venda emitida pelo lojista** das **facturas emitidas pela TUSSALA KAKA** (comissão de 5% ao lojista de retalho, 0% em serviços; e mensalidades/planos), com base fiscal preparada para AGT. Nenhuma alteração é feita agora.
 
-## 1. Base de dados (nova migração)
+## Fase 1 — Modelo `invoices` + migração segura de `subscription_invoices`
+- **Objetivo**: uma tabela única de documentos, com `issuer_kind` (plataforma / lojista), `doc_kind` (venda, comissão, subscrição), série e número por série, `order_id`/`subscription_id`, `store_id`, snapshots de emissor e adquirente, totais, moeda, estado.
+- **Afeta**: nova `invoices` (+ `invoice_series`, `invoice_items`); `subscription_invoices` mantida em modo leitura e copiada para `invoices`; trigger `create_invoice_on_subscription_active` reapontado; `lojista.subscricao.tsx`, `admin.subscricoes.tsx` passam a ler de `invoices`.
+- **Pré-requisitos**: nenhum. É a base das restantes fases.
+- **Riscos**: quebrar histórico de faturas; duplicação de numeração. Mitigação: migração copiadora (não destrutiva), sequência por série com unicidade `(series, number)`.
+- **Validações**: contagem antiga = nova; números preservados; painel do lojista e do admin mostram exactamente as mesmas faturas de antes.
 
-Tabelas novas no schema `public` (todas com RLS + GRANTs):
+## Fase 2 — Separação venda do lojista vs documentos TUSSALA KAKA
+- **Objetivo**: no pedido pago e verificado, registar (a) o documento de venda do lojista — número/série/ficheiro que o lojista associa ao pedido — e (b) gerar automaticamente a factura de comissão da TUSSALA KAKA ao lojista.
+- **Afeta**: `orders` (referência ao documento de venda), `invoices`, `payouts` (ligação à factura de comissão), funções `notify_payment_confirmed`, `create_payout_on_paid`; UI de pedidos do lojista (upload/registo do documento) e do admin.
+- **Pré-requisitos**: Fase 1; pagamento verificado pelo gateway (regra actual mantida).
+- **Riscos**: gerar comissão sobre pagamentos não verificados. Mitigação: emissão só a partir do mesmo gatilho verificado usado hoje.
+- **Validações**: pedido verificado gera exactamente 1 factura de comissão; serviços geram 0; listas de facturas do lojista e da plataforma não se misturam.
 
-- **`real_estate_agencies`** — perfil da imobiliária
-  - `owner_id` (uuid → auth.users), `name`, `nif` (obrigatório), `phone`, `email`, `description`, `logo_url`, `cover_url`
-  - `province_id`, `municipality_id`, `district`, `street`, `lat`, `lng`
-  - `status` (enum `agency_status`: pending / active / rejected / suspended), `rejection_reason`
-  - Política: só empresas registadas (NIF obrigatório); admin aprova manualmente.
+## Fase 3 — Correcção da comissão 5% / 0%
+- **Objetivo**: fonte única de verdade da percentagem.
+- **Afeta**: `store_commission_pct`, `calc_transaction_split`, `payment_intents.commission_pct` (default 10% desalinhado), `payouts`.
+- **Pré-requisitos**: Fase 1 (para a factura de comissão reflectir o valor certo).
+- **Riscos**: alterar valores de registos históricos. Mitigação: corrigir apenas o default e novos registos; histórico intocado.
+- **Validações**: testes de split existentes; retalho 5% sobre o subtotal de produtos (nunca sobre a entrega), serviços 0%.
 
-- **`properties`** — imóveis publicados
-  - `agency_id`, `title`, `description`, `property_type` (enum: casa, apartamento, terreno, comercial, escritório)
-  - `listing_type` (enum: venda, arrendamento)
-  - `price_aoa`, `rent_period` (mensal / diário — só para arrendamento)
-  - `bedrooms`, `bathrooms`, `area_m2`, `parking_spots`, `furnished` (bool)
-  - `province_id`, `municipality_id`, `district`, `street`, `lat`, `lng`
-  - `status` (enum `property_status`: pending / approved / rejected / sold / rented), `featured` (bool)
-  - Tabela auxiliar `property_images` (várias fotos por imóvel)
+## Fase 4 — Dados fiscais e RLS
+- **Objetivo**: identidade fiscal completa do emissor TUSSALA KAKA (NIF, morada, regime) e dos lojistas; acesso restrito.
+- **Afeta**: configuração de emissor da plataforma, `stores`/`store_private` (NIF obrigatório para emitir), políticas e GRANTs de `invoices`/`invoice_items`.
+- **Pré-requisitos**: Fases 1–3; dados legais reais fornecidos por si.
+- **Riscos**: expor dados fiscais de terceiros. Mitigação: leitura limitada ao dono, ao adquirente e ao gestor.
+- **Validações**: lojista vê só as suas; cliente vê só as do seu pedido; anónimo não vê nada.
 
-- **`property_visit_requests`** — pedidos de visita
-  - `property_id`, `customer_id`, `preferred_date`, `preferred_time`, `message`, `contact_phone`
-  - `status` (pendente / confirmada / recusada / realizada)
+## Fase 5 — PDF e arquivo em Storage
+- **Objetivo**: PDF gerado no servidor e guardado de forma imutável, com download por link assinado.
+- **Afeta**: `src/lib/invoice-pdf.ts` (emissor parametrizável), nova função de servidor, bucket privado de facturas, e-mails de subscrição (link).
+- **Pré-requisitos**: Fase 4 (dados do emissor).
+- **Riscos**: divergência entre PDF e registo. Mitigação: PDF gerado a partir do snapshot guardado, uma só vez.
+- **Validações**: ficheiro existe, não é substituível, e o link expira.
 
-- **`agency_live_fees`** — controle da taxa por live de imóvel
-  - `agency_id`, `live_id` (nullable até a live ser criada), `amount_aoa` (default 5000)
-  - `status` (pending / paid / approved / rejected), `proof_url`, `payment_method`, `rejection_reason`
-  - Fluxo igual à subscrição da loja: dono carrega comprovativo → admin aprova → live habilitada
+## Fase 6 — AGT / software certificado
+- **Objetivo**: numeração certificada, encadeamento de hash, assinatura e exportação SAF-T (AO), ou integração com fornecedor certificado.
+- **Afeta**: `invoices` (hash, assinatura, série certificada), rota de exportação, processo de certificação.
+- **Pré-requisitos**: Fases 1–5 e decisão comercial: certificar o próprio sistema ou integrar software já certificado.
+- **Riscos**: emitir documentos não conformes. Mitigação: até haver certificação, os documentos da plataforma ficam marcados como internos/pró-forma.
+- **Validações**: SAF-T válido, sequência sem furos, hash encadeado verificável.
 
-- **Configuração**: usar `payment_methods` existente; valor padrão da taxa fica em constante no código (5.000 Kz), editável depois.
+## Fase 7 — UI e testes
+- **Objetivo**: separadores distintos “Minhas facturas” (lojista) e “Facturas TUSSALA KAKA”, área do cliente com o documento do pedido, painel do gestor com toda a emissão.
+- **Afeta**: painéis do lojista, do cliente e do admin; suite de testes.
+- **Pré-requisitos**: fases anteriores.
+- **Riscos**: confusão entre documentos. Mitigação: etiquetas de emissor sempre visíveis.
+- **Validações**: typecheck, suite completa, build de produção e percurso manual em cada painel.
 
-Lives reutilizam a tabela `lives` existente, com gatilho: ao criar live para uma agência, exigir um `agency_live_fees` com status `approved` e ainda não consumido.
-
-## 2. Rotas novas
-
-- **`/imoveis`** (público) — listagem geral com filtros (tipo, venda/arrendamento, província, faixa de preço, quartos)
-- **`/imoveis/$id`** (público) — detalhe do imóvel: galeria, mapa OpenStreetMap, dados, botões "Marcar visita" (formulário) e "WhatsApp" (deep link), ver lives ativas da imobiliária
-- **`/imobiliaria/$id`** (público) — página da imobiliária: imóveis, lives, contatos
-- **`/_authenticated/imobiliaria/cadastro`** — formulário de cadastro da imobiliária (com validação Zod, captura de geolocalização, mapa preview)
-- **`/_authenticated/imobiliaria/painel`** — painel do dono: meus imóveis, criar/editar imóvel, pedidos de visita recebidos, lives, pagar taxa de live (upload de comprovativo)
-- **`/_authenticated/imobiliaria/imovel/novo`** e **`/_authenticated/imobiliaria/imovel/$id/editar`**
-- **`/_authenticated/admin/imobiliarias`** — admin aprova/rejeita imobiliárias, imóveis e taxas de live
-
-## 3. Integração com o app existente
-
-- **Home**: novo card "Imóveis" na grade de categorias, navegando para `/imoveis`
-- **Perfil**: novo bloco "Tenho imóveis para vender/arrendar" → `/imobiliaria/cadastro`
-- **Live**: tela de live verifica se é live de imobiliária; se sim, mostra badge "Imóvel" e botão para o imóvel/agência
-- **Chat existente** (`conversations`/`messages`): reutilizado para conversa cliente ↔ imobiliária a partir do botão "Contatar" no imóvel
-
-## 4. Detalhes técnicos
-
-- Server functions com `requireSupabaseAuth` para criar imóveis, marcar visita e iniciar live; admin usa funções `security definer` (`admin_approve_agency`, `admin_approve_property`, `admin_approve_agency_live_fee`)
-- Validação Zod em todos os formulários (NIF, telefone +244, preços > 0, datas futuras para visita)
-- Upload de imagens via bucket existente reaproveitado (`store-assets` para logo/cover, novo bucket `property-images` para fotos dos imóveis); comprovativos no bucket `subscription-proofs`
-- Mapas: OpenStreetMap embed (mesmo padrão usado em `/transportador`)
-- Pagamento de live: por enquanto manual (comprovativo + aprovação admin), valor fixo de 5.000 Kz; estrutura já permite trocar para integração marketplace depois
-
-## 5. Fora de escopo (fica para depois)
-
-- Pagamento automático/online (Multicaixa Express, Stripe) — agora só comprovativo manual
-- Repasse automático para a imobiliária via marketplace
-- Agenda integrada com calendário externo
-- Avaliações/reviews de imóveis
-
-Posso seguir e implementar?
+## Dependências externas
+- Dados legais/fiscais da TUSSALA KAKA e NIF dos lojistas.
+- Credenciais reais do gateway (sem elas, nada passa a “pago”).
+- Decisão sobre certificação AGT própria vs fornecedor certificado.
