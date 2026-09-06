@@ -816,6 +816,186 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          total_aoa: number
+          unit_price_aoa: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          quantity?: number
+          total_aoa?: number
+          unit_price_aoa?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          total_aoa?: number
+          unit_price_aoa?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_series: {
+        Row: {
+          code: string
+          created_at: string
+          doc_kind: string
+          id: string
+          is_active: boolean
+          issuer_kind: string
+          next_number: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          doc_kind: string
+          id?: string
+          is_active?: boolean
+          issuer_kind: string
+          next_number?: number
+          prefix: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          doc_kind?: string
+          id?: string
+          is_active?: boolean
+          issuer_kind?: string
+          next_number?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          currency_code: string
+          customer_snapshot: Json
+          doc_kind: string
+          full_number: string
+          id: string
+          issued_at: string
+          issuer_kind: string
+          issuer_snapshot: Json
+          legacy_subscription_invoice_id: string | null
+          number: number
+          order_id: string | null
+          payment_method: string | null
+          period_end: string | null
+          period_start: string | null
+          reference: string | null
+          series: string
+          status: string
+          store_id: string | null
+          subscription_id: string | null
+          subtotal_aoa: number
+          tax_aoa: number
+          total_aoa: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code?: string
+          customer_snapshot?: Json
+          doc_kind: string
+          full_number: string
+          id?: string
+          issued_at?: string
+          issuer_kind: string
+          issuer_snapshot?: Json
+          legacy_subscription_invoice_id?: string | null
+          number: number
+          order_id?: string | null
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          series: string
+          status?: string
+          store_id?: string | null
+          subscription_id?: string | null
+          subtotal_aoa?: number
+          tax_aoa?: number
+          total_aoa?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          customer_snapshot?: Json
+          doc_kind?: string
+          full_number?: string
+          id?: string
+          issued_at?: string
+          issuer_kind?: string
+          issuer_snapshot?: Json
+          legacy_subscription_invoice_id?: string | null
+          number?: number
+          order_id?: string | null
+          payment_method?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          series?: string
+          status?: string
+          store_id?: string | null
+          subscription_id?: string | null
+          subtotal_aoa?: number
+          tax_aoa?: number
+          total_aoa?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_cameras: {
         Row: {
           created_at: string
