@@ -1431,6 +1431,9 @@ export type Database = {
           id: string
           paid_at: string | null
           payment_method: string | null
+          sale_document_issued_at: string | null
+          sale_document_number: string | null
+          sale_document_url: string | null
           shipping_aoa: number
           status: Database["public"]["Enums"]["order_status"]
           store_id: string
@@ -1445,6 +1448,9 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payment_method?: string | null
+          sale_document_issued_at?: string | null
+          sale_document_number?: string | null
+          sale_document_url?: string | null
           shipping_aoa?: number
           status?: Database["public"]["Enums"]["order_status"]
           store_id: string
@@ -1459,6 +1465,9 @@ export type Database = {
           id?: string
           paid_at?: string | null
           payment_method?: string | null
+          sale_document_issued_at?: string | null
+          sale_document_number?: string | null
+          sale_document_url?: string | null
           shipping_aoa?: number
           status?: Database["public"]["Enums"]["order_status"]
           store_id?: string
@@ -3552,6 +3561,7 @@ export type Database = {
         }
         Returns: number
       }
+      next_invoice_number: { Args: { _code: string }; Returns: number }
       rate_limit_hit: {
         Args: {
           _block_minutes: number
@@ -3598,6 +3608,15 @@ export type Database = {
       store_balance: { Args: { _store_id: string }; Returns: Json }
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
       store_live_usage: { Args: { _store_id: string }; Returns: Json }
+      store_register_sale_document: {
+        Args: {
+          _issued_at?: string
+          _number: string
+          _order_id: string
+          _url?: string
+        }
+        Returns: string
+      }
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
       subscription_renewal_notices: { Args: never; Returns: number }
     }
