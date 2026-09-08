@@ -37,7 +37,7 @@ export function PartnerSettlementCard({ storeId }: { storeId: string }) {
     const { error } = await supabase.rpc("set_store_partner_type", { _store_id: storeId, _type: type });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success(type === "service" ? "Parceria de Serviços — sem comissão." : "Parceria de Retalho — comissão de 5%.");
+    toast.success(type === "service" ? "Parceria de Serviços — sem comissão." : "Parceria de Retalho — comissão de 10%.");
     load();
   };
 
@@ -54,13 +54,13 @@ export function PartnerSettlementCard({ storeId }: { storeId: string }) {
       <div>
         <h3 className="text-sm font-bold">Tipo de parceria</h3>
         <p className="text-[11px] text-muted-foreground">
-          Retalho: pagamento dividido automaticamente após a entrega. Serviços: sem comissão.
+          Retalho: pagamento dividido automaticamente após a entrega (comissão só sobre produtos). Serviços: sem comissão.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         {([
-          { key: "retail" as const, label: "Retalho", desc: "Comissão 5%", icon: StoreIcon },
+          { key: "retail" as const, label: "Retalho", desc: "Comissão 10%", icon: StoreIcon },
           { key: "service" as const, label: "Serviços", desc: "Sem comissão", icon: Wrench },
         ]).map(({ key, label, desc, icon: Icon }) => {
           const active = balance.partner_type === key;
