@@ -950,6 +950,8 @@ export type Database = {
           number: number
           order_id: string | null
           payment_method: string | null
+          pdf_generated_at: string | null
+          pdf_path: string | null
           period_end: string | null
           period_start: string | null
           reference: string | null
@@ -976,6 +978,8 @@ export type Database = {
           number: number
           order_id?: string | null
           payment_method?: string | null
+          pdf_generated_at?: string | null
+          pdf_path?: string | null
           period_end?: string | null
           period_start?: string | null
           reference?: string | null
@@ -1002,6 +1006,8 @@ export type Database = {
           number?: number
           order_id?: string | null
           payment_method?: string | null
+          pdf_generated_at?: string | null
+          pdf_path?: string | null
           period_end?: string | null
           period_start?: string | null
           reference?: string | null
