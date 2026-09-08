@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const COMMISSION_PCT = 5.0;
-
 /**
  * Cria um Payment Intent (Multicaixa Express) para um pedido do cliente.
- * Calcula o split entre a loja e a plataforma. Não contacta o gateway ainda:
- * grava o intent como "pending" para que o webhook do provedor possa confirmá-lo.
+ * O split (comissão da plataforma vs. líquido da loja) é calculado
+ * exclusivamente na base de dados (`calc_transaction_split` sobre o subtotal
+ * de produtos, entrega excluída). Não existe aqui qualquer percentagem fixa.
+ * Grava o intent como "pending" até confirmação do gateway.
  */
 export const createMulticaixaExpressIntent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -27,25 +27,22 @@ export const createMulticaixaExpressIntent = createServerFn({ method: "POST" })
     if (order.customer_id !== userId) throw new Error("not_authorized");
     if (order.status !== "pending") throw new Error("order_not_payable");
 
-    const amount = Number(order.total_aoa);
-    const platformFee = Math.round(amount * (COMMISSION_PCT / 100) * 100) / 100;
-    const storeAmount = Math.round((amount - platformFee) * 100) / 100;
-
     const reference = `LM-${order.id.slice(0, 8).toUpperCase()}-${Date.now().toString().slice(-5)}`;
 
+    // Montantes e comissão são recalculados pelo trigger `enforce_payment_intent_integrity`
+    // a partir do pedido (subtotal de produtos), pelo que não são enviados daqui.
     const { data: intent, error: insertErr } = await supabase
       .from("payment_intents")
       .insert({
         order_id: order.id,
         provider: "multicaixa_express",
-        amount_aoa: amount,
-        store_amount_aoa: storeAmount,
-        platform_fee_aoa: platformFee,
-        commission_pct: COMMISSION_PCT,
+        amount_aoa: 0,
+        platform_fee_aoa: 0,
+        store_amount_aoa: 0,
         reference,
         status: "pending",
       })
-      .select("id, reference, amount_aoa, store_amount_aoa, platform_fee_aoa, status")
+      .select("id, reference, amount_aoa, store_amount_aoa, platform_fee_aoa, commission_pct, status")
       .single();
     if (insertErr) throw new Error(insertErr.message);
 

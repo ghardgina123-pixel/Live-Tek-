@@ -194,7 +194,7 @@ function AdminFinance() {
           <section className="grid grid-cols-2 gap-3">
             <Stat icon={<TrendingUp size={14} />} label="Receita bruta verificada" value={kz(summary.gross_aoa)} hint={`${summary.orders_paid} pedidos confirmados pelo gateway`} />
             <Stat icon={<Receipt size={14} />} label="Não verificado" value={kz(summary.gross_unverified_aoa)} hint={`${summary.orders_unverified} pedidos · subscrições ${kz(summary.subscriptions_unverified_aoa)}`} />
-            <Stat icon={<Receipt size={14} />} label="Comissões plataforma" value={kz(summary.commission_aoa)} hint="5% retalho · 0% serviços" />
+            <Stat icon={<Receipt size={14} />} label="Comissões plataforma" value={kz(summary.commission_aoa)} hint="10% retalho · 0% serviços" />
             <Stat icon={<Banknote size={14} />} label="Líquido lojistas" value={kz(summary.net_sellers_aoa)} />
             <Stat icon={<Wallet size={14} />} label="Saques pendentes" value={kz(summary.payouts_pending_aoa)} hint={`Pagos: ${kz(summary.payouts_paid_aoa)}`} />
             <Stat icon={<Receipt size={14} />} label="Taxas de adesão" value={kz(summary.signup_fees_paid_aoa)} hint={`Por liquidar: ${kz(summary.signup_fees_pending_aoa)}`} />
