@@ -37,6 +37,8 @@ export const createMulticaixaExpressIntent = createServerFn({ method: "POST" })
         order_id: order.id,
         provider: "multicaixa_express",
         amount_aoa: 0,
+        platform_fee_aoa: 0,
+        store_amount_aoa: 0,
         reference,
         status: "pending",
       })
