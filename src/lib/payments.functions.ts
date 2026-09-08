@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const COMMISSION_PCT = 5.0;
-
 /**
  * Cria um Payment Intent (Multicaixa Express) para um pedido do cliente.
- * Calcula o split entre a loja e a plataforma. Não contacta o gateway ainda:
- * grava o intent como "pending" para que o webhook do provedor possa confirmá-lo.
+ * O split (comissão da plataforma vs. líquido da loja) é calculado
+ * exclusivamente na base de dados (`calc_transaction_split` sobre o subtotal
+ * de produtos, entrega excluída). Não existe aqui qualquer percentagem fixa.
+ * Grava o intent como "pending" até confirmação do gateway.
  */
 export const createMulticaixaExpressIntent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
