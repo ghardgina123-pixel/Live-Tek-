@@ -545,6 +545,48 @@ export type Database = {
           },
         ]
       }
+      customer_fiscal_profiles: {
+        Row: {
+          country_code: string
+          created_at: string
+          email: string | null
+          fiscal_address: string | null
+          legal_name: string | null
+          municipality: string | null
+          nif: string | null
+          phone: string | null
+          province: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          email?: string | null
+          fiscal_address?: string | null
+          legal_name?: string | null
+          municipality?: string | null
+          nif?: string | null
+          phone?: string | null
+          province?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          email?: string | null
+          fiscal_address?: string | null
+          legal_name?: string | null
+          municipality?: string | null
+          nif?: string | null
+          phone?: string | null
+          province?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       deliveries: {
         Row: {
           assigned_at: string | null
@@ -1725,6 +1767,63 @@ export type Database = {
           },
         ]
       }
+      platform_fiscal_identity: {
+        Row: {
+          country_code: string
+          created_at: string
+          currency_code: string
+          email: string | null
+          fiscal_address: string | null
+          id: string
+          is_active: boolean
+          legal_name: string | null
+          municipality: string | null
+          nif: string | null
+          phone: string | null
+          province: string | null
+          singleton: boolean
+          tax_regime: string | null
+          trade_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          currency_code?: string
+          email?: string | null
+          fiscal_address?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          municipality?: string | null
+          nif?: string | null
+          phone?: string | null
+          province?: string | null
+          singleton?: boolean
+          tax_regime?: string | null
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          currency_code?: string
+          email?: string | null
+          fiscal_address?: string | null
+          id?: string
+          is_active?: boolean
+          legal_name?: string | null
+          municipality?: string | null
+          nif?: string | null
+          phone?: string | null
+          province?: string | null
+          singleton?: boolean
+          tax_regime?: string | null
+          trade_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_videos: {
         Row: {
           caption: string | null
@@ -2475,8 +2574,15 @@ export type Database = {
           bank_holder: string | null
           bank_name: string | null
           created_at: string
+          fiscal_address: string | null
+          fiscal_email: string | null
+          fiscal_municipality: string | null
+          fiscal_phone: string | null
+          fiscal_province: string | null
+          legal_name: string | null
           nif: string | null
           store_id: string
+          tax_regime: string | null
           updated_at: string
         }
         Insert: {
@@ -2484,8 +2590,15 @@ export type Database = {
           bank_holder?: string | null
           bank_name?: string | null
           created_at?: string
+          fiscal_address?: string | null
+          fiscal_email?: string | null
+          fiscal_municipality?: string | null
+          fiscal_phone?: string | null
+          fiscal_province?: string | null
+          legal_name?: string | null
           nif?: string | null
           store_id: string
+          tax_regime?: string | null
           updated_at?: string
         }
         Update: {
@@ -2493,8 +2606,15 @@ export type Database = {
           bank_holder?: string | null
           bank_name?: string | null
           created_at?: string
+          fiscal_address?: string | null
+          fiscal_email?: string | null
+          fiscal_municipality?: string | null
+          fiscal_phone?: string | null
+          fiscal_province?: string | null
+          legal_name?: string | null
           nif?: string | null
           store_id?: string
+          tax_regime?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3525,6 +3645,9 @@ export type Database = {
         Returns: number
       }
       expire_due_subscriptions: { Args: never; Returns: number }
+      fiscal_snapshot_customer: { Args: { _user_id: string }; Returns: Json }
+      fiscal_snapshot_platform: { Args: never; Returns: Json }
+      fiscal_snapshot_store: { Args: { _store_id: string }; Returns: Json }
       get_own_phone: { Args: never; Returns: string }
       has_role: {
         Args: {
