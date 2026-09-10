@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { registerExternalInvoice, getExternalInvoicePdfUrl } from "@/lib/invoices.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro")({
