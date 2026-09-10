@@ -937,10 +937,18 @@ export type Database = {
       }
       invoices: {
         Row: {
+          agt_issued_at: string | null
+          agt_number: string | null
+          agt_pdf_path: string | null
+          agt_registered_at: string | null
+          agt_registered_by: string | null
+          agt_series: string | null
+          agt_total_aoa: number | null
           created_at: string
           currency_code: string
           customer_snapshot: Json
           doc_kind: string
+          fiscal_state: string
           full_number: string
           id: string
           issued_at: string
@@ -965,10 +973,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agt_issued_at?: string | null
+          agt_number?: string | null
+          agt_pdf_path?: string | null
+          agt_registered_at?: string | null
+          agt_registered_by?: string | null
+          agt_series?: string | null
+          agt_total_aoa?: number | null
           created_at?: string
           currency_code?: string
           customer_snapshot?: Json
           doc_kind: string
+          fiscal_state?: string
           full_number: string
           id?: string
           issued_at?: string
@@ -993,10 +1009,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agt_issued_at?: string | null
+          agt_number?: string | null
+          agt_pdf_path?: string | null
+          agt_registered_at?: string | null
+          agt_registered_by?: string | null
+          agt_series?: string | null
+          agt_total_aoa?: number | null
           created_at?: string
           currency_code?: string
           customer_snapshot?: Json
           doc_kind?: string
+          fiscal_state?: string
           full_number?: string
           id?: string
           issued_at?: string
@@ -3503,6 +3527,41 @@ export type Database = {
           user_id: string
           user_name: string
         }[]
+      }
+      admin_platform_fiscal_documents: {
+        Args: { _limit?: number; _state?: string }
+        Returns: {
+          agt_issued_at: string
+          agt_number: string
+          agt_pdf_path: string
+          agt_registered_at: string
+          agt_series: string
+          agt_total_aoa: number
+          currency_code: string
+          doc_kind: string
+          fiscal_state: string
+          full_number: string
+          id: string
+          issued_at: string
+          number: number
+          order_id: string
+          series: string
+          store_id: string
+          store_name: string
+          subscription_id: string
+          total_aoa: number
+        }[]
+      }
+      admin_register_external_invoice: {
+        Args: {
+          _invoice_id: string
+          _issued_at: string
+          _number: string
+          _pdf_path?: string
+          _series: string
+          _total_aoa: number
+        }
+        Returns: string
       }
       admin_reject_agency: {
         Args: { _agency_id: string; _reason: string }
