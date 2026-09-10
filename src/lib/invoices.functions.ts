@@ -139,7 +139,7 @@ export const registerExternalInvoice = createServerFn({ method: "POST" })
       _series: data.series,
       _issued_at: new Date(data.issuedAt).toISOString(),
       _total_aoa: data.totalAoa,
-      _pdf_path: pdfPath,
+      _pdf_path: pdfPath ?? undefined,
     });
     if (error) throw new Error(error.message);
 
