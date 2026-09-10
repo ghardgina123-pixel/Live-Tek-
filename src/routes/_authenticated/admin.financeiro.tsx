@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { registerExternalInvoice, getExternalInvoicePdfUrl } from "@/lib/invoices.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro")({
@@ -325,7 +327,204 @@ function AdminFinance() {
             </ul>
           )}
         </section>
+
+        <FiscalDocuments />
       </div>
     </AppShell>
+  );
+}
+
+type FiscalDoc = {
+  id: string;
+  doc_kind: string;
+  full_number: string;
+  store_name: string | null;
+  order_id: string | null;
+  subscription_id: string | null;
+  total_aoa: number;
+  currency_code: string;
+  issued_at: string;
+  fiscal_state: string;
+  agt_number: string | null;
+  agt_series: string | null;
+  agt_issued_at: string | null;
+  agt_total_aoa: number | null;
+  agt_pdf_path: string | null;
+};
+
+const DOC_LABEL: Record<string, string> = {
+  commission: "Comissão → lojista",
+  subscription: "Plano mensal → prestador",
+};
+
+/**
+ * Documentos emitidos pela TUSSALA KAKA. A emissão fiscal é feita manualmente
+ * no Portal da AGT; aqui o gestor apenas regista a factura real.
+ */
+function FiscalDocuments() {
+  const [docs, setDocs] = useState<FiscalDoc[] | null>(null);
+  const [filter, setFilter] = useState<"pending_issue" | "externally_issued">("pending_issue");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [form, setForm] = useState({ number: "", series: "", issuedAt: "", total: "" });
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const register = useServerFn(registerExternalInvoice);
+  const signExternal = useServerFn(getExternalInvoicePdfUrl);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc("admin_platform_fiscal_documents", {
+      _state: filter,
+      _limit: 100,
+    });
+    if (error) { toast.error(error.message); setDocs([]); return; }
+    setDocs((data as unknown as FiscalDoc[]) ?? []);
+  }, [filter]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const start = (d: FiscalDoc) => {
+    setOpenId(d.id);
+    setForm({ number: "", series: "", issuedAt: new Date().toISOString().slice(0, 10), total: String(d.total_aoa ?? "") });
+    setFile(null);
+  };
+
+  const submit = async (id: string) => {
+    if (!form.number.trim() || !form.series.trim() || !form.issuedAt) {
+      return toast.error("Preencha número, série e data da factura emitida na AGT.");
+    }
+    setSaving(true);
+    try {
+      let pdfBase64: string | undefined;
+      if (file) {
+        const buf = new Uint8Array(await file.arrayBuffer());
+        let bin = "";
+        buf.forEach((b) => { bin += String.fromCharCode(b); });
+        pdfBase64 = btoa(bin);
+      }
+      await register({
+        data: {
+          invoiceId: id,
+          number: form.number.trim(),
+          series: form.series.trim(),
+          issuedAt: form.issuedAt,
+          totalAoa: Number(form.total || 0),
+          ...(pdfBase64 ? { pdfBase64, pdfFileName: file?.name } : {}),
+        },
+      });
+      toast.success("Factura registada como emitida externamente.");
+      setOpenId(null);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível registar a factura.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openPdf = async (id: string) => {
+    try {
+      const r = await signExternal({ data: { invoiceId: id } });
+      window.open(r.url, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sem PDF disponível.");
+    }
+  };
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold">Documentos fiscais da TUSSALA KAKA</h2>
+      <p className="text-[11px] text-muted-foreground">
+        A emissão é feita manualmente no Portal da AGT. Aqui regista-se a factura real; nada é marcado
+        como emitido automaticamente. As facturas de venda ao cliente são da responsabilidade do lojista.
+      </p>
+
+      <div className="flex gap-2">
+        {([
+          ["pending_issue", "Pendentes de emissão"],
+          ["externally_issued", "Emitidas externamente"],
+        ] as const).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setFilter(k)}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${
+              filter === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {docs === null ? (
+        <div className="flex justify-center py-6"><Loader2 className="animate-spin text-primary" /></div>
+      ) : docs.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          Sem documentos nesta lista.
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {docs.map((d) => (
+            <li key={d.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{DOC_LABEL[d.doc_kind] ?? d.doc_kind}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {d.store_name ?? "—"} · interno {d.full_number}
+                  </p>
+                </div>
+                <Badge className={`shrink-0 border-0 ${d.fiscal_state === "externally_issued" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                  {d.fiscal_state === "externally_issued" ? "Emitida externamente" : "Pendente de emissão"}
+                </Badge>
+              </div>
+
+              <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                <p>Valor: <span className="font-medium text-foreground">{kz(d.total_aoa)}</span></p>
+                <p>Data interna: {dt(d.issued_at)}</p>
+                {d.fiscal_state === "externally_issued" && (
+                  <>
+                    <p>Factura AGT: <span className="font-medium text-foreground">{d.agt_series}/{d.agt_number}</span></p>
+                    <p>Emitida em: {dt(d.agt_issued_at)}</p>
+                    <p>Valor AGT: <span className="font-medium text-foreground">{kz(Number(d.agt_total_aoa ?? 0))}</span></p>
+                  </>
+                )}
+              </div>
+
+              {d.fiscal_state === "externally_issued" ? (
+                d.agt_pdf_path && (
+                  <Button size="sm" variant="outline" className="mt-3" onClick={() => openPdf(d.id)}>
+                    Ver PDF da factura
+                  </Button>
+                )
+              ) : openId === d.id ? (
+                <div className="mt-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input value={form.series} onChange={(e) => setForm((f) => ({ ...f, series: e.target.value }))} placeholder="Série (AGT)" />
+                    <Input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} placeholder="Número (AGT)" />
+                    <Input type="date" value={form.issuedAt} onChange={(e) => setForm((f) => ({ ...f, issuedAt: e.target.value }))} />
+                    <Input type="number" inputMode="decimal" value={form.total} onChange={(e) => setForm((f) => ({ ...f, total: e.target.value }))} placeholder="Valor (Kz)" />
+                  </div>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    className="block w-full text-[11px] text-muted-foreground"
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1" disabled={saving} onClick={() => submit(d.id)}>
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : "Registar factura emitida"}
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={saving} onClick={() => setOpenId(null)}>Cancelar</Button>
+                  </div>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" className="mt-3" onClick={() => start(d)}>
+                  Registar factura da AGT
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
