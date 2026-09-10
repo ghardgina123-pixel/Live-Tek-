@@ -97,3 +97,73 @@ export const getInvoicePdfUrl = createServerFn({ method: "POST" })
 
     return { url: signed.signedUrl, expiresIn: SIGNED_TTL, fileName: `${inv.full_number}.pdf` };
   });
+
+/* ------------------------------------------------------------------ *
+ * Registo de facturas emitidas MANUALMENTE no Portal da AGT.
+ * O Live Teká não emite nem valida documentos fiscais: apenas guarda o
+ * que o gestor registar (número, série, data, valor e PDF opcional).
+ * A autorização real é feita pela RPC `admin_register_external_invoice`.
+ * ------------------------------------------------------------------ */
+const registerInput = z.object({
+  invoiceId: z.string().uuid(),
+  number: z.string().trim().min(1).max(60),
+  series: z.string().trim().min(1).max(30),
+  issuedAt: z.string().min(4),
+  totalAoa: z.number().nonnegative(),
+  pdfBase64: z.string().min(1).max(14_000_000).optional(),
+  pdfFileName: z.string().max(180).optional(),
+});
+
+export const registerExternalInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => registerInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    let pdfPath: string | null = null;
+
+    if (data.pdfBase64) {
+      const bytes = Uint8Array.from(atob(data.pdfBase64), (c) => c.charCodeAt(0));
+      const safeName = (data.pdfFileName ?? "factura-agt.pdf").replace(/[^\w.-]/g, "-");
+      const candidate = `agt/${data.invoiceId}/${Date.now()}-${safeName}`;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error: upErr } = await supabaseAdmin.storage
+        .from(BUCKET)
+        .upload(candidate, bytes, { contentType: "application/pdf", upsert: false });
+      if (upErr) throw new Error(upErr.message);
+      pdfPath = candidate;
+    }
+
+    const { error } = await supabase.rpc("admin_register_external_invoice", {
+      _invoice_id: data.invoiceId,
+      _number: data.number,
+      _series: data.series,
+      _issued_at: new Date(data.issuedAt).toISOString(),
+      _total_aoa: data.totalAoa,
+      _pdf_path: pdfPath,
+    });
+    if (error) throw new Error(error.message);
+
+    return { ok: true as const, pdfPath };
+  });
+
+/** URL assinada temporária para o PDF da factura registada (Portal da AGT). */
+export const getExternalInvoicePdfUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => idInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: inv, error } = await supabase
+      .from("invoices")
+      .select("agt_pdf_path, agt_number")
+      .eq("id", data.invoiceId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!inv?.agt_pdf_path) throw new Error("Sem PDF registado para esta factura.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error: signErr } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .createSignedUrl(inv.agt_pdf_path, SIGNED_TTL);
+    if (signErr || !signed?.signedUrl) throw new Error(signErr?.message ?? "Falha ao assinar URL.");
+    return { url: signed.signedUrl, expiresIn: SIGNED_TTL };
+  });
