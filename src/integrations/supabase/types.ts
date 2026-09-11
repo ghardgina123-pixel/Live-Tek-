@@ -598,6 +598,7 @@ export type Database = {
           dropoff_lat: number | null
           dropoff_lng: number | null
           id: string
+          load_class: string | null
           order_id: string
           picked_up_at: string | null
           pickup_address: string | null
@@ -616,6 +617,7 @@ export type Database = {
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
+          load_class?: string | null
           order_id: string
           picked_up_at?: string | null
           pickup_address?: string | null
@@ -634,6 +636,7 @@ export type Database = {
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
+          load_class?: string | null
           order_id?: string
           picked_up_at?: string | null
           pickup_address?: string | null
@@ -1920,6 +1923,7 @@ export type Database = {
       products: {
         Row: {
           created_at: string
+          delivery_class: string | null
           description: string | null
           id: string
           image_url: string | null
@@ -1934,6 +1938,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_class?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -1948,6 +1953,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_class?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -3712,6 +3718,7 @@ export type Database = {
           created_at: string
           delivery_id: string
           dropoff_address: string
+          load_class: string
           municipality: string
           order_id: string
           pickup_address: string
@@ -3719,6 +3726,13 @@ export type Database = {
           status: string
           store_name: string
         }[]
+      }
+      courier_type_supports_class: {
+        Args: {
+          _class: string
+          _ct: Database["public"]["Enums"]["courier_type"]
+        }
+        Returns: boolean
       }
       courier_update_delivery_status: {
         Args: { _delivery_id: string; _status: string }
@@ -3780,6 +3794,7 @@ export type Database = {
         Returns: boolean
       }
       is_trusted_payment_source: { Args: { _source: string }; Returns: boolean }
+      load_class_rank: { Args: { _class: string }; Returns: number }
       log_security_event: {
         Args: {
           _actor?: string
@@ -3800,6 +3815,7 @@ export type Database = {
         Returns: number
       }
       next_invoice_number: { Args: { _code: string }; Returns: number }
+      order_load_class: { Args: { _order_id: string }; Returns: string }
       rate_limit_hit: {
         Args: {
           _block_minutes: number

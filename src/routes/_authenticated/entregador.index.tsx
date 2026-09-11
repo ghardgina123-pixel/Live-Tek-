@@ -14,7 +14,13 @@ export const Route = createFileRoute("/_authenticated/entregador/")({
 type Open = {
   delivery_id: string; order_id: string; status: string; shipping_aoa: number;
   courier_fee_aoa: number | null; pickup_address: string | null; dropoff_address: string | null;
-  store_name: string | null; municipality: string | null; created_at: string;
+  store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
+};
+
+const LOAD_CLASS_LABEL: Record<string, string> = {
+  pequeno: "Carga pequena",
+  medio: "Carga média",
+  grande: "Carga grande",
 };
 type Mine = Open & { order_status: string; street: string | null; assigned_at: string | null; delivered_at: string | null };
 
@@ -123,6 +129,9 @@ function EntregadorIndex() {
                           <p className="text-xs text-muted-foreground">{d.store_name ?? "Loja"} · {d.municipality ?? "—"}</p>
                           <p className="mt-1 text-[11px] text-muted-foreground">Recolha: {d.pickup_address ?? "loja"}</p>
                           <p className="text-[11px] text-muted-foreground">Entrega: {d.dropoff_address ?? "endereço do cliente"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {d.load_class ? LOAD_CLASS_LABEL[d.load_class] : "Carga não classificada"}
+                          </p>
                           <p className="mt-0.5 text-xs font-semibold text-primary">A receber: {formatAoa(Number(d.courier_fee_aoa ?? d.shipping_aoa))}</p>
                         </div>
                       </div>

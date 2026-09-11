@@ -27,6 +27,13 @@ type Product = {
   status: string;
   image_url: string | null;
   rejection_reason: string | null;
+  delivery_class: string | null;
+};
+
+const DELIVERY_CLASS_LABEL: Record<string, string> = {
+  pequeno: "Pequeno (motoboy)",
+  medio: "Médio (motoboy ou carro)",
+  grande: "Grande (carro, van ou empresa)",
 };
 
 function Produtos() {
@@ -93,6 +100,9 @@ function Produtos() {
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-semibold">{p.name}</p>
                 <p className="text-xs text-muted-foreground">Kz {Number(p.price_aoa).toLocaleString("pt-AO")} · Estoque {p.stock}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Entrega: {p.delivery_class ? DELIVERY_CLASS_LABEL[p.delivery_class] : "classe não definida"}
+                </p>
                 <StatusBadge status={p.status} />
                 {p.status === "rejected" && p.rejection_reason && (
                   <p className="mt-1 text-[10px] text-destructive">Motivo: {p.rejection_reason}</p>
@@ -115,6 +125,7 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
     description: initial?.description ?? "",
     price_aoa: initial ? String(initial.price_aoa) : "",
     stock: initial ? String(initial.stock) : "1",
+    delivery_class: initial?.delivery_class ?? "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -144,6 +155,8 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         price_brl: Math.round((parsed.data.price_aoa / 175) * 100) / 100,
         stock: parsed.data.stock,
         image_url,
+        // Classe logística definida pelo lojista; vazio = não definida.
+        delivery_class: form.delivery_class || null,
       };
       if (initial) {
         const { error } = await supabase.from("products").update({ ...payload, status: "pending", rejection_reason: null }).eq("id", initial.id);
@@ -170,6 +183,18 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         <Field label={t("s_preco_kz")}><Input type="number" step="1" value={form.price_aoa} onChange={(e) => setForm({ ...form, price_aoa: e.target.value })} /></Field>
         <Field label={t("s_estoque")}><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></Field>
       </div>
+      <Field label="Classe de entrega">
+        <select
+          value={form.delivery_class}
+          onChange={(e) => setForm({ ...form, delivery_class: e.target.value })}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="">Não definida</option>
+          <option value="pequeno">Pequeno — motoboy</option>
+          <option value="medio">Médio — motoboy ou carro</option>
+          <option value="grande">Grande — carro, van ou empresa</option>
+        </select>
+      </Field>
       <Field label={t("s_imagem")}>
         <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
       </Field>
