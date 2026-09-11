@@ -447,6 +447,7 @@ export type Database = {
           lat: number | null
           license_photo_url: string | null
           lng: number | null
+          load_capacity: string | null
           municipality_id: string | null
           notes: string | null
           phone: string
@@ -480,6 +481,7 @@ export type Database = {
           lat?: number | null
           license_photo_url?: string | null
           lng?: number | null
+          load_capacity?: string | null
           municipality_id?: string | null
           notes?: string | null
           phone: string
@@ -513,6 +515,7 @@ export type Database = {
           lat?: number | null
           license_photo_url?: string | null
           lng?: number | null
+          load_capacity?: string | null
           municipality_id?: string | null
           notes?: string | null
           phone?: string
@@ -3680,6 +3683,10 @@ export type Database = {
         Args: { _reason?: string; _store_id: string }
         Returns: Json
       }
+      capacity_supports_class: {
+        Args: { _cap: string; _class: string }
+        Returns: boolean
+      }
       check_login_throttle: { Args: { _keys: string[] }; Returns: Json }
       clear_login_attempts: { Args: { _keys: string[] }; Returns: undefined }
       confirm_payment_intent_by_reference: {
@@ -3693,6 +3700,10 @@ export type Database = {
       }
       courier_accept_delivery: {
         Args: { _delivery_id: string }
+        Returns: string
+      }
+      courier_capacity_for_type: {
+        Args: { _ct: Database["public"]["Enums"]["courier_type"] }
         Returns: string
       }
       courier_delivery_detail: { Args: { _delivery_id: string }; Returns: Json }
@@ -3794,6 +3805,7 @@ export type Database = {
         Returns: boolean
       }
       is_trusted_payment_source: { Args: { _source: string }; Returns: boolean }
+      load_capacity_rank: { Args: { _cap: string }; Returns: number }
       load_class_rank: { Args: { _class: string }; Returns: number }
       log_security_event: {
         Args: {
