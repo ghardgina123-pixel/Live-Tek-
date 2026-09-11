@@ -14,6 +14,7 @@ import {
 } from "@/lib/catalog";
 import { absoluteUrl, clampDescription, loadProductSeo, titleWithSite } from "@/lib/seo-meta";
 import { StorageImage } from "@/lib/storage";
+import { StoreChatButton } from "@/components/StoreChatButton";
 
 export const Route = createFileRoute("/produto/$id")({
   loader: ({ params }) => loadProductSeo(params.id),
@@ -187,7 +188,11 @@ function ProdutoPage() {
 
       <div className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background/95 p-3 backdrop-blur-xl">
         <div className="flex items-center gap-2">
-          <Link to="/chat" className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-foreground"><MessageCircle size={20} /></Link>
+          {store ? (
+            <StoreChatButton storeId={store.id} className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-foreground" />
+          ) : (
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground"><MessageCircle size={20} /></span>
+          )}
           <button
             onClick={() => buy(false)}
             disabled={!canBuy}

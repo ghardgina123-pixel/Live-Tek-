@@ -590,14 +590,17 @@ export type Database = {
       deliveries: {
         Row: {
           assigned_at: string | null
+          courier_fee_aoa: number | null
           courier_id: string | null
           created_at: string
           delivered_at: string | null
+          dropoff_address: string | null
           dropoff_lat: number | null
           dropoff_lng: number | null
           id: string
           order_id: string
           picked_up_at: string | null
+          pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
           status: string
@@ -605,14 +608,17 @@ export type Database = {
         }
         Insert: {
           assigned_at?: string | null
+          courier_fee_aoa?: number | null
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          dropoff_address?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
           order_id: string
           picked_up_at?: string | null
+          pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
           status?: string
@@ -620,14 +626,17 @@ export type Database = {
         }
         Update: {
           assigned_at?: string | null
+          courier_fee_aoa?: number | null
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          dropoff_address?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
           order_id?: string
           picked_up_at?: string | null
+          pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
           status?: string
@@ -3699,16 +3708,27 @@ export type Database = {
       courier_open_deliveries: {
         Args: never
         Returns: {
+          courier_fee_aoa: number
           created_at: string
           delivery_id: string
+          dropoff_address: string
           municipality: string
           order_id: string
+          pickup_address: string
           shipping_aoa: number
           status: string
           store_name: string
         }[]
       }
+      courier_update_delivery_status: {
+        Args: { _delivery_id: string; _status: string }
+        Returns: string
+      }
       courier_withdrawable: { Args: never; Returns: Json }
+      create_delivery_for_order: {
+        Args: { _order_id: string }
+        Returns: string
+      }
       create_order_with_items: {
         Args: {
           p_address_id: string

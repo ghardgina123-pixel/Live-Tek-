@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, MapPin, Trash2, Loader2, Star } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, Trash2, Loader2, Star, LocateFixed } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -136,6 +136,8 @@ function AddressForm({ onDone }: { onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [loc, setLoc] = useState<LocationValue>({ country_id: "", province_id: "", municipality_id: "", district_id: "" });
   const [shippingFee, setShippingFee] = useState<number | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
   const [form, setForm] = useState({
     label: "Casa", district: "", street: "", reference: "", recipient_name: "", phone: "",
   });
@@ -167,6 +169,8 @@ function AddressForm({ onDone }: { onDone: () => void }) {
       reference: form.reference || null,
       recipient_name: form.recipient_name || null,
       phone: form.phone || null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
       is_default: isFirst,
     });
     setBusy(false);
@@ -190,6 +194,36 @@ function AddressForm({ onDone }: { onDone: () => void }) {
       <div className="space-y-1.5">
         <Label className="text-xs">{t("s_rua_avenida")}</Label>
         <Input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} placeholder={t("s_rua_numero_casa")} />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Localização exacta (para o entregador)</Label>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={locating}
+          onClick={() => {
+            if (!navigator.geolocation) return toast.error("Geolocalização não suportada neste dispositivo.");
+            setLocating(true);
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                setLocating(false);
+                toast.success("Localização capturada.");
+              },
+              (err) => { setLocating(false); toast.error(err.message); },
+              { enableHighAccuracy: true, timeout: 15000 },
+            );
+          }}
+        >
+          {locating ? <Loader2 className="animate-spin" /> : <LocateFixed size={14} />}
+          {coords ? "Localização capturada" : "Usar a minha localização actual"}
+        </Button>
+        {coords && (
+          <p className="text-[11px] text-muted-foreground">
+            {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+          </p>
+        )}
       </div>
       <div className="space-y-1.5">
         <Label className="text-xs">{t("s_ponto_de_referencia")}</Label>
