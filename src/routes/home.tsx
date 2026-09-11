@@ -326,7 +326,7 @@ function Home() {
           </p>
           <p>
             ☎️ Apoio:{" "}
-            <a href="tel:+244927046161" className="font-semibold underline">+244 927 046 161</a>
+            <a href="tel:+244957078313" className="font-semibold underline">+244 957 078 313</a>
           </p>
         </div>
       </footer>
