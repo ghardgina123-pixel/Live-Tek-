@@ -49,6 +49,20 @@ const schema = z.object({
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
+const CAPACITY_LABEL: Record<CourierType, string> = {
+  motoboy: "pequena",
+  carro: "média",
+  van: "grande",
+  empresa: "grande",
+};
+
+const CAPACITY_SCOPE: Record<CourierType, string> = {
+  motoboy: "pequenas",
+  carro: "pequenas e médias",
+  van: "pequenas, médias e grandes",
+  empresa: "pequenas, médias e grandes",
+};
+
 function TransportadorPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
