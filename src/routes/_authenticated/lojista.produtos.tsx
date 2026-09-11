@@ -155,6 +155,8 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         price_brl: Math.round((parsed.data.price_aoa / 175) * 100) / 100,
         stock: parsed.data.stock,
         image_url,
+        // Classe logística definida pelo lojista; vazio = não definida.
+        delivery_class: form.delivery_class || null,
       };
       if (initial) {
         const { error } = await supabase.from("products").update({ ...payload, status: "pending", rejection_reason: null }).eq("id", initial.id);
