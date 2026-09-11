@@ -201,6 +201,9 @@ function TransportadorPage() {
                   >{t}</button>
                 ))}
               </div>
+              <p className="text-[11px] text-muted-foreground">
+                Capacidade de carga: <span className="font-semibold">{CAPACITY_LABEL[form.courier_type]}</span> — recebe encomendas {CAPACITY_SCOPE[form.courier_type]}.
+              </p>
             </section>
 
             <section className="space-y-3">
