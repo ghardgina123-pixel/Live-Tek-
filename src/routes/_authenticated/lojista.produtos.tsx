@@ -27,6 +27,13 @@ type Product = {
   status: string;
   image_url: string | null;
   rejection_reason: string | null;
+  delivery_class: string | null;
+};
+
+const DELIVERY_CLASS_LABEL: Record<string, string> = {
+  pequeno: "Pequeno (motoboy)",
+  medio: "Médio (motoboy ou carro)",
+  grande: "Grande (carro, van ou empresa)",
 };
 
 function Produtos() {
