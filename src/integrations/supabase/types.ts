@@ -1961,6 +1961,30 @@ export type Database = {
           },
         ]
       }
+      profile_public_data: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string
+          is_online: boolean
+          last_seen_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id: string
+          is_online?: boolean
+          last_seen_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
