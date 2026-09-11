@@ -87,7 +87,7 @@ function EntregadorPage() {
     loadGoogleMaps()
       .then((maps) => {
         if (cancelled || !mapRef.current) return;
-        const center = pickup ?? dropoff ?? { lat: mapDefaults.lat, lng: mapDefaults.lng };
+        const center = pickup ?? dropoff ?? mapDefaults.center;
         mapObjRef.current = new maps.Map(mapRef.current, { center, zoom: 13, disableDefaultUI: true });
         if (pickup) new maps.Marker({ position: pickup, map: mapObjRef.current, title: "Recolha" });
         if (dropoff) new maps.Marker({ position: dropoff, map: mapObjRef.current, title: "Entrega" });
@@ -100,7 +100,7 @@ function EntregadorPage() {
       })
       .catch(() => { /* mapa opcional: chave ausente não bloqueia a entrega */ });
     return () => { cancelled = true; };
-  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, mapDefaults.lat, mapDefaults.lng]);
+  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, mapDefaults.center]);
 
   const stop = () => {
     if (watchRef.current !== null && navigator.geolocation) {
