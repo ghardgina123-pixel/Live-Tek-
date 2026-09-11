@@ -14,7 +14,13 @@ export const Route = createFileRoute("/_authenticated/entregador/")({
 type Open = {
   delivery_id: string; order_id: string; status: string; shipping_aoa: number;
   courier_fee_aoa: number | null; pickup_address: string | null; dropoff_address: string | null;
-  store_name: string | null; municipality: string | null; created_at: string;
+  store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
+};
+
+const LOAD_CLASS_LABEL: Record<string, string> = {
+  pequeno: "Carga pequena",
+  medio: "Carga média",
+  grande: "Carga grande",
 };
 type Mine = Open & { order_status: string; street: string | null; assigned_at: string | null; delivered_at: string | null };
 
