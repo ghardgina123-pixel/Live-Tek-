@@ -49,6 +49,20 @@ const schema = z.object({
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
+const CAPACITY_LABEL: Record<CourierType, string> = {
+  motoboy: "pequena",
+  carro: "média",
+  van: "grande",
+  empresa: "grande",
+};
+
+const CAPACITY_SCOPE: Record<CourierType, string> = {
+  motoboy: "pequenas",
+  carro: "pequenas e médias",
+  van: "pequenas, médias e grandes",
+  empresa: "pequenas, médias e grandes",
+};
+
 function TransportadorPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -201,6 +215,9 @@ function TransportadorPage() {
                   >{t}</button>
                 ))}
               </div>
+              <p className="text-[11px] text-muted-foreground">
+                Capacidade de carga: <span className="font-semibold">{CAPACITY_LABEL[form.courier_type]}</span> — recebe encomendas {CAPACITY_SCOPE[form.courier_type]}.
+              </p>
             </section>
 
             <section className="space-y-3">
