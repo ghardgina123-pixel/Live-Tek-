@@ -183,6 +183,18 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         <Field label={t("s_preco_kz")}><Input type="number" step="1" value={form.price_aoa} onChange={(e) => setForm({ ...form, price_aoa: e.target.value })} /></Field>
         <Field label={t("s_estoque")}><Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} /></Field>
       </div>
+      <Field label="Classe de entrega">
+        <select
+          value={form.delivery_class}
+          onChange={(e) => setForm({ ...form, delivery_class: e.target.value })}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="">Não definida</option>
+          <option value="pequeno">Pequeno — motoboy</option>
+          <option value="medio">Médio — motoboy ou carro</option>
+          <option value="grande">Grande — carro, van ou empresa</option>
+        </select>
+      </Field>
       <Field label={t("s_imagem")}>
         <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
       </Field>
