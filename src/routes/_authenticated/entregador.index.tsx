@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/entregador/")({
 
 type Open = {
   delivery_id: string; order_id: string; status: string; shipping_aoa: number;
+  courier_fee_aoa: number | null; pickup_address: string | null; dropoff_address: string | null;
   store_name: string | null; municipality: string | null; created_at: string;
 };
 type Mine = Open & { order_status: string; street: string | null; assigned_at: string | null; delivered_at: string | null };
@@ -45,6 +46,20 @@ function EntregadorIndex() {
   }, []);
 
   useEffect(() => { if (user) void load(); }, [user?.id, load]);
+
+  // Novas entregas aparecem em tempo real, sem recarregar a página.
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel("courier-deliveries")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "deliveries" }, () => {
+        toast.info("Nova entrega disponível.");
+        void load();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "deliveries" }, () => { void load(); })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id, load]);
 
   const accept = async (id: string) => {
     setBusy(id);
@@ -106,7 +121,9 @@ function EntregadorIndex() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold">Pedido #{d.order_id.slice(0, 8)}</p>
                           <p className="text-xs text-muted-foreground">{d.store_name ?? "Loja"} · {d.municipality ?? "—"}</p>
-                          <p className="mt-0.5 text-xs font-semibold text-primary">Taxa de entrega: {formatAoa(Number(d.shipping_aoa))}</p>
+                          <p className="mt-1 text-[11px] text-muted-foreground">Recolha: {d.pickup_address ?? "loja"}</p>
+                          <p className="text-[11px] text-muted-foreground">Entrega: {d.dropoff_address ?? "endereço do cliente"}</p>
+                          <p className="mt-0.5 text-xs font-semibold text-primary">A receber: {formatAoa(Number(d.courier_fee_aoa ?? d.shipping_aoa))}</p>
                         </div>
                       </div>
                       <button
