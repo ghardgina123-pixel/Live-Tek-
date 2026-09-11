@@ -100,6 +100,9 @@ function Produtos() {
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-semibold">{p.name}</p>
                 <p className="text-xs text-muted-foreground">Kz {Number(p.price_aoa).toLocaleString("pt-AO")} · Estoque {p.stock}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Entrega: {p.delivery_class ? DELIVERY_CLASS_LABEL[p.delivery_class] : "classe não definida"}
+                </p>
                 <StatusBadge status={p.status} />
                 {p.status === "rejected" && p.rejection_reason && (
                   <p className="mt-1 text-[10px] text-destructive">Motivo: {p.rejection_reason}</p>
