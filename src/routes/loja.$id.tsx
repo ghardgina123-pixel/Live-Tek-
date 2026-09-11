@@ -5,6 +5,7 @@ import { fetchStore, fetchStoreProducts, toCartProduct, type CatalogProduct, typ
 import { formatPrice, useCurrency } from "@/lib/currency";
 import { absoluteUrl, clampDescription, loadStoreSeo, titleWithSite } from "@/lib/seo-meta";
 import { StorageImage } from "@/lib/storage";
+import { StoreChatButton } from "@/components/StoreChatButton";
 
 export const Route = createFileRoute("/loja/$id")({
   loader: ({ params }) => loadStoreSeo(params.id),
@@ -128,9 +129,7 @@ function LojaPage() {
           <Link to="/live/$id" params={{ id: store.id }} className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary py-2.5 text-xs font-semibold text-secondary-foreground">
             <Radio size={14} /> Entrar na live
           </Link>
-          <Link to="/chat" className="flex items-center justify-center gap-1.5 rounded-xl bg-muted py-2.5 text-xs font-semibold text-foreground">
-            <MessageCircle size={14} /> Conversar
-          </Link>
+          <StoreChatButton storeId={store.id} withLabel size={14} className="flex items-center justify-center gap-1.5 rounded-xl bg-muted py-2.5 text-xs font-semibold text-foreground" />
         </div>
       </div>
 
