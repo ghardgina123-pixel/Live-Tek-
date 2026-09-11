@@ -1803,6 +1803,7 @@ export type Database = {
           created_at: string
           currency_code: string
           email: string | null
+          entity_type: string | null
           fiscal_address: string | null
           id: string
           is_active: boolean
@@ -1815,12 +1816,14 @@ export type Database = {
           tax_regime: string | null
           trade_name: string | null
           updated_at: string
+          vat_regime: string | null
         }
         Insert: {
           country_code?: string
           created_at?: string
           currency_code?: string
           email?: string | null
+          entity_type?: string | null
           fiscal_address?: string | null
           id?: string
           is_active?: boolean
@@ -1833,12 +1836,14 @@ export type Database = {
           tax_regime?: string | null
           trade_name?: string | null
           updated_at?: string
+          vat_regime?: string | null
         }
         Update: {
           country_code?: string
           created_at?: string
           currency_code?: string
           email?: string | null
+          entity_type?: string | null
           fiscal_address?: string | null
           id?: string
           is_active?: boolean
@@ -1851,6 +1856,7 @@ export type Database = {
           tax_regime?: string | null
           trade_name?: string | null
           updated_at?: string
+          vat_regime?: string | null
         }
         Relationships: []
       }
