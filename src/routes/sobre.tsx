@@ -55,7 +55,7 @@ function Sobre() {
         ))}
         <footer className="rounded-2xl bg-muted/40 p-4 text-center text-xs text-muted-foreground">
           <p className="font-semibold text-foreground">www.livemarketplece.live</p>
-          <p className="mt-1">Apoio ao cliente: +244 927 046 161</p>
+          <p className="mt-1">Apoio ao cliente: +244 957 078 313</p>
         </footer>
       </main>
     </AppShell>

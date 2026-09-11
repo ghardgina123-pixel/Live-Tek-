@@ -36,17 +36,17 @@ function Ajuda() {
         <h1 className="text-lg font-semibold">Ajuda e suporte</h1>
       </header>
       <div className="space-y-3 px-5 py-5">
-        <a href="mailto:livemarketcomercioaovivo@gmail.com" className="flex items-center gap-3 rounded-xl border border-border p-3">
+        <a href="mailto:tussalakaka.contatos@gmail.com" className="flex items-center gap-3 rounded-xl border border-border p-3">
           <Mail size={18} className="text-primary" />
-          <div><p className="text-sm font-semibold">Email</p><p className="text-xs text-muted-foreground">livemarketcomercioaovivo@gmail.com</p></div>
+          <div><p className="text-sm font-semibold">Email</p><p className="text-xs text-muted-foreground">tussalakaka.contatos@gmail.com</p></div>
         </a>
-        <a href="https://wa.me/244927046161" className="flex items-center gap-3 rounded-xl border border-border p-3">
+        <a href="https://wa.me/244957078313" className="flex items-center gap-3 rounded-xl border border-border p-3">
           <MessageCircle size={18} className="text-primary" />
-          <div><p className="text-sm font-semibold">WhatsApp</p><p className="text-xs text-muted-foreground">+244 927 046 161</p></div>
+          <div><p className="text-sm font-semibold">WhatsApp</p><p className="text-xs text-muted-foreground">+244 957 078 313</p></div>
         </a>
-        <a href="tel:+244927046161" className="flex items-center gap-3 rounded-xl border border-border p-3">
+        <a href="tel:+244957078313" className="flex items-center gap-3 rounded-xl border border-border p-3">
           <Phone size={18} className="text-primary" />
-          <div><p className="text-sm font-semibold">Telefone</p><p className="text-xs text-muted-foreground">+244 927 046 161</p></div>
+          <div><p className="text-sm font-semibold">Telefone</p><p className="text-xs text-muted-foreground">+244 957 078 313</p></div>
         </a>
         <Link to="/como-vender" className="flex items-center gap-3 rounded-xl border border-border p-3">
           <MessageCircle size={18} className="text-primary" />
