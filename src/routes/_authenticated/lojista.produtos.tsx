@@ -125,6 +125,7 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
     description: initial?.description ?? "",
     price_aoa: initial ? String(initial.price_aoa) : "",
     stock: initial ? String(initial.stock) : "1",
+    delivery_class: initial?.delivery_class ?? "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
