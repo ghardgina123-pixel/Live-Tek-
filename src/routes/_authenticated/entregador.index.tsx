@@ -129,6 +129,9 @@ function EntregadorIndex() {
                           <p className="text-xs text-muted-foreground">{d.store_name ?? "Loja"} · {d.municipality ?? "—"}</p>
                           <p className="mt-1 text-[11px] text-muted-foreground">Recolha: {d.pickup_address ?? "loja"}</p>
                           <p className="text-[11px] text-muted-foreground">Entrega: {d.dropoff_address ?? "endereço do cliente"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {d.load_class ? LOAD_CLASS_LABEL[d.load_class] : "Carga não classificada"}
+                          </p>
                           <p className="mt-0.5 text-xs font-semibold text-primary">A receber: {formatAoa(Number(d.courier_fee_aoa ?? d.shipping_aoa))}</p>
                         </div>
                       </div>
