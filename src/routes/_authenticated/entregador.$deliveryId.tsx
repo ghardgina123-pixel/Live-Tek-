@@ -249,6 +249,38 @@ function EntregadorPage() {
               </p>
             )}
 
+            {/* Distância e tempo reais — nunca estimados no cliente */}
+            <div className="rounded-2xl border border-border p-4 text-sm">
+              <p className="flex items-center gap-2 font-semibold"><RouteIcon size={16} /> Distância e rota</p>
+              {geoLoading ? (
+                <p className="mt-2 text-xs text-muted-foreground">A obter dados reais…</p>
+              ) : !geo ? (
+                <p className="mt-2 text-xs text-muted-foreground">INDISPONÍVEL</p>
+              ) : (
+                <div className="mt-2 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Distância em linha reta</span>
+                    <span className="font-semibold">{formatDistanceM(geo.straightDistanceM) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Distância da rota</span>
+                    <span className="font-semibold">{formatDistanceM(geo.routeDistanceM) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1 text-muted-foreground"><Clock size={12} /> Tempo estimado</span>
+                    <span className="font-semibold">{formatDurationS(geo.routeDurationS) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  {geo.message && <p className="pt-1 text-[11px] text-muted-foreground">{geo.message}</p>}
+                  {geo.routeComputedAt && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Rota obtida em {new Date(geo.routeComputedAt).toLocaleString("pt-AO")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+
             <div className="rounded-2xl border border-border p-4 text-sm">
               <p className="flex items-center gap-2 font-semibold"><MapPin size={16} /> Transmissão GPS</p>
               <p className="mt-1 text-xs text-muted-foreground">
