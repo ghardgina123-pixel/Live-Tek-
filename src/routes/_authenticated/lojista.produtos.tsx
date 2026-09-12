@@ -131,16 +131,33 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
     price_aoa: initial ? String(initial.price_aoa) : "",
     stock: initial ? String(initial.stock) : "1",
     delivery_class: initial?.delivery_class ?? "",
+    weight_kg: initial?.weight_kg != null ? String(initial.weight_kg) : "",
+    length_cm: initial?.length_cm != null ? String(initial.length_cm) : "",
+    width_cm: initial?.width_cm != null ? String(initial.width_cm) : "",
+    height_cm: initial?.height_cm != null ? String(initial.height_cm) : "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Campos vazios ficam sem dados (null); nunca inventamos medidas.
+  const num = (v: string) => (v.trim() === "" ? null : Number(v));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const priceAoa = Number(form.price_aoa);
     const stock = Number(form.stock);
-    const parsed = productSchema.safeParse({ name: form.name, description: form.description, price_aoa: priceAoa, stock });
+    const parsed = productSchema.safeParse({
+      name: form.name,
+      description: form.description,
+      price_aoa: priceAoa,
+      stock,
+      weight_kg: num(form.weight_kg),
+      length_cm: num(form.length_cm),
+      width_cm: num(form.width_cm),
+      height_cm: num(form.height_cm),
+    });
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? t("s_dados_invalidos"));
+
     setBusy(true);
     try {
       let image_url = initial?.image_url ?? null;
