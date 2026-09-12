@@ -83,7 +83,18 @@ function EntregadorPage() {
     return () => { cancelled = true; };
   }, [deliveryId]);
 
-  // Mapa com recolha (loja) e entrega (cliente)
+  // Geografia real (distância congelada + rota do serviço de mapas)
+  useEffect(() => {
+    let cancelled = false;
+    setGeoLoading(true);
+    fetchRoute({ data: { deliveryId } })
+      .then((res) => { if (!cancelled) setGeo(res); })
+      .catch(() => { if (!cancelled) setGeo(null); })
+      .finally(() => { if (!cancelled) setGeoLoading(false); });
+    return () => { cancelled = true; };
+  }, [deliveryId]);
+
+  // Mapa com recolha (loja), entrega (cliente) e rota real quando disponível
   useEffect(() => {
     if (!delivery || !mapRef.current) return;
     const pickup = delivery.pickup_lat != null && delivery.pickup_lng != null
@@ -99,6 +110,25 @@ function EntregadorPage() {
         mapObjRef.current = new maps.Map(mapRef.current, { center, zoom: 13, disableDefaultUI: true });
         if (pickup) new maps.Marker({ position: pickup, map: mapObjRef.current, title: "Recolha" });
         if (dropoff) new maps.Marker({ position: dropoff, map: mapObjRef.current, title: "Entrega" });
+        // Só desenha o traçado devolvido pelo serviço de rotas. Sem rota real,
+        // ficam apenas os pontos — nunca uma linha simulada.
+        const encoded = geo?.routePolyline;
+        if (encoded) {
+          const path = decodePolyline(encoded);
+          if (path.length > 1) {
+            new maps.Polyline({
+              path,
+              map: mapObjRef.current,
+              strokeColor: "#2563eb",
+              strokeOpacity: 0.9,
+              strokeWeight: 4,
+            });
+            const b = new maps.LatLngBounds();
+            path.forEach((p) => b.extend(p));
+            mapObjRef.current.fitBounds(b);
+            return;
+          }
+        }
         if (pickup && dropoff) {
           const bounds = new maps.LatLngBounds();
           bounds.extend(pickup);
@@ -108,7 +138,8 @@ function EntregadorPage() {
       })
       .catch(() => { /* mapa opcional: chave ausente não bloqueia a entrega */ });
     return () => { cancelled = true; };
-  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, mapDefaults.center]);
+  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, geo?.routePolyline, mapDefaults.center]);
+
 
   const stop = () => {
     if (watchRef.current !== null && navigator.geolocation) {
