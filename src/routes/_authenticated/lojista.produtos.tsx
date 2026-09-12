@@ -179,7 +179,12 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
         image_url,
         // Classe logística definida pelo lojista; vazio = não definida.
         delivery_class: form.delivery_class || null,
+        weight_kg: parsed.data.weight_kg ?? null,
+        length_cm: parsed.data.length_cm ?? null,
+        width_cm: parsed.data.width_cm ?? null,
+        height_cm: parsed.data.height_cm ?? null,
       };
+
       if (initial) {
         const { error } = await supabase.from("products").update({ ...payload, status: "pending", rejection_reason: null }).eq("id", initial.id);
         if (error) throw error;
