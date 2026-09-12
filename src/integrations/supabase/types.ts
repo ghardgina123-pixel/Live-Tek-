@@ -4003,6 +4003,7 @@ export type Database = {
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
       affiliate_withdrawable: { Args: never; Returns: Json }
+      agency_live_fee_amount: { Args: never; Returns: number }
       approved_stores_count: { Args: never; Returns: number }
       assign_delivery_courier: {
         Args: { _courier_id: string; _delivery_id: string }
