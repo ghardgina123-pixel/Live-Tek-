@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/imobiliaria")({
 
 type Agency = {
   id: string; status: "pending" | "active" | "rejected" | "suspended";
-  name: string; nif: string; phone: string; email: string | null;
+  name: string; phone: string; email: string | null;
   description: string | null; logo_url: string | null;
   province_id: string | null; municipality_id: string | null;
   district: string | null; street: string | null;
@@ -129,9 +129,9 @@ function AgencyRegistration({ onCreated }: { onCreated: () => void }) {
     const parsed = agencySchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
     setBusy(true);
-    const { error } = await (supabase as any).from("real_estate_agencies").insert({
+    const { data: created, error } = await (supabase as any).from("real_estate_agencies").insert({
       owner_id: user.id,
-      name: form.name, nif: form.nif, phone: form.phone,
+      name: form.name, phone: form.phone,
       email: form.email || null, description: form.description || null,
       country_id: loc.country_id || null,
       province_id: loc.province_id || null,
@@ -139,9 +139,14 @@ function AgencyRegistration({ onCreated }: { onCreated: () => void }) {
       district_id: loc.district_id || null,
       district: form.district || null, street: form.street || null,
       lat: coords.lat, lng: coords.lng,
-    });
+    }).select("id").maybeSingle();
+    if (error) { setBusy(false); return toast.error(error.message); }
+    // O NIF é dado fiscal privado: fica numa tabela acessível apenas ao dono e admin.
+    const { error: nifError } = await (supabase as any)
+      .from("real_estate_agency_private")
+      .insert({ agency_id: created?.id, nif: form.nif });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (nifError) return toast.error(nifError.message);
     toast.success("Cadastro enviado para análise");
     onCreated();
   };
