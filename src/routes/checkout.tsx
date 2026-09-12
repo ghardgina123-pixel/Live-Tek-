@@ -68,6 +68,11 @@ function Checkout() {
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const region = useRegion();
   const countryCode = region.code;
+  const fetchQuote = useServerFn(quoteDeliveryFee);
+  const [quote, setQuote] = useState<DeliveryFeeQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const itemsKey = items.map((i) => `${i.product.id}:${i.qty}`).join(",");
 
   useEffect(() => {
     if (!user) { setAddrLoading(false); return; }
