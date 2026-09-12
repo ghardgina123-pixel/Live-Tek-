@@ -1,10 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Package, Truck, Wallet } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Package, Truck, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatAoa } from "@/lib/commerce";
+import { formatDistanceM } from "@/lib/geo";
 import { toast } from "sonner";
+
+const ACCEPT_ERROR_LABEL: Record<string, string> = {
+  not_authenticated: "Sessão inválida. Entre novamente.",
+  courier_not_active: "A sua conta de entregador não está activa.",
+  courier_unavailable: "Está indisponível. Active a disponibilidade para aceitar entregas.",
+  delivery_not_found: "Entrega não encontrada.",
+  delivery_already_assigned: "Esta entrega já foi atribuída a outro entregador.",
+  delivery_closed: "Esta entrega já foi concluída ou cancelada.",
+  delivery_not_open: "Esta entrega já não está aberta.",
+  vehicle_incompatible_with_load_class: "O seu veículo não tem capacidade para esta carga.",
+};
+
+function acceptErrorMessage(message: string): string {
+  const key = Object.keys(ACCEPT_ERROR_LABEL).find((k) => message.includes(k));
+  return key ? ACCEPT_ERROR_LABEL[key]! : message;
+}
 
 export const Route = createFileRoute("/_authenticated/entregador/")({
   head: () => ({ meta: [{ title: "Painel do entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
@@ -17,7 +34,8 @@ type Open = {
   store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
   total_weight_kg?: number | null; total_volume_cm3?: number | null; items_count?: number | null;
   logistics_incomplete?: boolean | null;
-
+  pickup_distance_m?: number | null;
+  gps_fresh?: boolean | null;
 };
 
 const LOAD_CLASS_LABEL: Record<string, string> = {
@@ -41,20 +59,68 @@ function EntregadorIndex() {
   const [mine, setMine] = useState<Mine[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [gpsAt, setGpsAt] = useState<string | null>(null);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+  const [gpsBusy, setGpsBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [o, m] = await Promise.all([
+    const [o, m, c] = await Promise.all([
       supabase.rpc("courier_open_deliveries"),
       supabase.rpc("courier_my_deliveries"),
+      supabase.from("couriers").select("is_available, last_location_at").maybeSingle(),
     ]);
     if (o.error) toast.error(o.error.message);
     if (m.error) toast.error(m.error.message);
     setOpen((o.data as Open[]) ?? []);
     setMine((m.data as Mine[]) ?? []);
+    if (c.data) {
+      setAvailable(Boolean(c.data.is_available));
+      setGpsAt(c.data.last_location_at ?? null);
+    }
     setLoading(false);
   }, []);
 
   useEffect(() => { if (user) void load(); }, [user?.id, load]);
+
+  // Envia a localização GPS REAL do dispositivo. Sem GPS não há proximidade.
+  const shareLocation = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGpsError("Este dispositivo não disponibiliza GPS.");
+      return;
+    }
+    setGpsBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { error } = await supabase.rpc("courier_update_location", {
+          _lat: pos.coords.latitude,
+          _lng: pos.coords.longitude,
+        });
+        setGpsBusy(false);
+        if (error) { setGpsError(error.message); return; }
+        setGpsError(null);
+        void load();
+      },
+      (err) => {
+        setGpsBusy(false);
+        setGpsError(
+          err.code === err.PERMISSION_DENIED
+            ? "Permissão de localização recusada."
+            : "Localização indisponível neste momento.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  }, [load]);
+
+  const toggleAvailability = async () => {
+    if (available === null) return;
+    const next = !available;
+    const { error } = await supabase.rpc("courier_set_availability", { _available: next });
+    if (error) return toast.error(error.message);
+    setAvailable(next);
+    void load();
+  };
 
   // Novas entregas aparecem em tempo real, sem recarregar a página.
   useEffect(() => {
@@ -74,7 +140,11 @@ function EntregadorIndex() {
     setBusy(id);
     const { error } = await supabase.rpc("courier_accept_delivery", { _delivery_id: id });
     setBusy(null);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(acceptErrorMessage(error.message));
+      void load();
+      return;
+    }
     toast.success("Entrega atribuída a si");
     void load();
   };
@@ -111,6 +181,47 @@ function EntregadorIndex() {
           O levantamento é feito na área de saques.
         </p>
 
+        <section className="space-y-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold">Disponibilidade</p>
+              <p className="text-[11px] text-muted-foreground">
+                {available === null
+                  ? "Estado indisponível"
+                  : available
+                    ? "Está a receber entregas."
+                    : "Está indisponível — não recebe entregas."}
+              </p>
+            </div>
+            <button
+              onClick={toggleAvailability}
+              disabled={available === null}
+              className="h-9 rounded-xl border border-border px-3 text-xs font-semibold disabled:opacity-60"
+            >
+              {available ? "Ficar indisponível" : "Ficar disponível"}
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
+            <div className="min-w-0">
+              <p className="flex items-center gap-1 text-sm font-semibold"><MapPin size={14} /> Localização GPS</p>
+              <p className="text-[11px] text-muted-foreground">
+                {gpsError
+                  ? gpsError
+                  : gpsAt
+                    ? `Última actualização: ${new Date(gpsAt).toLocaleTimeString("pt-AO")}`
+                    : "Sem localização — não é possível ordenar por proximidade."}
+              </p>
+            </div>
+            <button
+              onClick={shareLocation}
+              disabled={gpsBusy}
+              className="h-9 rounded-xl bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {gpsBusy ? "A obter…" : "Actualizar GPS"}
+            </button>
+          </div>
+        </section>
+
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" /></div>
         ) : (
@@ -131,6 +242,13 @@ function EntregadorIndex() {
                           <p className="text-sm font-semibold">Pedido #{d.order_id.slice(0, 8)}</p>
                           <p className="text-xs text-muted-foreground">{d.store_name ?? "Loja"} · {d.municipality ?? "—"}</p>
                           <p className="mt-1 text-[11px] text-muted-foreground">Recolha: {d.pickup_address ?? "loja"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {d.pickup_distance_m != null
+                              ? `Distância até à recolha: ${formatDistanceM(Number(d.pickup_distance_m))}`
+                              : d.gps_fresh
+                                ? "Distância até à recolha: INDISPONÍVEL (loja sem coordenadas)"
+                                : "Distância até à recolha: INDISPONÍVEL (GPS em falta ou antigo)"}
+                          </p>
                           <p className="text-[11px] text-muted-foreground">Entrega: {d.dropoff_address ?? "endereço do cliente"}</p>
                           <p className="text-[11px] text-muted-foreground">
                             {d.load_class ? LOAD_CLASS_LABEL[d.load_class] : "Carga não classificada"}
