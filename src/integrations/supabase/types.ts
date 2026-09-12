@@ -601,13 +601,17 @@ export type Database = {
           dropoff_lat: number | null
           dropoff_lng: number | null
           id: string
+          items_count: number | null
           load_class: string | null
+          logistics_incomplete: boolean
           order_id: string
           picked_up_at: string | null
           pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
           status: string
+          total_volume_cm3: number | null
+          total_weight_kg: number | null
           updated_at: string
         }
         Insert: {
@@ -620,13 +624,17 @@ export type Database = {
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
+          items_count?: number | null
           load_class?: string | null
+          logistics_incomplete?: boolean
           order_id: string
           picked_up_at?: string | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
           status?: string
+          total_volume_cm3?: number | null
+          total_weight_kg?: number | null
           updated_at?: string
         }
         Update: {
@@ -639,13 +647,17 @@ export type Database = {
           dropoff_lat?: number | null
           dropoff_lng?: number | null
           id?: string
+          items_count?: number | null
           load_class?: string | null
+          logistics_incomplete?: boolean
           order_id?: string
           picked_up_at?: string | null
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
           status?: string
+          total_volume_cm3?: number | null
+          total_weight_kg?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1476,6 +1488,8 @@ export type Database = {
           quantity: number
           unit_price_aoa: number
           unit_price_brl: number
+          unit_volume_cm3: number | null
+          unit_weight_kg: number | null
         }
         Insert: {
           id?: string
@@ -1484,6 +1498,8 @@ export type Database = {
           quantity: number
           unit_price_aoa?: number
           unit_price_brl: number
+          unit_volume_cm3?: number | null
+          unit_weight_kg?: number | null
         }
         Update: {
           id?: string
@@ -1492,6 +1508,8 @@ export type Database = {
           quantity?: number
           unit_price_aoa?: number
           unit_price_brl?: number
+          unit_volume_cm3?: number | null
+          unit_weight_kg?: number | null
         }
         Relationships: [
           {
@@ -1516,6 +1534,8 @@ export type Database = {
           created_at: string
           customer_id: string
           id: string
+          items_count: number | null
+          logistics_incomplete: boolean
           paid_at: string | null
           payment_method: string | null
           sale_document_issued_at: string | null
@@ -1527,12 +1547,16 @@ export type Database = {
           subtotal_aoa: number
           total_aoa: number
           total_brl: number
+          total_volume_cm3: number | null
+          total_weight_kg: number | null
         }
         Insert: {
           address_id?: string | null
           created_at?: string
           customer_id: string
           id?: string
+          items_count?: number | null
+          logistics_incomplete?: boolean
           paid_at?: string | null
           payment_method?: string | null
           sale_document_issued_at?: string | null
@@ -1544,12 +1568,16 @@ export type Database = {
           subtotal_aoa?: number
           total_aoa?: number
           total_brl: number
+          total_volume_cm3?: number | null
+          total_weight_kg?: number | null
         }
         Update: {
           address_id?: string | null
           created_at?: string
           customer_id?: string
           id?: string
+          items_count?: number | null
+          logistics_incomplete?: boolean
           paid_at?: string | null
           payment_method?: string | null
           sale_document_issued_at?: string | null
@@ -1561,6 +1589,8 @@ export type Database = {
           subtotal_aoa?: number
           total_aoa?: number
           total_brl?: number
+          total_volume_cm3?: number | null
+          total_weight_kg?: number | null
         }
         Relationships: [
           {
@@ -1928,8 +1958,10 @@ export type Database = {
           created_at: string
           delivery_class: string | null
           description: string | null
+          height_cm: number | null
           id: string
           image_url: string | null
+          length_cm: number | null
           name: string
           price_aoa: number
           price_brl: number
@@ -1938,13 +1970,17 @@ export type Database = {
           stock: number
           store_id: string
           updated_at: string
+          weight_kg: number | null
+          width_cm: number | null
         }
         Insert: {
           created_at?: string
           delivery_class?: string | null
           description?: string | null
+          height_cm?: number | null
           id?: string
           image_url?: string | null
+          length_cm?: number | null
           name: string
           price_aoa?: number
           price_brl: number
@@ -1953,13 +1989,17 @@ export type Database = {
           stock?: number
           store_id: string
           updated_at?: string
+          weight_kg?: number | null
+          width_cm?: number | null
         }
         Update: {
           created_at?: string
           delivery_class?: string | null
           description?: string | null
+          height_cm?: number | null
           id?: string
           image_url?: string | null
+          length_cm?: number | null
           name?: string
           price_aoa?: number
           price_brl?: number
@@ -1968,6 +2008,8 @@ export type Database = {
           stock?: number
           store_id?: string
           updated_at?: string
+          weight_kg?: number | null
+          width_cm?: number | null
         }
         Relationships: [
           {
@@ -3729,13 +3771,17 @@ export type Database = {
           created_at: string
           delivery_id: string
           dropoff_address: string
+          items_count: number
           load_class: string
+          logistics_incomplete: boolean
           municipality: string
           order_id: string
           pickup_address: string
           shipping_aoa: number
           status: string
           store_name: string
+          total_volume_cm3: number
+          total_weight_kg: number
         }[]
       }
       courier_type_supports_class: {
@@ -3828,6 +3874,15 @@ export type Database = {
       }
       next_invoice_number: { Args: { _code: string }; Returns: number }
       order_load_class: { Args: { _order_id: string }; Returns: string }
+      order_logistics_snapshot: {
+        Args: { _order_id: string }
+        Returns: {
+          incomplete: boolean
+          items_count: number
+          total_volume_cm3: number
+          total_weight_kg: number
+        }[]
+      }
       rate_limit_hit: {
         Args: {
           _block_minutes: number
