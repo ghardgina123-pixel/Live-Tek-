@@ -1,16 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, MapPin, Loader2, Power, Truck, CheckCircle2, Package, Phone } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, MapPin, Loader2, Power, Truck, CheckCircle2, Package, Phone, Route as RouteIcon, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatAoa } from "@/lib/commerce";
 import { loadGoogleMaps } from "@/lib/google-maps";
 import { useMapDefaults } from "@/lib/region";
+import { getDeliveryRoute, type DeliveryRouteResult } from "@/lib/logistics.functions";
+import { decodePolyline, formatDistanceM, formatDurationS } from "@/lib/geo";
 
 export const Route = createFileRoute("/_authenticated/entregador/$deliveryId")({
   head: () => ({ meta: [{ title: "Entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
   component: EntregadorPage,
 });
+
 
 type Delivery = {
   delivery_id: string;
