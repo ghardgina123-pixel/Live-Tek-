@@ -28,19 +28,19 @@ function Splash() {
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-6">
         <div className="flex w-full flex-col items-center gap-5" aria-labelledby="splash-title splash-slogan">
-          <div className="flex aspect-square w-[min(58vw,236px)] items-center justify-center overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
+          <div className="aspect-[306/240] w-[min(62vw,236px)] overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
             <img
               src={logoAsset.url}
               alt="Live Teká"
               width={306}
               height={300}
-              className="block h-full w-full object-contain"
+              className="block h-auto w-full"
               loading="eager"
               decoding="async"
               fetchPriority="high"
             />
           </div>
-          <h1 id="splash-title" className="text-center text-sm font-bold text-primary">
+          <h1 id="splash-title" className="sr-only">
             Live Teká — Venda em Tempo Real
           </h1>
           <p
