@@ -181,6 +181,47 @@ function EntregadorIndex() {
           O levantamento é feito na área de saques.
         </p>
 
+        <section className="space-y-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold">Disponibilidade</p>
+              <p className="text-[11px] text-muted-foreground">
+                {available === null
+                  ? "Estado indisponível"
+                  : available
+                    ? "Está a receber entregas."
+                    : "Está indisponível — não recebe entregas."}
+              </p>
+            </div>
+            <button
+              onClick={toggleAvailability}
+              disabled={available === null}
+              className="h-9 rounded-xl border border-border px-3 text-xs font-semibold disabled:opacity-60"
+            >
+              {available ? "Ficar indisponível" : "Ficar disponível"}
+            </button>
+          </div>
+          <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
+            <div className="min-w-0">
+              <p className="flex items-center gap-1 text-sm font-semibold"><MapPin size={14} /> Localização GPS</p>
+              <p className="text-[11px] text-muted-foreground">
+                {gpsError
+                  ? gpsError
+                  : gpsAt
+                    ? `Última actualização: ${new Date(gpsAt).toLocaleTimeString("pt-AO")}`
+                    : "Sem localização — não é possível ordenar por proximidade."}
+              </p>
+            </div>
+            <button
+              onClick={shareLocation}
+              disabled={gpsBusy}
+              className="h-9 rounded-xl bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {gpsBusy ? "A obter…" : "Actualizar GPS"}
+            </button>
+          </div>
+        </section>
+
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" /></div>
         ) : (
