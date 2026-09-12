@@ -15,6 +15,9 @@ type Open = {
   delivery_id: string; order_id: string; status: string; shipping_aoa: number;
   courier_fee_aoa: number | null; pickup_address: string | null; dropoff_address: string | null;
   store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
+  total_weight_kg?: number | null; total_volume_cm3?: number | null; items_count?: number | null;
+  logistics_incomplete?: boolean | null;
+
 };
 
 const LOAD_CLASS_LABEL: Record<string, string> = {
