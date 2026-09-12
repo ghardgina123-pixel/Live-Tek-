@@ -1,9 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, Store as StoreIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { SITE_URL } from "@/lib/site";
 import bannerAsset from "@/assets/live-teka-banner.png.asset.json";
-import logoAsset from "@/assets/live-teka-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,53 +14,13 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: `${SITE_URL}/` },
-      { rel: "preload", as: "image", href: logoAsset.url, fetchPriority: "high" },
       { rel: "preload", as: "image", href: bannerAsset.url },
     ],
   }),
-  component: Splash,
+  component: EntryScreen,
 });
 
-function Splash() {
-  const [showRegistration, setShowRegistration] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShowRegistration(true), 2200);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  if (!showRegistration) {
-    return (
-      <main className="flex min-h-screen w-full items-center justify-center bg-background px-6 text-foreground">
-        <div className="flex w-full max-w-[320px] flex-col items-center gap-7" aria-labelledby="splash-title splash-slogan">
-          <div className="aspect-[306/238] w-[min(68vw,250px)] overflow-hidden bg-card">
-            <img
-              src={logoAsset.url}
-              alt="Live Teká"
-              width={306}
-              height={300}
-              className="block h-auto w-full"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-          </div>
-          <h1 id="splash-title" className="sr-only">Live Teká</h1>
-          <p
-            id="splash-slogan"
-            className="flex w-full flex-nowrap items-center justify-center gap-2 whitespace-nowrap text-center text-[clamp(0.72rem,3.4vw,0.9rem)] font-extrabold text-primary"
-          >
-            <span>COMPRE</span>
-            <span aria-hidden="true" className="text-primary-glow">•</span>
-            <span>CONVERSE</span>
-            <span aria-hidden="true" className="text-primary-glow">•</span>
-            <span>RECEBA</span>
-          </p>
-        </div>
-      </main>
-    );
-  }
-
+function EntryScreen() {
   return (
     <main
       className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col items-center justify-between px-6 py-10 text-foreground"
