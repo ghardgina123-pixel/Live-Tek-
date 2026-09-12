@@ -106,16 +106,44 @@ function Checkout() {
   }, [countryCode]);
 
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
+
+  // A taxa de entrega vem exclusivamente do cálculo server-side, o mesmo usado
+  // ao criar a encomenda: nunca é calculada nem enviada pelo frontend.
+  useEffect(() => {
+    if (!user || !selectedAddrId || items.length === 0) { setQuote(null); return; }
+    const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
+    if (storeIds.length !== 1) { setQuote(null); return; }
+    let cancelled = false;
+    setQuoteLoading(true);
+    setQuoteError(null);
+    fetchQuote({
+      data: {
+        storeId: storeIds[0]!,
+        addressId: selectedAddrId,
+        items: items.map((i) => ({ productId: i.product.id, quantity: i.qty })),
+      },
+    })
+      .then((q) => { if (!cancelled) setQuote(q); })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setQuote(null);
+        setQuoteError(e instanceof Error ? e.message : "quote_failed");
+      })
+      .finally(() => { if (!cancelled) setQuoteLoading(false); });
+    return () => { cancelled = true; };
+  }, [user?.id, selectedAddrId, itemsKey, fetchQuote]);
+
   // Só métodos com gateway realmente configurado (ou pagamento na entrega) são operacionais.
   const availableMethods = methods.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
   const pendingMethods = methods.filter((m) => !m.gateway_configured && !m.is_cash_on_delivery);
   const selectedMethod = availableMethods.find((m) => m.id === selectedMethodId) ?? null;
-  // Frete oficial em AOA (tabela `municipalities`), convertido pela taxa em vigor.
-  const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
-  const shippingBrl = fromAoa(Number(shippingAoa));
-  const totalBrl = subtotal + shippingBrl;
+  const feeAvailable = !!quote?.available && quote.fee_aoa != null;
+  const shippingAoa = feeAvailable ? Number(quote!.fee_aoa) : null;
+  const shippingBrl = shippingAoa == null ? null : fromAoa(shippingAoa);
+  const totalBrl = shippingBrl == null ? subtotal : subtotal + shippingBrl;
   // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
   const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
+  
   
 
   if (done) {
