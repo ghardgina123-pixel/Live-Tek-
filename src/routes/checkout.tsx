@@ -331,7 +331,7 @@ function Checkout() {
             cartStore.clear();
             toast.success(t("s_pedido_realizado"));
           }}
-          disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0}
+          disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0 || !feeAvailable || quoteLoading}
           className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]"
         >
           {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : gatewayPending ? "Registar pedido" : t("s_pagar")} {formatPrice(totalBrl, currency)}</>}
