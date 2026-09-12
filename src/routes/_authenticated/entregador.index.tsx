@@ -15,6 +15,9 @@ type Open = {
   delivery_id: string; order_id: string; status: string; shipping_aoa: number;
   courier_fee_aoa: number | null; pickup_address: string | null; dropoff_address: string | null;
   store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
+  total_weight_kg?: number | null; total_volume_cm3?: number | null; items_count?: number | null;
+  logistics_incomplete?: boolean | null;
+
 };
 
 const LOAD_CLASS_LABEL: Record<string, string> = {
@@ -132,6 +135,12 @@ function EntregadorIndex() {
                           <p className="text-[11px] text-muted-foreground">
                             {d.load_class ? LOAD_CLASS_LABEL[d.load_class] : "Carga não classificada"}
                           </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {d.logistics_incomplete
+                              ? "Dados logísticos incompletos"
+                              : `${d.items_count ?? 0} artigo(s) · ${Number(d.total_weight_kg ?? 0).toLocaleString("pt-AO")} kg · ${Math.round(Number(d.total_volume_cm3 ?? 0) / 1000).toLocaleString("pt-AO")} L`}
+                          </p>
+
                           <p className="mt-0.5 text-xs font-semibold text-primary">A receber: {formatAoa(Number(d.courier_fee_aoa ?? d.shipping_aoa))}</p>
                         </div>
                       </div>

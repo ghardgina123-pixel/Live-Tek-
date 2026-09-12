@@ -82,6 +82,27 @@ describe("productSchema", () => {
     expect(productSchema.safeParse({ ...valid, description: "x".repeat(2001) }).success).toBe(false);
   });
 
+  it("accepts optional logistics data (weight/dimensions)", () => {
+    expect(
+      productSchema.safeParse({ ...valid, weight_kg: 1.5, length_cm: 30, width_cm: 20, height_cm: 10 }).success,
+    ).toBe(true);
+  });
+
+  it("accepts missing logistics data as null", () => {
+    expect(
+      productSchema.safeParse({ ...valid, weight_kg: null, length_cm: null, width_cm: null, height_cm: null }).success,
+    ).toBe(true);
+  });
+
+  it("rejects zero or negative weight and dimensions", () => {
+    expect(productSchema.safeParse({ ...valid, weight_kg: 0 }).success).toBe(false);
+    expect(productSchema.safeParse({ ...valid, weight_kg: -2 }).success).toBe(false);
+    expect(productSchema.safeParse({ ...valid, length_cm: -1 }).success).toBe(false);
+    expect(productSchema.safeParse({ ...valid, width_cm: 0 }).success).toBe(false);
+    expect(productSchema.safeParse({ ...valid, height_cm: -0.5 }).success).toBe(false);
+  });
+
+
   it("rejects missing required fields", () => {
     expect(productSchema.safeParse({ name: "X" }).success).toBe(false);
   });

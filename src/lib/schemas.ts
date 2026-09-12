@@ -16,13 +16,26 @@ export const signupSchema = z.object({
 export type SignupInput = z.infer<typeof signupSchema>;
 
 // Produtos (painel do lojista)
+const optionalPositive = (max: number, msg: string) =>
+  z
+    .number()
+    .positive(msg)
+    .max(max, msg)
+    .optional()
+    .nullable();
+
 export const productSchema = z.object({
   name: z.string().trim().min(2, "Nome muito curto").max(200, "Nome muito longo"),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   price_aoa: z.number().positive("Preço inválido").max(100_000_000),
   stock: z.number().int().min(0).max(1_000_000),
+  weight_kg: optionalPositive(10_000, "Peso inválido"),
+  length_cm: optionalPositive(1_000, "Comprimento inválido"),
+  width_cm: optionalPositive(1_000, "Largura inválida"),
+  height_cm: optionalPositive(1_000, "Altura inválida"),
 });
 export type ProductInput = z.infer<typeof productSchema>;
+
 
 // Checkout
 export const checkoutSchema = z.object({
