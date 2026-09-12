@@ -34,7 +34,8 @@ type Open = {
   store_name: string | null; municipality: string | null; load_class?: string | null; created_at: string;
   total_weight_kg?: number | null; total_volume_cm3?: number | null; items_count?: number | null;
   logistics_incomplete?: boolean | null;
-
+  pickup_distance_m?: number | null;
+  gps_fresh?: boolean | null;
 };
 
 const LOAD_CLASS_LABEL: Record<string, string> = {
