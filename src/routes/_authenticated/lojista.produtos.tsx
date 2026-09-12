@@ -222,6 +222,22 @@ function ProductForm({ storeId, initial, onDone }: { storeId: string; initial: P
           <option value="grande">Grande — carro, van ou empresa</option>
         </select>
       </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Peso por unidade (kg)">
+          <Input type="number" min="0" step="0.001" inputMode="decimal" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
+        </Field>
+        <Field label="Comprimento (cm)">
+          <Input type="number" min="0" step="0.1" inputMode="decimal" value={form.length_cm} onChange={(e) => setForm({ ...form, length_cm: e.target.value })} />
+        </Field>
+        <Field label="Largura (cm)">
+          <Input type="number" min="0" step="0.1" inputMode="decimal" value={form.width_cm} onChange={(e) => setForm({ ...form, width_cm: e.target.value })} />
+        </Field>
+        <Field label="Altura (cm)">
+          <Input type="number" min="0" step="0.1" inputMode="decimal" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} />
+        </Field>
+      </div>
+      <p className="text-[10px] text-muted-foreground">Deixe em branco se ainda não souber. Nada é inventado pelo sistema.</p>
+
       <Field label={t("s_imagem")}>
         <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
       </Field>
