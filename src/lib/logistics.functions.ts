@@ -145,7 +145,7 @@ export const getDeliveryRoute = createServerFn({ method: "POST" })
         _delivery_id: data.deliveryId,
         _distance_m: distanceM,
         _duration_s: Math.round(durationS),
-        _polyline: route?.polyline?.encodedPolyline ?? null,
+        _polyline: (route?.polyline?.encodedPolyline ?? null) as unknown as string,
         _provider: "google_routes_api",
       });
       if (saveErr) console.error("set_delivery_route failed", saveErr);
