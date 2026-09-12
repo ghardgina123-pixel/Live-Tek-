@@ -2608,7 +2608,6 @@ export type Database = {
           logo_url: string | null
           municipality_id: string | null
           name: string
-          nif: string
           owner_id: string
           phone: string
           province_id: string | null
@@ -2631,7 +2630,6 @@ export type Database = {
           logo_url?: string | null
           municipality_id?: string | null
           name: string
-          nif: string
           owner_id: string
           phone: string
           province_id?: string | null
@@ -2654,7 +2652,6 @@ export type Database = {
           logo_url?: string | null
           municipality_id?: string | null
           name?: string
-          nif?: string
           owner_id?: string
           phone?: string
           province_id?: string | null
@@ -2690,6 +2687,35 @@ export type Database = {
             columns: ["province_id"]
             isOneToOne: false
             referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      real_estate_agency_private: {
+        Row: {
+          agency_id: string
+          created_at: string
+          nif: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          nif: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          nif?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "real_estate_agency_private_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "real_estate_agencies"
             referencedColumns: ["id"]
           },
         ]
@@ -3977,6 +4003,7 @@ export type Database = {
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
       affiliate_withdrawable: { Args: never; Returns: Json }
+      agency_live_fee_amount: { Args: never; Returns: number }
       approved_stores_count: { Args: never; Returns: number }
       assign_delivery_courier: {
         Args: { _courier_id: string; _delivery_id: string }

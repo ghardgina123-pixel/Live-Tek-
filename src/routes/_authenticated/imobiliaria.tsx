@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/imobiliaria")({
 
 type Agency = {
   id: string; status: "pending" | "active" | "rejected" | "suspended";
-  name: string; nif: string; phone: string; email: string | null;
+  name: string; phone: string; email: string | null;
   description: string | null; logo_url: string | null;
   province_id: string | null; municipality_id: string | null;
   district: string | null; street: string | null;
@@ -41,7 +41,6 @@ type LiveFee = {
   proof_url: string | null; rejection_reason: string | null; created_at: string;
 };
 
-const LIVE_FEE_AOA = 5000;
 
 const agencySchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -129,9 +128,9 @@ function AgencyRegistration({ onCreated }: { onCreated: () => void }) {
     const parsed = agencySchema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
     setBusy(true);
-    const { error } = await (supabase as any).from("real_estate_agencies").insert({
+    const { data: created, error } = await (supabase as any).from("real_estate_agencies").insert({
       owner_id: user.id,
-      name: form.name, nif: form.nif, phone: form.phone,
+      name: form.name, phone: form.phone,
       email: form.email || null, description: form.description || null,
       country_id: loc.country_id || null,
       province_id: loc.province_id || null,
@@ -139,9 +138,14 @@ function AgencyRegistration({ onCreated }: { onCreated: () => void }) {
       district_id: loc.district_id || null,
       district: form.district || null, street: form.street || null,
       lat: coords.lat, lng: coords.lng,
-    });
+    }).select("id").maybeSingle();
+    if (error) { setBusy(false); return toast.error(error.message); }
+    // O NIF é dado fiscal privado: fica numa tabela acessível apenas ao dono e admin.
+    const { error: nifError } = await (supabase as any)
+      .from("real_estate_agency_private")
+      .insert({ agency_id: created?.id, nif: form.nif });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (nifError) return toast.error(nifError.message);
     toast.success("Cadastro enviado para análise");
     onCreated();
   };
@@ -431,10 +435,16 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
   const [busy, setBusy] = useState(false);
   const { user } = useAuth();
 
+  const [feeAoa, setFeeAoa] = useState<number | null>(null);
+
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("agency_live_fees").select("*").eq("agency_id", agencyId).order("created_at", { ascending: false });
+    const [{ data }, fee] = await Promise.all([
+      (supabase as any).from("agency_live_fees").select("*").eq("agency_id", agencyId).order("created_at", { ascending: false }),
+      (supabase as any).rpc("agency_live_fee_amount"),
+    ]);
     setItems((data as LiveFee[]) ?? []);
+    setFeeAoa(fee?.data != null ? Number(fee.data) : null);
     setLoading(false);
   };
   useEffect(() => { load(); }, [agencyId]);
@@ -449,7 +459,8 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
     const up = await supabase.storage.from("subscription-proofs").upload(path, proofFile, { upsert: true, contentType: proofFile.type });
     if (up.error) { setBusy(false); return toast.error(up.error.message); }
     const { error } = await (supabase as any).from("agency_live_fees").insert({
-      agency_id: agencyId, amount_aoa: LIVE_FEE_AOA,
+      // O valor é definido pelo servidor; qualquer valor enviado aqui é ignorado.
+      agency_id: agencyId,
       status: "pending", payment_method: method,
       proof_url: path,
     });
@@ -463,7 +474,7 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs">
-        <p className="font-bold">Taxa por live de imóvel: {LIVE_FEE_AOA.toLocaleString("pt-AO")} Kz</p>
+        <p className="font-bold">Taxa por live de imóvel: {feeAoa != null ? `${feeAoa.toLocaleString("pt-AO")} Kz` : "INDISPONÍVEL"}</p>
         <p className="mt-1 text-muted-foreground">Cada live transmitida tem uma taxa única. Envie o comprovativo de pagamento e aguarde aprovação. Após aprovado, a live pode ser iniciada.</p>
       </div>
       <form onSubmit={pay} className="space-y-3 rounded-xl border border-border p-4">
