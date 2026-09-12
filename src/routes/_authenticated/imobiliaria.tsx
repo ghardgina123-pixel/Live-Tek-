@@ -41,7 +41,6 @@ type LiveFee = {
   proof_url: string | null; rejection_reason: string | null; created_at: string;
 };
 
-const LIVE_FEE_AOA = 5000;
 
 const agencySchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -460,7 +459,8 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
     const up = await supabase.storage.from("subscription-proofs").upload(path, proofFile, { upsert: true, contentType: proofFile.type });
     if (up.error) { setBusy(false); return toast.error(up.error.message); }
     const { error } = await (supabase as any).from("agency_live_fees").insert({
-      agency_id: agencyId, amount_aoa: LIVE_FEE_AOA,
+      // O valor é definido pelo servidor; qualquer valor enviado aqui é ignorado.
+      agency_id: agencyId,
       status: "pending", payment_method: method,
       proof_url: path,
     });
@@ -474,7 +474,7 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs">
-        <p className="font-bold">Taxa por live de imóvel: {LIVE_FEE_AOA.toLocaleString("pt-AO")} Kz</p>
+        <p className="font-bold">Taxa por live de imóvel: {feeAoa != null ? `${feeAoa.toLocaleString("pt-AO")} Kz` : "INDISPONÍVEL"}</p>
         <p className="mt-1 text-muted-foreground">Cada live transmitida tem uma taxa única. Envie o comprovativo de pagamento e aguarde aprovação. Após aprovado, a live pode ser iniciada.</p>
       </div>
       <form onSubmit={pay} className="space-y-3 rounded-xl border border-border p-4">
