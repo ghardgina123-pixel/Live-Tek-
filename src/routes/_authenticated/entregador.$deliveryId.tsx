@@ -53,10 +53,14 @@ const STATUS_LABEL: Record<string, string> = {
 function EntregadorPage() {
   const { deliveryId } = Route.useParams();
   const [delivery, setDelivery] = useState<Delivery | null>(null);
+  const [geo, setGeo] = useState<DeliveryRouteResult | null>(null);
+  const [geoLoading, setGeoLoading] = useState(true);
+  const fetchRoute = useServerFn(getDeliveryRoute);
   const [tracking, setTracking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ lat: number; lng: number; ts: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const watchRef = useRef<number | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapObjRef = useRef<any>(null);
