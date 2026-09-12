@@ -436,10 +436,16 @@ function LivesFeeTab({ agencyId }: { agencyId: string }) {
   const [busy, setBusy] = useState(false);
   const { user } = useAuth();
 
+  const [feeAoa, setFeeAoa] = useState<number | null>(null);
+
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("agency_live_fees").select("*").eq("agency_id", agencyId).order("created_at", { ascending: false });
+    const [{ data }, fee] = await Promise.all([
+      (supabase as any).from("agency_live_fees").select("*").eq("agency_id", agencyId).order("created_at", { ascending: false }),
+      (supabase as any).rpc("agency_live_fee_amount"),
+    ]);
     setItems((data as LiveFee[]) ?? []);
+    setFeeAoa(fee?.data != null ? Number(fee.data) : null);
     setLoading(false);
   };
   useEffect(() => { load(); }, [agencyId]);
