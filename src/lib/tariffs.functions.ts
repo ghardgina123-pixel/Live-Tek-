@@ -52,7 +52,6 @@ export type TariffEvent = {
   id: string;
   tariff_id: string | null;
   action: string;
-  details: Record<string, unknown> | null;
   created_at: string;
 };
 

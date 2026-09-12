@@ -101,7 +101,7 @@ function AdminTariffs() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await load({ data: undefined as never });
+      const res = (await load({ data: undefined as never })) as { tariffs: Tariff[]; events: TariffEvent[] };
       setTariffs(res.tariffs);
       setEvents(res.events);
     } catch (e) {
