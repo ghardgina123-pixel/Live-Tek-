@@ -277,15 +277,31 @@ function Checkout() {
         <div className="flex justify-between">
           <span className="text-muted-foreground">Taxa de entrega ({t("s_frete")})</span>
           <span>
-            {selectedAddr
-              ? <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
-              : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}
+            {!selectedAddr ? (
+              <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>
+            ) : quoteLoading ? (
+              <Loader2 className="animate-spin text-primary" size={14} />
+            ) : shippingBrl != null ? (
+              <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
+            ) : (
+              <span className="text-muted-foreground">Não calculada</span>
+            )}
           </span>
         </div>
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
-          <span>{t("s_total")}</span><span>{formatPrice(totalBrl, currency)}</span>
+          <span>{t("s_total")}</span>
+          <span>{shippingBrl == null ? "—" : formatPrice(totalBrl, currency)}</span>
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega. É este valor que é usado no pagamento.</p>
+        {selectedAddr && !quoteLoading && shippingBrl == null && (
+          <p className="mt-2 rounded-xl bg-amber-500/10 p-2 text-[11px] text-amber-900 dark:text-amber-200">
+            {quote?.unavailable_reason
+              ? (QUOTE_REASON_LABEL[quote.unavailable_reason] ?? `Taxa de entrega indisponível (${quote.unavailable_reason}).`)
+              : quoteError
+                ? "Taxa de entrega indisponível — não foi possível obter o cálculo do servidor."
+                : "Taxa de entrega indisponível."}
+          </p>
+        )}
+        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega, calculada no servidor. É este valor que é usado no pagamento.</p>
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
