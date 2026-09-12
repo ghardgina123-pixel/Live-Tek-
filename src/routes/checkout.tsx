@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
 import { useT } from "@/lib/i18n";
+import { useServerFn } from "@tanstack/react-start";
+import { quoteDeliveryFee, QUOTE_REASON_LABEL, type DeliveryFeeQuote } from "@/lib/tariffs.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -66,6 +68,11 @@ function Checkout() {
   const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const region = useRegion();
   const countryCode = region.code;
+  const fetchQuote = useServerFn(quoteDeliveryFee);
+  const [quote, setQuote] = useState<DeliveryFeeQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const itemsKey = items.map((i) => `${i.product.id}:${i.qty}`).join(",");
 
   useEffect(() => {
     if (!user) { setAddrLoading(false); return; }
@@ -104,16 +111,44 @@ function Checkout() {
   }, [countryCode]);
 
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
+
+  // A taxa de entrega vem exclusivamente do cálculo server-side, o mesmo usado
+  // ao criar a encomenda: nunca é calculada nem enviada pelo frontend.
+  useEffect(() => {
+    if (!user || !selectedAddrId || items.length === 0) { setQuote(null); return; }
+    const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
+    if (storeIds.length !== 1) { setQuote(null); return; }
+    let cancelled = false;
+    setQuoteLoading(true);
+    setQuoteError(null);
+    fetchQuote({
+      data: {
+        storeId: storeIds[0]!,
+        addressId: selectedAddrId,
+        items: items.map((i) => ({ productId: i.product.id, quantity: i.qty })),
+      },
+    })
+      .then((q) => { if (!cancelled) setQuote(q); })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setQuote(null);
+        setQuoteError(e instanceof Error ? e.message : "quote_failed");
+      })
+      .finally(() => { if (!cancelled) setQuoteLoading(false); });
+    return () => { cancelled = true; };
+  }, [user?.id, selectedAddrId, itemsKey, fetchQuote]);
+
   // Só métodos com gateway realmente configurado (ou pagamento na entrega) são operacionais.
   const availableMethods = methods.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
   const pendingMethods = methods.filter((m) => !m.gateway_configured && !m.is_cash_on_delivery);
   const selectedMethod = availableMethods.find((m) => m.id === selectedMethodId) ?? null;
-  // Frete oficial em AOA (tabela `municipalities`), convertido pela taxa em vigor.
-  const shippingAoa = selectedAddr?.municipalities?.shipping_fee_aoa ?? 0;
-  const shippingBrl = fromAoa(Number(shippingAoa));
-  const totalBrl = subtotal + shippingBrl;
+  const feeAvailable = !!quote?.available && quote.fee_aoa != null;
+  const shippingAoa = feeAvailable ? Number(quote!.fee_aoa) : null;
+  const shippingBrl = shippingAoa == null ? null : fromAoa(shippingAoa);
+  const totalBrl = shippingBrl == null ? subtotal : subtotal + shippingBrl;
   // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
   const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
+  
   
 
   if (done) {
@@ -173,7 +208,7 @@ function Checkout() {
                   <p className="text-xs text-muted-foreground">
                     {a.district ? `${a.district}, ` : ""}{a.municipalities?.name} · {a.provinces?.name}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-primary">Frete: Kz {Number(a.municipalities?.shipping_fee_aoa ?? 0).toLocaleString("pt-AO")}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">Taxa base do município: Kz {Number(a.municipalities?.shipping_fee_aoa ?? 0).toLocaleString("pt-AO")}</p>
                 </div>
                 <div className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${selectedAddrId === a.id ? "border-primary bg-primary" : "border-border"}`}>
                   {selectedAddrId === a.id && <Check size={10} className="m-auto text-primary-foreground" strokeWidth={3} />}
@@ -242,15 +277,31 @@ function Checkout() {
         <div className="flex justify-between">
           <span className="text-muted-foreground">Taxa de entrega ({t("s_frete")})</span>
           <span>
-            {selectedAddr
-              ? <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
-              : <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>}
+            {!selectedAddr ? (
+              <span className="text-muted-foreground">{t("s_selecione_um_endereco")}</span>
+            ) : quoteLoading ? (
+              <Loader2 className="animate-spin text-primary" size={14} />
+            ) : shippingBrl != null ? (
+              <>{formatPrice(shippingBrl, currency)} <span className="text-[11px] text-muted-foreground">({formatAoa(Number(shippingAoa))})</span></>
+            ) : (
+              <span className="text-muted-foreground">Não calculada</span>
+            )}
           </span>
         </div>
         <div className="mt-2 flex justify-between border-t border-border pt-2 text-base font-bold">
-          <span>{t("s_total")}</span><span>{formatPrice(totalBrl, currency)}</span>
+          <span>{t("s_total")}</span>
+          <span>{shippingBrl == null ? "—" : formatPrice(totalBrl, currency)}</span>
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega. É este valor que é usado no pagamento.</p>
+        {selectedAddr && !quoteLoading && shippingBrl == null && (
+          <p className="mt-2 rounded-xl bg-amber-500/10 p-2 text-[11px] text-amber-900 dark:text-amber-200">
+            {quote?.unavailable_reason
+              ? (QUOTE_REASON_LABEL[quote.unavailable_reason] ?? `Taxa de entrega indisponível (${quote.unavailable_reason}).`)
+              : quoteError
+                ? "Taxa de entrega indisponível — não foi possível obter o cálculo do servidor."
+                : "Taxa de entrega indisponível."}
+          </p>
+        )}
+        <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega, calculada no servidor. É este valor que é usado no pagamento.</p>
       </section>
 
       <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
@@ -263,6 +314,7 @@ function Checkout() {
             if (!user) return toast.error(t("s_faca_login_para_finalizar_a_compra"));
             if (!selectedAddr) return toast.error(t("s_selecione_um_endereco_de_entrega"));
             if (!selectedMethod) return toast.error(t("s_selecione_um_metodo_de_pagamento"));
+            if (!feeAvailable) return toast.error("Taxa de entrega não calculada — não é possível criar o pedido.");
             const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
             if (storeIds.length !== 1) return toast.error(t("s_carrinho_com_lojas_diferentes_nao_e_suportado"));
             setSubmitting(true);
@@ -279,7 +331,7 @@ function Checkout() {
             cartStore.clear();
             toast.success(t("s_pedido_realizado"));
           }}
-          disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0}
+          disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0 || !feeAvailable || quoteLoading}
           className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]"
         >
           {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : gatewayPending ? "Registar pedido" : t("s_pagar")} {formatPrice(totalBrl, currency)}</>}

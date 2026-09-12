@@ -597,6 +597,12 @@ export type Database = {
           courier_id: string | null
           created_at: string
           delivered_at: string | null
+          delivery_fee_computed_at: string | null
+          delivery_fee_currency: string | null
+          delivery_fee_distance_m: number | null
+          delivery_fee_distance_source: string | null
+          delivery_fee_source: string | null
+          delivery_tariff_id: string | null
           distance_computed_at: string | null
           distance_destination_lat: number | null
           distance_destination_lng: number | null
@@ -632,6 +638,12 @@ export type Database = {
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          delivery_fee_computed_at?: string | null
+          delivery_fee_currency?: string | null
+          delivery_fee_distance_m?: number | null
+          delivery_fee_distance_source?: string | null
+          delivery_fee_source?: string | null
+          delivery_tariff_id?: string | null
           distance_computed_at?: string | null
           distance_destination_lat?: number | null
           distance_destination_lng?: number | null
@@ -667,6 +679,12 @@ export type Database = {
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          delivery_fee_computed_at?: string | null
+          delivery_fee_currency?: string | null
+          delivery_fee_distance_m?: number | null
+          delivery_fee_distance_source?: string | null
+          delivery_fee_source?: string | null
+          delivery_tariff_id?: string | null
           distance_computed_at?: string | null
           distance_destination_lat?: number | null
           distance_destination_lng?: number | null
@@ -705,6 +723,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "deliveries_delivery_tariff_id_fkey"
+            columns: ["delivery_tariff_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_tariffs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deliveries_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: true
@@ -712,6 +737,139 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      delivery_tariff_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          tariff_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          tariff_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          tariff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tariff_events_tariff_id_fkey"
+            columns: ["tariff_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_tariffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_tariff_rules: {
+        Row: {
+          capacity: string | null
+          created_at: string
+          id: string
+          load_class: string | null
+          min_fee_aoa: number | null
+          multiplier: number
+          tariff_id: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: string | null
+          created_at?: string
+          id?: string
+          load_class?: string | null
+          min_fee_aoa?: number | null
+          multiplier?: number
+          tariff_id: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: string | null
+          created_at?: string
+          id?: string
+          load_class?: string | null
+          min_fee_aoa?: number | null
+          multiplier?: number
+          tariff_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tariff_rules_tariff_id_fkey"
+            columns: ["tariff_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_tariffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_tariffs: {
+        Row: {
+          activated_at: string | null
+          base_fee_aoa: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          deactivated_at: string | null
+          id: string
+          included_weight_kg: number
+          is_active: boolean
+          min_fee_aoa: number
+          name: string
+          notes: string | null
+          per_kg_fee_aoa: number
+          per_m3_fee_aoa: number
+          price_per_km_aoa: number
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          base_fee_aoa?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deactivated_at?: string | null
+          id?: string
+          included_weight_kg?: number
+          is_active?: boolean
+          min_fee_aoa?: number
+          name: string
+          notes?: string | null
+          per_kg_fee_aoa?: number
+          per_m3_fee_aoa?: number
+          price_per_km_aoa?: number
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          base_fee_aoa?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deactivated_at?: string | null
+          id?: string
+          included_weight_kg?: number
+          is_active?: boolean
+          min_fee_aoa?: number
+          name?: string
+          notes?: string | null
+          per_kg_fee_aoa?: number
+          per_m3_fee_aoa?: number
+          price_per_km_aoa?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       delivery_tracking: {
         Row: {
@@ -1569,6 +1727,12 @@ export type Database = {
           address_id: string | null
           created_at: string
           customer_id: string
+          delivery_distance_m: number | null
+          delivery_distance_source: string | null
+          delivery_fee_computed_at: string | null
+          delivery_fee_currency: string | null
+          delivery_fee_source: string | null
+          delivery_tariff_id: string | null
           id: string
           items_count: number | null
           logistics_incomplete: boolean
@@ -1590,6 +1754,12 @@ export type Database = {
           address_id?: string | null
           created_at?: string
           customer_id: string
+          delivery_distance_m?: number | null
+          delivery_distance_source?: string | null
+          delivery_fee_computed_at?: string | null
+          delivery_fee_currency?: string | null
+          delivery_fee_source?: string | null
+          delivery_tariff_id?: string | null
           id?: string
           items_count?: number | null
           logistics_incomplete?: boolean
@@ -1611,6 +1781,12 @@ export type Database = {
           address_id?: string | null
           created_at?: string
           customer_id?: string
+          delivery_distance_m?: number | null
+          delivery_distance_source?: string | null
+          delivery_fee_computed_at?: string | null
+          delivery_fee_currency?: string | null
+          delivery_fee_source?: string | null
+          delivery_tariff_id?: string | null
           id?: string
           items_count?: number | null
           logistics_incomplete?: boolean
@@ -1634,6 +1810,13 @@ export type Database = {
             columns: ["address_id"]
             isOneToOne: false
             referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_delivery_tariff_id_fkey"
+            columns: ["delivery_tariff_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_tariffs"
             referencedColumns: ["id"]
           },
           {
@@ -3566,6 +3749,33 @@ export type Database = {
         }
         Returns: Json
       }
+      active_delivery_tariff: {
+        Args: never
+        Returns: {
+          activated_at: string | null
+          base_fee_aoa: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          deactivated_at: string | null
+          id: string
+          included_weight_kg: number
+          is_active: boolean
+          min_fee_aoa: number
+          name: string
+          notes: string | null
+          per_kg_fee_aoa: number
+          per_m3_fee_aoa: number
+          price_per_km_aoa: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "delivery_tariffs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_approve_agency: { Args: { _agency_id: string }; Returns: undefined }
       admin_approve_agency_live_fee: {
         Args: { _fee_id: string }
@@ -3590,6 +3800,7 @@ export type Database = {
         }
         Returns: string
       }
+      admin_delivery_tariffs: { Args: never; Returns: Json }
       admin_financial_summary: { Args: never; Returns: Json }
       admin_financial_transactions: {
         Args: {
@@ -3712,6 +3923,14 @@ export type Database = {
       admin_reprocess_subscription: {
         Args: { _approve?: boolean; _reference: string }
         Returns: Json
+      }
+      admin_save_delivery_tariff: {
+        Args: { _id: string; _payload: Json; _rules?: Json }
+        Returns: string
+      }
+      admin_set_delivery_tariff_active: {
+        Args: { _active: boolean; _id: string }
+        Returns: boolean
       }
       admin_set_store_review_state: {
         Args: { _reason?: string; _state: string; _store_id: string }
@@ -3856,6 +4075,15 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      delivery_fee_quote: {
+        Args: {
+          _address_id: string
+          _items: Json
+          _route_distance_m?: number
+          _store_id: string
+        }
+        Returns: Json
       }
       dispatch_push: {
         Args: { _kind: string; _payload: Json }
