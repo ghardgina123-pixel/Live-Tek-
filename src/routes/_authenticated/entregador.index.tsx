@@ -140,7 +140,11 @@ function EntregadorIndex() {
     setBusy(id);
     const { error } = await supabase.rpc("courier_accept_delivery", { _delivery_id: id });
     setBusy(null);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(acceptErrorMessage(error.message));
+      void load();
+      return;
+    }
     toast.success("Entrega atribuída a si");
     void load();
   };
