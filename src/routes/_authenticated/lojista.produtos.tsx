@@ -28,7 +28,12 @@ type Product = {
   image_url: string | null;
   rejection_reason: string | null;
   delivery_class: string | null;
+  weight_kg: number | null;
+  length_cm: number | null;
+  width_cm: number | null;
+  height_cm: number | null;
 };
+
 
 const DELIVERY_CLASS_LABEL: Record<string, string> = {
   pequeno: "Pequeno (motoboy)",
