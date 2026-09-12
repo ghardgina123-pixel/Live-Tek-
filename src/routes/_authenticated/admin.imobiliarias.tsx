@@ -91,7 +91,7 @@ function AgenciesAdmin() {
             <p className="font-semibold">{a.name}</p>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${badgeColor(a.status)}`}>{a.status}</span>
           </div>
-          <p className="text-xs text-muted-foreground">NIF {a.nif} · {a.phone}</p>
+          <p className="text-xs text-muted-foreground">NIF {a.nif ?? "INDISPONÍVEL"} · {a.phone}</p>
           {a.status === "pending" && (
             <div className="mt-2 flex gap-2">
               <Button size="sm" onClick={() => approve(a.id)}>Aprovar</Button>
