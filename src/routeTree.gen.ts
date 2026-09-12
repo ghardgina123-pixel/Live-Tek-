@@ -65,6 +65,7 @@ import { Route as AuthenticatedLojistaPedidosRouteImport } from './routes/_authe
 import { Route as AuthenticatedLojistaLivesRouteImport } from './routes/_authenticated/lojista.lives'
 import { Route as AuthenticatedLojistaDashboardRouteImport } from './routes/_authenticated/lojista.dashboard'
 import { Route as AuthenticatedEntregadorDeliveryIdRouteImport } from './routes/_authenticated/entregador.$deliveryId'
+import { Route as AuthenticatedAdminTarifarioRouteImport } from './routes/_authenticated/admin.tarifario'
 import { Route as AuthenticatedAdminSubscricoesRouteImport } from './routes/_authenticated/admin.subscricoes'
 import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
 import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
@@ -370,6 +371,12 @@ const AuthenticatedEntregadorDeliveryIdRoute =
     path: '/entregador/$deliveryId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTarifarioRoute =
+  AuthenticatedAdminTarifarioRouteImport.update({
+    id: '/admin/tarifario',
+    path: '/admin/tarifario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSubscricoesRoute =
   AuthenticatedAdminSubscricoesRouteImport.update({
     id: '/admin/subscricoes',
@@ -467,6 +474,7 @@ export interface FileRoutesByFullPath {
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
+  '/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
   '/entregador/$deliveryId': typeof AuthenticatedEntregadorDeliveryIdRoute
   '/lojista/dashboard': typeof AuthenticatedLojistaDashboardRoute
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
@@ -532,6 +540,7 @@ export interface FileRoutesByTo {
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
+  '/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
   '/entregador/$deliveryId': typeof AuthenticatedEntregadorDeliveryIdRoute
   '/lojista/dashboard': typeof AuthenticatedLojistaDashboardRoute
   '/lojista/lives': typeof AuthenticatedLojistaLivesRoute
@@ -600,6 +609,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
   '/_authenticated/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/_authenticated/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
+  '/_authenticated/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
   '/_authenticated/entregador/$deliveryId': typeof AuthenticatedEntregadorDeliveryIdRoute
   '/_authenticated/lojista/dashboard': typeof AuthenticatedLojistaDashboardRoute
   '/_authenticated/lojista/lives': typeof AuthenticatedLojistaLivesRoute
@@ -668,6 +678,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
+    | '/admin/tarifario'
     | '/entregador/$deliveryId'
     | '/lojista/dashboard'
     | '/lojista/lives'
@@ -733,6 +744,7 @@ export interface FileRouteTypes {
     | '/admin/imobiliarias'
     | '/admin/lojas'
     | '/admin/subscricoes'
+    | '/admin/tarifario'
     | '/entregador/$deliveryId'
     | '/lojista/dashboard'
     | '/lojista/lives'
@@ -800,6 +812,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/imobiliarias'
     | '/_authenticated/admin/lojas'
     | '/_authenticated/admin/subscricoes'
+    | '/_authenticated/admin/tarifario'
     | '/_authenticated/entregador/$deliveryId'
     | '/_authenticated/lojista/dashboard'
     | '/_authenticated/lojista/lives'
@@ -1256,6 +1269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEntregadorDeliveryIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/tarifario': {
+      id: '/_authenticated/admin/tarifario'
+      path: '/admin/tarifario'
+      fullPath: '/admin/tarifario'
+      preLoaderRoute: typeof AuthenticatedAdminTarifarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/subscricoes': {
       id: '/_authenticated/admin/subscricoes'
       path: '/admin/subscricoes'
@@ -1364,6 +1384,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminImobiliariasRoute: typeof AuthenticatedAdminImobiliariasRoute
   AuthenticatedAdminLojasRoute: typeof AuthenticatedAdminLojasRoute
   AuthenticatedAdminSubscricoesRoute: typeof AuthenticatedAdminSubscricoesRoute
+  AuthenticatedAdminTarifarioRoute: typeof AuthenticatedAdminTarifarioRoute
   AuthenticatedEntregadorDeliveryIdRoute: typeof AuthenticatedEntregadorDeliveryIdRoute
   AuthenticatedEntregadorIndexRoute: typeof AuthenticatedEntregadorIndexRoute
 }
@@ -1387,6 +1408,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminImobiliariasRoute: AuthenticatedAdminImobiliariasRoute,
   AuthenticatedAdminLojasRoute: AuthenticatedAdminLojasRoute,
   AuthenticatedAdminSubscricoesRoute: AuthenticatedAdminSubscricoesRoute,
+  AuthenticatedAdminTarifarioRoute: AuthenticatedAdminTarifarioRoute,
   AuthenticatedEntregadorDeliveryIdRoute:
     AuthenticatedEntregadorDeliveryIdRoute,
   AuthenticatedEntregadorIndexRoute: AuthenticatedEntregadorIndexRoute,
