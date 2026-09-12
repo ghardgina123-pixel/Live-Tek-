@@ -1,10 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Package, Truck, Wallet } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Package, Truck, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatAoa } from "@/lib/commerce";
+import { formatDistanceM } from "@/lib/geo";
 import { toast } from "sonner";
+
+const ACCEPT_ERROR_LABEL: Record<string, string> = {
+  not_authenticated: "Sessão inválida. Entre novamente.",
+  courier_not_active: "A sua conta de entregador não está activa.",
+  courier_unavailable: "Está indisponível. Active a disponibilidade para aceitar entregas.",
+  delivery_not_found: "Entrega não encontrada.",
+  delivery_already_assigned: "Esta entrega já foi atribuída a outro entregador.",
+  delivery_closed: "Esta entrega já foi concluída ou cancelada.",
+  delivery_not_open: "Esta entrega já não está aberta.",
+  vehicle_incompatible_with_load_class: "O seu veículo não tem capacidade para esta carga.",
+};
+
+function acceptErrorMessage(message: string): string {
+  const key = Object.keys(ACCEPT_ERROR_LABEL).find((k) => message.includes(k));
+  return key ? ACCEPT_ERROR_LABEL[key]! : message;
+}
 
 export const Route = createFileRoute("/_authenticated/entregador/")({
   head: () => ({ meta: [{ title: "Painel do entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
