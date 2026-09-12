@@ -208,7 +208,7 @@ function Checkout() {
                   <p className="text-xs text-muted-foreground">
                     {a.district ? `${a.district}, ` : ""}{a.municipalities?.name} · {a.provinces?.name}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-primary">Frete: Kz {Number(a.municipalities?.shipping_fee_aoa ?? 0).toLocaleString("pt-AO")}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">Taxa base do município: Kz {Number(a.municipalities?.shipping_fee_aoa ?? 0).toLocaleString("pt-AO")}</p>
                 </div>
                 <div className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${selectedAddrId === a.id ? "border-primary bg-primary" : "border-border"}`}>
                   {selectedAddrId === a.id && <Check size={10} className="m-auto text-primary-foreground" strokeWidth={3} />}
