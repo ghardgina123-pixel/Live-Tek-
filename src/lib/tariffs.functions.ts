@@ -52,7 +52,7 @@ export type TariffEvent = {
   id: string;
   tariff_id: string | null;
   action: string;
-  details: unknown;
+  details: Record<string, unknown> | null;
   created_at: string;
 };
 
@@ -127,7 +127,7 @@ export const saveDeliveryTariff = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { data: id, error } = await context.supabase.rpc("admin_save_delivery_tariff", {
-      _id: data.id,
+      _id: data.id as unknown as string,
       _payload: data.payload as never,
       _rules: data.rules as never,
     });
@@ -143,7 +143,7 @@ export const setDeliveryTariffActive = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase.rpc("admin_set_delivery_tariff_active", {
-      _id: data.id,
+      _id: data.id as unknown as string,
       _active: data.active,
     });
     if (error) throw new Error(error.message);
