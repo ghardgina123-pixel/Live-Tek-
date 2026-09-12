@@ -314,6 +314,7 @@ function Checkout() {
             if (!user) return toast.error(t("s_faca_login_para_finalizar_a_compra"));
             if (!selectedAddr) return toast.error(t("s_selecione_um_endereco_de_entrega"));
             if (!selectedMethod) return toast.error(t("s_selecione_um_metodo_de_pagamento"));
+            if (!feeAvailable) return toast.error("Taxa de entrega não calculada — não é possível criar o pedido.");
             const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
             if (storeIds.length !== 1) return toast.error(t("s_carrinho_com_lojas_diferentes_nao_e_suportado"));
             setSubmitting(true);
