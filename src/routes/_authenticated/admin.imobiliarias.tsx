@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/admin/imobiliarias")({
   errorComponent: PanelErrorBoundary,
 });
 
-type Agency = { id: string; name: string; nif: string; phone: string; status: string; rejection_reason: string | null };
+type Agency = { id: string; name: string; nif: string | null; phone: string; status: string; rejection_reason: string | null };
 type Property = { id: string; title: string; status: string; price_aoa: number; agency_id: string; real_estate_agencies: { name: string } | null };
 type Fee = { id: string; agency_id: string; amount_aoa: number; status: string; payment_method: string | null; proof_url: string | null; created_at: string; real_estate_agencies: { name: string } | null };
 
@@ -56,8 +56,17 @@ function AgenciesAdmin() {
   const [loading, setLoading] = useState(true);
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("real_estate_agencies").select("id,name,nif,phone,status,rejection_reason").order("created_at", { ascending: false });
-    setRows((data as Agency[]) ?? []);
+    // O NIF vive numa tabela privada; só admin/dono a consegue ler.
+    const { data } = await (supabase as any)
+      .from("real_estate_agencies")
+      .select("id,name,phone,status,rejection_reason,real_estate_agency_private(nif)")
+      .order("created_at", { ascending: false });
+    setRows(
+      ((data as any[]) ?? []).map((a) => ({
+        ...a,
+        nif: a.real_estate_agency_private?.nif ?? null,
+      })) as Agency[],
+    );
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
