@@ -58,20 +58,68 @@ function EntregadorIndex() {
   const [mine, setMine] = useState<Mine[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [gpsAt, setGpsAt] = useState<string | null>(null);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+  const [gpsBusy, setGpsBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [o, m] = await Promise.all([
+    const [o, m, c] = await Promise.all([
       supabase.rpc("courier_open_deliveries"),
       supabase.rpc("courier_my_deliveries"),
+      supabase.from("couriers").select("is_available, last_location_at").maybeSingle(),
     ]);
     if (o.error) toast.error(o.error.message);
     if (m.error) toast.error(m.error.message);
     setOpen((o.data as Open[]) ?? []);
     setMine((m.data as Mine[]) ?? []);
+    if (c.data) {
+      setAvailable(Boolean(c.data.is_available));
+      setGpsAt(c.data.last_location_at ?? null);
+    }
     setLoading(false);
   }, []);
 
   useEffect(() => { if (user) void load(); }, [user?.id, load]);
+
+  // Envia a localização GPS REAL do dispositivo. Sem GPS não há proximidade.
+  const shareLocation = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGpsError("Este dispositivo não disponibiliza GPS.");
+      return;
+    }
+    setGpsBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { error } = await supabase.rpc("courier_update_location", {
+          _lat: pos.coords.latitude,
+          _lng: pos.coords.longitude,
+        });
+        setGpsBusy(false);
+        if (error) { setGpsError(error.message); return; }
+        setGpsError(null);
+        void load();
+      },
+      (err) => {
+        setGpsBusy(false);
+        setGpsError(
+          err.code === err.PERMISSION_DENIED
+            ? "Permissão de localização recusada."
+            : "Localização indisponível neste momento.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  }, [load]);
+
+  const toggleAvailability = async () => {
+    if (available === null) return;
+    const next = !available;
+    const { error } = await supabase.rpc("courier_set_availability", { _available: next });
+    if (error) return toast.error(error.message);
+    setAvailable(next);
+    void load();
+  };
 
   // Novas entregas aparecem em tempo real, sem recarregar a página.
   useEffect(() => {
