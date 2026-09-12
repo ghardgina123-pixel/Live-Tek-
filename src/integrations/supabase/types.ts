@@ -444,6 +444,10 @@ export type Database = {
           emergency_contact_phone: string | null
           full_name: string
           id: string
+          is_available: boolean
+          last_lat: number | null
+          last_lng: number | null
+          last_location_at: string | null
           lat: number | null
           license_photo_url: string | null
           lng: number | null
@@ -478,6 +482,10 @@ export type Database = {
           emergency_contact_phone?: string | null
           full_name: string
           id?: string
+          is_available?: boolean
+          last_lat?: number | null
+          last_lng?: number | null
+          last_location_at?: string | null
           lat?: number | null
           license_photo_url?: string | null
           lng?: number | null
@@ -512,6 +520,10 @@ export type Database = {
           emergency_contact_phone?: string | null
           full_name?: string
           id?: string
+          is_available?: boolean
+          last_lat?: number | null
+          last_lng?: number | null
+          last_location_at?: string | null
           lat?: number | null
           license_photo_url?: string | null
           lng?: number | null
@@ -4004,6 +4016,11 @@ export type Database = {
         Returns: string
       }
       courier_delivery_detail: { Args: { _delivery_id: string }; Returns: Json }
+      courier_gps_is_fresh: {
+        Args: { _at: string; _lat: number; _lng: number }
+        Returns: boolean
+      }
+      courier_location_max_age: { Args: never; Returns: string }
       courier_my_deliveries: {
         Args: never
         Returns: {
@@ -4026,18 +4043,24 @@ export type Database = {
           created_at: string
           delivery_id: string
           dropoff_address: string
+          gps_fresh: boolean
           items_count: number
           load_class: string
           logistics_incomplete: boolean
           municipality: string
           order_id: string
           pickup_address: string
+          pickup_distance_m: number
           shipping_aoa: number
           status: string
           store_name: string
           total_volume_cm3: number
           total_weight_kg: number
         }[]
+      }
+      courier_set_availability: {
+        Args: { _available: boolean }
+        Returns: boolean
       }
       courier_type_supports_class: {
         Args: {
@@ -4048,6 +4071,10 @@ export type Database = {
       }
       courier_update_delivery_status: {
         Args: { _delivery_id: string; _status: string }
+        Returns: string
+      }
+      courier_update_location: {
+        Args: { _lat: number; _lng: number }
         Returns: string
       }
       courier_withdrawable: { Args: never; Returns: Json }
@@ -4075,6 +4102,21 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      delivery_eligible_couriers: {
+        Args: { _delivery_id: string }
+        Returns: {
+          capacity: string
+          courier_id: string
+          courier_type: string
+          display_name: string
+          eligible: boolean
+          gps_fresh: boolean
+          is_available: boolean
+          last_location_at: string
+          pickup_distance_m: number
+          reason: string
+        }[]
       }
       delivery_fee_quote: {
         Args: {
