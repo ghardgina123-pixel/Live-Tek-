@@ -242,6 +242,13 @@ function EntregadorIndex() {
                           <p className="text-sm font-semibold">Pedido #{d.order_id.slice(0, 8)}</p>
                           <p className="text-xs text-muted-foreground">{d.store_name ?? "Loja"} · {d.municipality ?? "—"}</p>
                           <p className="mt-1 text-[11px] text-muted-foreground">Recolha: {d.pickup_address ?? "loja"}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {d.pickup_distance_m != null
+                              ? `Distância até à recolha: ${formatDistanceM(Number(d.pickup_distance_m))}`
+                              : d.gps_fresh
+                                ? "Distância até à recolha: INDISPONÍVEL (loja sem coordenadas)"
+                                : "Distância até à recolha: INDISPONÍVEL (GPS em falta ou antigo)"}
+                          </p>
                           <p className="text-[11px] text-muted-foreground">Entrega: {d.dropoff_address ?? "endereço do cliente"}</p>
                           <p className="text-[11px] text-muted-foreground">
                             {d.load_class ? LOAD_CLASS_LABEL[d.load_class] : "Carga não classificada"}
