@@ -1,16 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, MapPin, Loader2, Power, Truck, CheckCircle2, Package, Phone } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowLeft, MapPin, Loader2, Power, Truck, CheckCircle2, Package, Phone, Route as RouteIcon, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatAoa } from "@/lib/commerce";
 import { loadGoogleMaps } from "@/lib/google-maps";
 import { useMapDefaults } from "@/lib/region";
+import { getDeliveryRoute, type DeliveryRouteResult } from "@/lib/logistics.functions";
+import { decodePolyline, formatDistanceM, formatDurationS } from "@/lib/geo";
 
 export const Route = createFileRoute("/_authenticated/entregador/$deliveryId")({
   head: () => ({ meta: [{ title: "Entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
   component: EntregadorPage,
 });
+
 
 type Delivery = {
   delivery_id: string;
@@ -49,10 +53,14 @@ const STATUS_LABEL: Record<string, string> = {
 function EntregadorPage() {
   const { deliveryId } = Route.useParams();
   const [delivery, setDelivery] = useState<Delivery | null>(null);
+  const [geo, setGeo] = useState<DeliveryRouteResult | null>(null);
+  const [geoLoading, setGeoLoading] = useState(true);
+  const fetchRoute = useServerFn(getDeliveryRoute);
   const [tracking, setTracking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ lat: number; lng: number; ts: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const watchRef = useRef<number | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapObjRef = useRef<any>(null);
@@ -75,7 +83,18 @@ function EntregadorPage() {
     return () => { cancelled = true; };
   }, [deliveryId]);
 
-  // Mapa com recolha (loja) e entrega (cliente)
+  // Geografia real (distância congelada + rota do serviço de mapas)
+  useEffect(() => {
+    let cancelled = false;
+    setGeoLoading(true);
+    fetchRoute({ data: { deliveryId } })
+      .then((res) => { if (!cancelled) setGeo(res); })
+      .catch(() => { if (!cancelled) setGeo(null); })
+      .finally(() => { if (!cancelled) setGeoLoading(false); });
+    return () => { cancelled = true; };
+  }, [deliveryId]);
+
+  // Mapa com recolha (loja), entrega (cliente) e rota real quando disponível
   useEffect(() => {
     if (!delivery || !mapRef.current) return;
     const pickup = delivery.pickup_lat != null && delivery.pickup_lng != null
@@ -91,6 +110,25 @@ function EntregadorPage() {
         mapObjRef.current = new maps.Map(mapRef.current, { center, zoom: 13, disableDefaultUI: true });
         if (pickup) new maps.Marker({ position: pickup, map: mapObjRef.current, title: "Recolha" });
         if (dropoff) new maps.Marker({ position: dropoff, map: mapObjRef.current, title: "Entrega" });
+        // Só desenha o traçado devolvido pelo serviço de rotas. Sem rota real,
+        // ficam apenas os pontos — nunca uma linha simulada.
+        const encoded = geo?.routePolyline;
+        if (encoded) {
+          const path = decodePolyline(encoded);
+          if (path.length > 1) {
+            new maps.Polyline({
+              path,
+              map: mapObjRef.current,
+              strokeColor: "#2563eb",
+              strokeOpacity: 0.9,
+              strokeWeight: 4,
+            });
+            const b = new maps.LatLngBounds();
+            path.forEach((p) => b.extend(p));
+            mapObjRef.current.fitBounds(b);
+            return;
+          }
+        }
         if (pickup && dropoff) {
           const bounds = new maps.LatLngBounds();
           bounds.extend(pickup);
@@ -100,7 +138,8 @@ function EntregadorPage() {
       })
       .catch(() => { /* mapa opcional: chave ausente não bloqueia a entrega */ });
     return () => { cancelled = true; };
-  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, mapDefaults.center]);
+  }, [delivery?.delivery_id, delivery?.pickup_lat, delivery?.dropoff_lat, geo?.routePolyline, mapDefaults.center]);
+
 
   const stop = () => {
     if (watchRef.current !== null && navigator.geolocation) {
@@ -209,6 +248,38 @@ function EntregadorPage() {
                 Sem coordenadas registadas para esta entrega. Use os endereços acima.
               </p>
             )}
+
+            {/* Distância e tempo reais — nunca estimados no cliente */}
+            <div className="rounded-2xl border border-border p-4 text-sm">
+              <p className="flex items-center gap-2 font-semibold"><RouteIcon size={16} /> Distância e rota</p>
+              {geoLoading ? (
+                <p className="mt-2 text-xs text-muted-foreground">A obter dados reais…</p>
+              ) : !geo ? (
+                <p className="mt-2 text-xs text-muted-foreground">INDISPONÍVEL</p>
+              ) : (
+                <div className="mt-2 space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Distância em linha reta</span>
+                    <span className="font-semibold">{formatDistanceM(geo.straightDistanceM) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Distância da rota</span>
+                    <span className="font-semibold">{formatDistanceM(geo.routeDistanceM) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1 text-muted-foreground"><Clock size={12} /> Tempo estimado</span>
+                    <span className="font-semibold">{formatDurationS(geo.routeDurationS) ?? "INDISPONÍVEL"}</span>
+                  </div>
+                  {geo.message && <p className="pt-1 text-[11px] text-muted-foreground">{geo.message}</p>}
+                  {geo.routeComputedAt && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Rota obtida em {new Date(geo.routeComputedAt).toLocaleString("pt-AO")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
 
             <div className="rounded-2xl border border-border p-4 text-sm">
               <p className="flex items-center gap-2 font-semibold"><MapPin size={16} /> Transmissão GPS</p>

@@ -597,6 +597,12 @@ export type Database = {
           courier_id: string | null
           created_at: string
           delivered_at: string | null
+          distance_computed_at: string | null
+          distance_destination_lat: number | null
+          distance_destination_lng: number | null
+          distance_origin_lat: number | null
+          distance_origin_lng: number | null
+          distance_unit: string | null
           dropoff_address: string | null
           dropoff_lat: number | null
           dropoff_lng: number | null
@@ -609,7 +615,13 @@ export type Database = {
           pickup_address: string | null
           pickup_lat: number | null
           pickup_lng: number | null
+          route_computed_at: string | null
+          route_distance_m: number | null
+          route_duration_s: number | null
+          route_polyline: string | null
+          route_provider: string | null
           status: string
+          straight_distance_m: number | null
           total_volume_cm3: number | null
           total_weight_kg: number | null
           updated_at: string
@@ -620,6 +632,12 @@ export type Database = {
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          distance_computed_at?: string | null
+          distance_destination_lat?: number | null
+          distance_destination_lng?: number | null
+          distance_origin_lat?: number | null
+          distance_origin_lng?: number | null
+          distance_unit?: string | null
           dropoff_address?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
@@ -632,7 +650,13 @@ export type Database = {
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          route_computed_at?: string | null
+          route_distance_m?: number | null
+          route_duration_s?: number | null
+          route_polyline?: string | null
+          route_provider?: string | null
           status?: string
+          straight_distance_m?: number | null
           total_volume_cm3?: number | null
           total_weight_kg?: number | null
           updated_at?: string
@@ -643,6 +667,12 @@ export type Database = {
           courier_id?: string | null
           created_at?: string
           delivered_at?: string | null
+          distance_computed_at?: string | null
+          distance_destination_lat?: number | null
+          distance_destination_lng?: number | null
+          distance_origin_lat?: number | null
+          distance_origin_lng?: number | null
+          distance_unit?: string | null
           dropoff_address?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
@@ -655,7 +685,13 @@ export type Database = {
           pickup_address?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          route_computed_at?: string | null
+          route_distance_m?: number | null
+          route_duration_s?: number | null
+          route_polyline?: string | null
+          route_provider?: string | null
           status?: string
+          straight_distance_m?: number | null
           total_volume_cm3?: number | null
           total_weight_kg?: number | null
           updated_at?: string
@@ -3834,6 +3870,10 @@ export type Database = {
       fiscal_snapshot_customer: { Args: { _user_id: string }; Returns: Json }
       fiscal_snapshot_platform: { Args: never; Returns: Json }
       fiscal_snapshot_store: { Args: { _store_id: string }; Returns: Json }
+      geo_distance_m: {
+        Args: { _lat1: number; _lat2: number; _lng1: number; _lng2: number }
+        Returns: number
+      }
       get_own_phone: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -3919,6 +3959,16 @@ export type Database = {
       }
       seller_create_delivery: { Args: { _order_id: string }; Returns: string }
       seller_signup_status: { Args: never; Returns: Json }
+      set_delivery_route: {
+        Args: {
+          _delivery_id: string
+          _distance_m: number
+          _duration_s: number
+          _polyline: string
+          _provider: string
+        }
+        Returns: undefined
+      }
       set_store_partner_type: {
         Args: {
           _store_id: string
