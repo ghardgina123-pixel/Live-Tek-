@@ -173,7 +173,7 @@ export function LojistaLivePanel({
         toast.error(error.message);
       }
     },
-    [user, text, liveId],
+    [user, text, liveId, t],
   );
 
   const rows = useMemo(() => msgs, [msgs]);
