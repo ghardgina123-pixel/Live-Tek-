@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Activity,
   Bluetooth,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
@@ -30,12 +31,23 @@ import { createVoiceChain, micConstraints, type AudioChain } from "@/lib/live-au
 import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
 import { logLiveAuditEvent, reportCameraTelemetry } from "@/lib/live-cameras.functions";
 import { useT } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import type { ReactNode } from "react";
 
 type Props = {
   liveId: string;
   onConnected?: () => void;
   onDisconnected?: () => void;
   onError?: (message: string) => void;
+  studio?: boolean;
+  settingsExtras?: ReactNode;
 };
 
 type State =
@@ -122,7 +134,14 @@ function getErrorMessage(error: unknown) {
   return `${prefix}${detail}`;
 }
 
-export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: Props) {
+export function LivePublisher({
+  liveId,
+  onConnected,
+  onDisconnected,
+  onError,
+  studio = false,
+  settingsExtras,
+}: Props) {
   const { t } = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const roomRef = useRef<Room | null>(null);
@@ -554,9 +573,71 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
     };
   }, []);
 
+  const secondaryControls = (
+    <>
+      <div className="space-y-2 rounded-xl border border-border bg-card p-3">
+        <label htmlFor="mic-select" className="flex items-center gap-1.5 text-xs font-semibold">
+          <Bluetooth size={13} className="text-primary" /> {t("s_microfone")}
+        </label>
+        <select
+          id="mic-select"
+          value={micId}
+          onChange={(e) => {
+            setMicId(e.target.value);
+            if (typeof window !== "undefined") localStorage.setItem(MIC_PREF_KEY, e.target.value);
+            void logLiveAuditEvent({
+              data: {
+                liveId,
+                kind: "mic_change",
+                message: `Microfone alterado para "${mics.find((d) => d.deviceId === e.target.value)?.label || "predefinido"}"`,
+                metadata: { deviceId: e.target.value || "default" },
+              },
+            }).catch(() => {});
+          }}
+          disabled={state === "publishing" || state === "connecting"}
+          className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
+        >
+          <option value="">{t("s_predefinido_do_sistema")}</option>
+          {mics.map((d) => (
+            <option key={d.deviceId} value={d.deviceId}>
+              {d.label || t("s_microfone")}
+            </option>
+          ))}
+        </select>
+        {(state === "publishing" || state === "connecting") && (
+          <p className="text-[11px] text-muted-foreground">Pare a transmissão para trocar de microfone.</p>
+        )}
+        <label className="flex items-center justify-between gap-2 text-xs">
+          <span className="flex items-center gap-1.5">
+            <Mic size={13} /> {t("s_supressao_de_ruido_da_loja")}
+          </span>
+          <input
+            type="checkbox"
+            checked={noiseGate}
+            onChange={(e) => setNoiseGate(e.target.checked)}
+            className="h-4 w-4 accent-[var(--primary)]"
+          />
+        </label>
+      </div>
+
+      {state === "publishing" && net && (
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2.5 text-[11px]">
+          <Activity
+            size={13}
+            className={net.rttMs > 400 ? "text-destructive" : net.rttMs > 200 ? "text-amber-500" : "text-emerald-500"}
+          />
+          <span>Latência {net.rttMs} ms</span>
+          <span className="text-muted-foreground">· perda {net.lossPct}%</span>
+          <span className="ml-auto font-semibold">vídeo {net.targetKbps} kbps</span>
+        </div>
+      )}
+      {settingsExtras}
+    </>
+  );
+
   return (
-    <div className="space-y-3">
-      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black">
+    <div className={studio ? "relative h-full min-h-0" : "space-y-3"}>
+      <div className={`relative w-full overflow-hidden bg-black ${studio ? "h-full" : "aspect-[9/16] rounded-2xl"}`}>
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
         {(state === "idle" ||
           state === "requesting" ||
@@ -606,6 +687,26 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
             <Radio size={11} /> {t("s_ao_vivo")}
           </div>
         )}
+        {studio && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute right-3 top-14 z-20 h-9 w-9 rounded-full bg-background/85 shadow-md backdrop-blur"
+                aria-label="Definições e estatísticas"
+              >
+                <SlidersHorizontal size={16} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[min(92vw,420px)] overflow-y-auto p-4">
+              <SheetHeader className="mb-4 pr-8 text-left">
+                <SheetTitle>Definições e estatísticas</SheetTitle>
+              </SheetHeader>
+              <div className="space-y-3">{secondaryControls}</div>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
 
       {(state === "preflight" || state === "connecting") && (
@@ -634,110 +735,50 @@ export function LivePublisher({ liveId, onConnected, onDisconnected, onError }: 
         </div>
       )}
 
-      {/* Áudio profissional: microfone Bluetooth + supressão de ruído */}
-      <div className="space-y-2 rounded-xl border border-border bg-card p-3">
-        <label htmlFor="mic-select" className="flex items-center gap-1.5 text-xs font-semibold">
-          <Bluetooth size={13} className="text-primary" /> {t("s_microfone")}
-        </label>
-        <select
-          id="mic-select"
-          value={micId}
-          onChange={(e) => {
-            setMicId(e.target.value);
-            if (typeof window !== "undefined") localStorage.setItem(MIC_PREF_KEY, e.target.value);
-            void logLiveAuditEvent({
-              data: {
-                liveId,
-                kind: "mic_change",
-                message: `Microfone alterado para "${mics.find((d) => d.deviceId === e.target.value)?.label || "predefinido"}"`,
-                metadata: { deviceId: e.target.value || "default" },
-              },
-            }).catch(() => {});
-          }}
-          disabled={state === "publishing" || state === "connecting"}
-          className="h-10 w-full rounded-md border bg-background px-2 text-sm disabled:opacity-60"
-        >
-          <option value="">{t("s_predefinido_do_sistema")}</option>
-          {mics.map((d) => (
-            <option key={d.deviceId} value={d.deviceId}>
-              {d.label || t("s_microfone")}
-            </option>
-          ))}
-        </select>
-        {(state === "publishing" || state === "connecting") && (
-          <p className="text-[11px] text-muted-foreground">
-            Pare a transmissão para trocar de microfone.
-          </p>
-        )}
-        <label className="flex items-center justify-between gap-2 text-xs">
-          <span className="flex items-center gap-1.5">
-            <Mic size={13} /> {t("s_supressao_de_ruido_da_loja")}
-          </span>
-          <input
-            type="checkbox"
-            checked={noiseGate}
-            onChange={(e) => setNoiseGate(e.target.checked)}
-            className="h-4 w-4 accent-[var(--primary)]"
-          />
-        </label>
-      </div>
+      {!studio && secondaryControls}
 
-      {state === "publishing" && net && (
-        <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2.5 text-[11px]">
-          <Activity
-            size={13}
-            className={
-              net.rttMs > 400
-                ? "text-destructive"
-                : net.rttMs > 200
-                  ? "text-amber-500" : "text-emerald-500"
-            }
-          />
-          <span>Latência {net.rttMs} ms</span>
-          <span className="text-muted-foreground">· perda {net.lossPct}%</span>
-          <span className="ml-auto font-semibold">vídeo {net.targetKbps} kbps</span>
-        </div>
-      )}
-
-      <div className="flex gap-2">
+      <div className={studio ? "absolute inset-x-3 bottom-3 z-20 flex gap-2" : "flex gap-2"}>
         {state === "publishing" ? (
-          <button
+          <Button
             onClick={stop}
-            className="flex-1 rounded-full bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground"
+            variant="destructive"
+            className="h-11 flex-1 rounded-full"
           >
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
-          </button>
+          </Button>
         ) : state === "preflight" ? (
           <>
-            <button
+            <Button
               onClick={stop}
-              className="rounded-full border border-border bg-background px-4 py-3 text-sm font-semibold"
+              variant="secondary"
+              className="h-11 rounded-full"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={publish}
               disabled={!cameraOk}
-              className="flex-1 rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              variant="destructive"
+              className="h-11 flex-1 rounded-full"
             >
               <Radio size={16} className="mr-2 inline" /> {t("s_iniciar")}
-            </button>
+            </Button>
           </>
         ) : state === "connecting" ? (
-          <button
+          <Button
             disabled
-            className="flex-1 rounded-full bg-primary/60 px-4 py-3 text-sm font-semibold text-primary-foreground"
+            className="h-11 flex-1 rounded-full"
           >
             <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={preflight}
             disabled={state === "requesting"}
-            className="flex-1 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="h-11 flex-1 rounded-full"
           >
             <Video size={16} className="mr-2 inline" /> {t("s_ligar_camara")}
-          </button>
+          </Button>
         )}
       </div>
     </div>
