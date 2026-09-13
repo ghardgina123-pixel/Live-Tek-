@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Loader2, Radio, Play, Square, Plus, Users, ExternalLink, Trash2 } from "lucide-react";
+import { Loader2, Radio, Play, Square, Plus, Users, ExternalLink, Trash2, Share2, X } from "lucide-react";
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,16 @@ function liveErrorMessage(msg: string) {
 }
 
 export const Route = createFileRoute("/_authenticated/lojista/lives")({
-  head: () => ({ meta: [{ title: "Lives — Lojista" }] }),
+  head: () => ({
+    meta: [
+      { title: "Transmissões em direto — Live Teká" },
+      { name: "description", content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká." },
+      { property: "og:title", content: "Transmissões em direto — Live Teká" },
+      { property: "og:description", content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ShellPage,
 });
 
@@ -67,6 +76,7 @@ function LivesManager() {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [activeViewers, setActiveViewers] = useState(0);
 
   const storeId = store?.id;
   const { status: subStatus, usage, reload: reloadSub } = useSubscriptionStatus(storeId);
@@ -210,6 +220,21 @@ function LivesManager() {
 
   const activeLive = lives?.find((l) => l.id === activeId) ?? null;
 
+  const shareLive = async (live: Live) => {
+    const url = `${window.location.origin}/live/${live.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: live.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Ligação da live copiada");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast.error("Não foi possível partilhar a live");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Criar nova live */}
@@ -280,24 +305,43 @@ function LivesManager() {
 
       {/* Painel de transmissão da live activa */}
       {activeLive && (
-        <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold">{activeLive.title}</h2>
-              <p className="text-[11px] text-muted-foreground">
-                Estado: {statusLabel(activeLive.status)}
-              </p>
+        <section className="fixed inset-x-0 bottom-16 top-0 z-30 mx-auto grid w-full max-w-[480px] grid-rows-[minmax(0,56%)_minmax(0,44%)] overflow-hidden bg-background shadow-xl">
+          <div className="relative min-h-0 overflow-hidden bg-foreground">
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/80 to-transparent" />
+            <div className="absolute inset-x-3 top-3 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 text-background">
+              <div className="flex min-w-0 items-center gap-2">
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-9 w-9 shrink-0 rounded-full bg-background/85 text-foreground backdrop-blur"
+                  onClick={() => setActiveId(null)}
+                  aria-label="Fechar painel"
+                >
+                  <X size={16} />
+                </Button>
+                <div className="min-w-0">
+                  <h2 className="truncate text-sm font-semibold">{activeLive.title}</h2>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold">
+                    <span className={`h-1.5 w-1.5 rounded-full ${activeLive.status === "live" ? "bg-destructive" : "bg-muted-foreground"}`} />
+                    {statusLabel(activeLive.status)}
+                  </span>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <span className="inline-flex h-9 items-center gap-1 rounded-full bg-background/85 px-3 text-xs font-semibold text-foreground backdrop-blur">
+                  <Users size={14} /> {activeViewers}
+                </span>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-9 w-9 rounded-full bg-background/85 text-foreground backdrop-blur"
+                  onClick={() => void shareLive(activeLive)}
+                  aria-label="Partilhar live"
+                >
+                  <Share2 size={15} />
+                </Button>
+              </div>
             </div>
-            {activeLive.status !== "live" ? (
-              <span className="text-[11px] text-muted-foreground">
-                {t("s_clique_em_iniciar_camara_abaixo")}
-              </span>
-            ) : (
-              <Button size="sm" variant="destructive" onClick={() => endLive(activeLive.id)}>
-                <Square size={14} className="mr-1" /> {t("s_encerrar")}
-              </Button>
-            )}
-          </div>
           <Suspense
             fallback={
               <div className="flex justify-center py-8">
@@ -307,6 +351,20 @@ function LivesManager() {
           >
             <LivePublisher
               liveId={activeLive.id}
+              studio
+              settingsExtras={
+                <>
+                  <LiveCameraManager liveId={activeLive.id} />
+                  <LiveAuditLog liveId={activeLive.id} />
+                  <Link
+                    to="/live/$id"
+                    params={{ id: activeLive.id }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline"
+                  >
+                    Ver como espetador <ExternalLink size={11} />
+                  </Link>
+                </>
+              }
               onConnected={() => markLive(activeLive.id)}
               onDisconnected={() => {
                 if (activeLive.status === "live") endLive(activeLive.id);
@@ -314,6 +372,7 @@ function LivesManager() {
               onError={(msg) => rollbackLive(activeLive.id, msg)}
             />
           </Suspense>
+          </div>
           <Suspense
             fallback={
               <div className="mt-3 flex justify-center py-6">
@@ -321,25 +380,8 @@ function LivesManager() {
               </div>
             }
           >
-            <LiveCameraManager liveId={activeLive.id} />
-            <LiveAuditLog liveId={activeLive.id} />
+            <LojistaLivePanel liveId={activeLive.id} studio onViewerCountChange={setActiveViewers} />
           </Suspense>
-          <Suspense
-            fallback={
-              <div className="mt-3 flex justify-center py-6">
-                <Loader2 className="animate-spin text-primary" size={16} />
-              </div>
-            }
-          >
-            <LojistaLivePanel liveId={activeLive.id} />
-          </Suspense>
-          <Link
-            to="/live/$id"
-            params={{ id: activeLive.id }}
-            className="mt-3 inline-flex items-center gap-1 text-xs text-primary underline"
-          >
-            Ver como espetador <ExternalLink size={11} />
-          </Link>
         </section>
       )}
 

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useT } from "@/lib/i18n";
@@ -18,7 +19,15 @@ const msgSchema = z.string().trim().min(1).max(500);
  * Subscreve exactamente o mesmo canal que o cliente (live_messages, live_viewers)
  * filtrado por live_id, para que a comunicação seja bidireccional.
  */
-export function LojistaLivePanel({ liveId }: { liveId: string }) {
+export function LojistaLivePanel({
+  liveId,
+  studio = false,
+  onViewerCountChange,
+}: {
+  liveId: string;
+  studio?: boolean;
+  onViewerCountChange?: (count: number) => void;
+}) {
   const { t } = useT();
   const { user } = useAuth();
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -57,8 +66,10 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
       .select("*", { count: "exact", head: true })
       .eq("live_id", liveId)
       .gte("last_seen_at", cutoff);
-    setViewers(count ?? 0);
-  }, [liveId]);
+    const nextCount = count ?? 0;
+    setViewers(nextCount);
+    onViewerCountChange?.(nextCount);
+  }, [liveId, onViewerCountChange]);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,8 +136,14 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
   const rows = useMemo(() => msgs, [msgs]);
 
   return (
-    <div className="mt-3 grid gap-3 rounded-2xl border border-border bg-muted/30 p-3">
-      <div className="flex items-center justify-between text-xs">
+    <div
+      className={
+        studio
+          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 border-t border-border bg-background/95 p-3 backdrop-blur-md"
+          : "mt-3 grid gap-3 rounded-2xl border border-border bg-muted/30 p-3"
+      }
+    >
+      <div className={`items-center justify-between text-xs ${studio ? "hidden" : "flex"}`}>
         <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
           <MessageCircle size={14} className="text-primary" /> {t("s_chat_da_live")}
         </span>
@@ -135,7 +152,9 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
         </span>
       </div>
 
-      <div className="h-64 space-y-1.5 overflow-y-auto rounded-xl bg-background p-2.5 text-sm">
+      <div
+        className={`${studio ? "min-h-0" : "h-64 rounded-xl bg-background p-2.5"} space-y-1.5 overflow-y-auto overscroll-contain text-sm`}
+      >
         {loading ? (
           <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-primary" size={16} /></div>
         ) : rows.length === 0 ? (
@@ -146,23 +165,24 @@ export function LojistaLivePanel({ liveId }: { liveId: string }) {
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={send} className="flex items-center gap-2">
+      <form onSubmit={send} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("s_responder_a_audiencia")}
           maxLength={500}
           disabled={!user || sending}
-          className="h-10 flex-1 rounded-full"
+          className="h-10 min-w-0 rounded-full"
         />
-        <button
+        <Button
           type="submit"
+          size="icon"
           disabled={!user || !text.trim() || sending}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"
+          className="h-10 w-10 shrink-0 rounded-full"
           aria-label={t("s_enviar_mensagem")}
         >
           {sending ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -322,17 +322,19 @@ function CopyRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center gap-1">
       <span className="shrink-0 font-semibold">{label}:</span>
       <span className="truncate font-mono">{value}</span>
-      <button
+      <Button
         type="button"
+        size="icon"
+        variant="ghost"
         aria-label={`Copiar ${label}`}
-        className="ml-auto shrink-0 text-primary"
+        className="ml-auto h-7 w-7 shrink-0 text-primary"
         onClick={() => {
           void navigator.clipboard.writeText(value);
           toast.success(t("s_copiado"));
         }}
       >
         <Copy size={12} />
-      </button>
+      </Button>
     </div>
   );
 }
