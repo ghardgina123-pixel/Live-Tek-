@@ -4,4 +4,4 @@
 - [x] Manter chat e resposta sempre visíveis.
 - [x] Mover câmaras, áudio, rede, auditoria e CSV para uma gaveta.
 - [x] Adicionar espectadores e partilha no topo.
-- [ ] Validar compilação e apresentação em dois tamanhos móveis.
+- [x] Validar compilação e apresentação em dois tamanhos móveis.
