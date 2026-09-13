@@ -32,13 +32,7 @@ import { startAdaptiveBitrate, type NetworkReport } from "@/lib/live-adaptive";
 import { logLiveAuditEvent, reportCameraTelemetry } from "@/lib/live-cameras.functions";
 import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -605,7 +599,9 @@ export function LivePublisher({
           ))}
         </select>
         {(state === "publishing" || state === "connecting") && (
-          <p className="text-[11px] text-muted-foreground">Pare a transmissão para trocar de microfone.</p>
+          <p className="text-[11px] text-muted-foreground">
+            Pare a transmissão para trocar de microfone.
+          </p>
         )}
         <label className="flex items-center justify-between gap-2 text-xs">
           <span className="flex items-center gap-1.5">
@@ -624,7 +620,13 @@ export function LivePublisher({
         <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-2.5 text-[11px]">
           <Activity
             size={13}
-            className={net.rttMs > 400 ? "text-destructive" : net.rttMs > 200 ? "text-amber-500" : "text-emerald-500"}
+            className={
+              net.rttMs > 400
+                ? "text-destructive"
+                : net.rttMs > 200
+                  ? "text-amber-500"
+                  : "text-emerald-500"
+            }
           />
           <span>Latência {net.rttMs} ms</span>
           <span className="text-muted-foreground">· perda {net.lossPct}%</span>
@@ -637,7 +639,9 @@ export function LivePublisher({
 
   return (
     <div className={studio ? "relative h-full min-h-0" : "space-y-3"}>
-      <div className={`relative w-full overflow-hidden bg-black ${studio ? "h-full" : "aspect-[9/16] rounded-2xl"}`}>
+      <div
+        className={`relative w-full overflow-hidden bg-black ${studio ? "h-full" : "aspect-[9/16] rounded-2xl"}`}
+      >
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
         {(state === "idle" ||
           state === "requesting" ||
@@ -739,20 +743,12 @@ export function LivePublisher({
 
       <div className={studio ? "absolute inset-x-3 bottom-3 z-20 flex gap-2" : "flex gap-2"}>
         {state === "publishing" ? (
-          <Button
-            onClick={stop}
-            variant="destructive"
-            className="h-11 flex-1 rounded-full"
-          >
+          <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
           <>
-            <Button
-              onClick={stop}
-              variant="secondary"
-              className="h-11 rounded-full"
-            >
+            <Button onClick={stop} variant="secondary" className="h-11 rounded-full">
               Cancelar
             </Button>
             <Button
@@ -765,10 +761,7 @@ export function LivePublisher({
             </Button>
           </>
         ) : state === "connecting" ? (
-          <Button
-            disabled
-            className="h-11 flex-1 rounded-full"
-          >
+          <Button disabled className="h-11 flex-1 rounded-full">
             <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
           </Button>
         ) : (

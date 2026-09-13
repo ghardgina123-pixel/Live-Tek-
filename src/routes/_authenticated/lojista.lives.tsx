@@ -1,6 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Loader2, Radio, Play, Square, Plus, Users, ExternalLink, Trash2, Share2, X } from "lucide-react";
+import {
+  Loader2,
+  Radio,
+  Play,
+  Square,
+  Plus,
+  Users,
+  ExternalLink,
+  Trash2,
+  Share2,
+  X,
+} from "lucide-react";
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,9 +56,15 @@ export const Route = createFileRoute("/_authenticated/lojista/lives")({
   head: () => ({
     meta: [
       { title: "Transmissões em direto — Live Teká" },
-      { name: "description", content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká." },
+      {
+        name: "description",
+        content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká.",
+      },
       { property: "og:title", content: "Transmissões em direto — Live Teká" },
-      { property: "og:description", content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká." },
+      {
+        property: "og:description",
+        content: "Crie e acompanhe transmissões em direto da sua loja na Live Teká.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -322,7 +339,9 @@ function LivesManager() {
                 <div className="min-w-0">
                   <h2 className="truncate text-sm font-semibold">{activeLive.title}</h2>
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold">
-                    <span className={`h-1.5 w-1.5 rounded-full ${activeLive.status === "live" ? "bg-destructive" : "bg-muted-foreground"}`} />
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${activeLive.status === "live" ? "bg-destructive" : "bg-muted-foreground"}`}
+                    />
                     {statusLabel(activeLive.status)}
                   </span>
                 </div>
@@ -342,36 +361,36 @@ function LivesManager() {
                 </Button>
               </div>
             </div>
-          <Suspense
-            fallback={
-              <div className="flex justify-center py-8">
-                <Loader2 className="animate-spin text-primary" />
-              </div>
-            }
-          >
-            <LivePublisher
-              liveId={activeLive.id}
-              studio
-              settingsExtras={
-                <>
-                  <LiveCameraManager liveId={activeLive.id} />
-                  <LiveAuditLog liveId={activeLive.id} />
-                  <Link
-                    to="/live/$id"
-                    params={{ id: activeLive.id }}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline"
-                  >
-                    Ver como espetador <ExternalLink size={11} />
-                  </Link>
-                </>
+            <Suspense
+              fallback={
+                <div className="flex justify-center py-8">
+                  <Loader2 className="animate-spin text-primary" />
+                </div>
               }
-              onConnected={() => markLive(activeLive.id)}
-              onDisconnected={() => {
-                if (activeLive.status === "live") endLive(activeLive.id);
-              }}
-              onError={(msg) => rollbackLive(activeLive.id, msg)}
-            />
-          </Suspense>
+            >
+              <LivePublisher
+                liveId={activeLive.id}
+                studio
+                settingsExtras={
+                  <>
+                    <LiveCameraManager liveId={activeLive.id} />
+                    <LiveAuditLog liveId={activeLive.id} />
+                    <Link
+                      to="/live/$id"
+                      params={{ id: activeLive.id }}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline"
+                    >
+                      Ver como espetador <ExternalLink size={11} />
+                    </Link>
+                  </>
+                }
+                onConnected={() => markLive(activeLive.id)}
+                onDisconnected={() => {
+                  if (activeLive.status === "live") endLive(activeLive.id);
+                }}
+                onError={(msg) => rollbackLive(activeLive.id, msg)}
+              />
+            </Suspense>
           </div>
           <Suspense
             fallback={
@@ -380,7 +399,11 @@ function LivesManager() {
               </div>
             }
           >
-            <LojistaLivePanel liveId={activeLive.id} studio onViewerCountChange={setActiveViewers} />
+            <LojistaLivePanel
+              liveId={activeLive.id}
+              studio
+              onViewerCountChange={setActiveViewers}
+            />
           </Suspense>
         </section>
       )}
