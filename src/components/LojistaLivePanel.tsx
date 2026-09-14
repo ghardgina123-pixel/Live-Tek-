@@ -182,7 +182,7 @@ export function LojistaLivePanel({
     <div
       className={
         studio
-          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 border-t border-border bg-background/95 p-3 backdrop-blur-md"
+          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-1.5 border-t border-border bg-background/95 p-2 backdrop-blur-md"
           : "mt-3 grid gap-3 rounded-2xl border border-border bg-muted/30 p-3"
       }
     >

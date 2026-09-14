@@ -322,7 +322,7 @@ function LivesManager() {
 
       {/* Painel de transmissão da live activa */}
       {activeLive && (
-        <section className="fixed inset-x-0 bottom-16 top-0 z-30 mx-auto grid w-full max-w-[480px] grid-rows-[minmax(0,56%)_minmax(0,44%)] overflow-hidden bg-background shadow-xl">
+        <section className="fixed inset-x-0 bottom-16 top-0 z-30 mx-auto grid w-full max-w-[480px] grid-rows-[minmax(0,70%)_minmax(0,30%)] overflow-hidden bg-background shadow-xl">
           <div className="relative min-h-0 overflow-hidden bg-foreground">
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/80 to-transparent" />
             <div className="absolute inset-x-3 top-3 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 text-background">
