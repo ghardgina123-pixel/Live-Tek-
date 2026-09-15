@@ -223,6 +223,13 @@ export function LivePlayer({ liveId }: Props) {
               <p className="text-[11px] text-white/60">{errorMsg}</p>
             </>
           )}
+          {state === "signin" && (
+            <>
+              <Video />
+              <p className="text-sm">Entre na sua conta para assistir à live</p>
+              <p className="text-[11px] text-white/60">O chat e os produtos continuam visíveis.</p>
+            </>
+          )}
           {state === "unconfigured" && (
             <>
               <Video />
