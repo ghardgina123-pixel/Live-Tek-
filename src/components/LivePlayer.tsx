@@ -15,7 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Props = { liveId: string };
 
-type State = "connecting" | "reconnecting" | "live" | "waiting" | "error" | "unconfigured";
+type State =
+  | "connecting"
+  | "reconnecting"
+  | "live"
+  | "waiting"
+  | "error"
+  | "unconfigured"
+  | "signin";
 
 /**
  * Player LiveKit isolado do chat — falhas/reconexões aqui não
