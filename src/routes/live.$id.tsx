@@ -164,10 +164,9 @@ function LivePage() {
           .eq("live_id", id),
         supabase
           .from("live_messages")
-          .select("id, sender_id, text, created_at")
+          .select("id, sender_id, text, created_at", { count: "exact" })
           .eq("live_id", id)
           .order("created_at", { ascending: true })
-          .select("id, sender_id, text, created_at", { count: "exact" })
           .limit(100),
       ]);
       if (cancelled) return;
@@ -378,11 +377,17 @@ function LivePage() {
         : `https://www.livemarketplece.live/live/${id}`;
     const title = live?.title ?? "Live Teká";
     try {
-      if (typeof navigator !== "undefined" && "share" in navigator) {
-        await navigator.share({ title, text: `Assiste a live “${title}” agora na Live Teká`, url });
+      const deviceNavigator = window.navigator;
+      const clipboard = deviceNavigator.clipboard;
+      if (typeof deviceNavigator.share === "function") {
+        await deviceNavigator.share({
+          title,
+          text: `Assiste a live “${title}” agora na Live Teká`,
+          url,
+        });
         return;
       }
-      await navigator.clipboard.writeText(url);
+      await clipboard.writeText(url);
       toast.success(t("s_link_copiado"));
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
