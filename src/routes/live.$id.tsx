@@ -1,14 +1,5 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
-import {
-  lazy,
-  memo,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -267,10 +258,12 @@ function LivePage() {
     refreshViewerCount();
     if (!user) return;
     const heartbeat = async () => {
-      await supabase.from("live_viewers").upsert(
-        { live_id: id, user_id: user.id, last_seen_at: new Date().toISOString() },
-        { onConflict: "live_id,user_id" },
-      );
+      await supabase
+        .from("live_viewers")
+        .upsert(
+          { live_id: id, user_id: user.id, last_seen_at: new Date().toISOString() },
+          { onConflict: "live_id,user_id" },
+        );
     };
     void heartbeat();
     const interval = setInterval(heartbeat, 30_000);
@@ -365,11 +358,7 @@ function LivePage() {
     const wasFollowing = following;
     setFollowing(!wasFollowing);
     const { error } = wasFollowing
-      ? await supabase
-          .from("store_follows")
-          .delete()
-          .eq("store_id", storeId)
-          .eq("user_id", user.id)
+      ? await supabase.from("store_follows").delete().eq("store_id", storeId).eq("user_id", user.id)
       : await supabase.from("store_follows").insert({ store_id: storeId, user_id: user.id });
     if (error) {
       setFollowing(wasFollowing);
@@ -379,7 +368,10 @@ function LivePage() {
   }, [followBusy, following, live?.store?.id, user]);
 
   const share = useCallback(async () => {
-    const url = typeof window !== "undefined" ? window.location.href : `https://www.livemarketplece.live/live/${id}`;
+    const url =
+      typeof window !== "undefined"
+        ? window.location.href
+        : `https://www.livemarketplece.live/live/${id}`;
     const title = live?.title ?? "Live Teká";
     try {
       if (typeof navigator !== "undefined" && "share" in navigator) {
@@ -415,30 +407,33 @@ function LivePage() {
     [id, t, text, user],
   );
 
-  const addProduct = useCallback((product: Product, checkout: boolean) => {
-    if (product.status !== "approved" || product.stock <= 0) {
-      toast.error("Este produto não está disponível para compra.");
-      return;
-    }
-    cartStore.add(
-      {
-        id: product.id,
-        name: product.name,
-        price: fromAoa(product.price_aoa),
-        priceAoa: Number(product.price_aoa),
-        emoji: "🛍️",
-        storeId: product.store_id,
-        rating: 0,
-        sold: "0",
-        description: product.description ?? "",
-        image: product.image_url,
-      },
-      1,
-    );
-    setSelectedProduct(null);
-    if (checkout) void navigate({ to: "/checkout" });
-    else toast.success(`${product.name} no carrinho`);
-  }, [navigate]);
+  const addProduct = useCallback(
+    (product: Product, checkout: boolean) => {
+      if (product.status !== "approved" || product.stock <= 0) {
+        toast.error("Este produto não está disponível para compra.");
+        return;
+      }
+      cartStore.add(
+        {
+          id: product.id,
+          name: product.name,
+          price: fromAoa(product.price_aoa),
+          priceAoa: Number(product.price_aoa),
+          emoji: "🛍️",
+          storeId: product.store_id,
+          rating: 0,
+          sold: "0",
+          description: product.description ?? "",
+          image: product.image_url,
+        },
+        1,
+      );
+      setSelectedProduct(null);
+      if (checkout) void navigate({ to: "/checkout" });
+      else toast.success(`${product.name} no carrinho`);
+    },
+    [navigate],
+  );
 
   const productItems = useMemo(
     () =>
@@ -467,7 +462,9 @@ function LivePage() {
   return (
     <main className="fixed inset-0 z-40 mx-auto h-dvh w-full max-w-[480px] overflow-hidden bg-secondary text-secondary-foreground shadow-xl">
       <h1 className="sr-only">
-        {live.store?.name ? `${live.store.name} ao vivo — ${live.title}` : `${live.title} — Live Teká`}
+        {live.store?.name
+          ? `${live.store.name} ao vivo — ${live.title}`
+          : `${live.title} — Live Teká`}
       </h1>
 
       <div className="absolute inset-0">
@@ -579,7 +576,9 @@ function LivePage() {
       <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[62dvh] flex-col px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="mb-2 max-w-[calc(100%-4.5rem)]">
           <p className="text-sm font-bold">{live.store?.name ?? "Live Teká"}</p>
-          <p className="line-clamp-2 text-xs leading-relaxed text-secondary-foreground/85">{live.title}</p>
+          <p className="line-clamp-2 text-xs leading-relaxed text-secondary-foreground/85">
+            {live.title}
+          </p>
         </div>
 
         <div
@@ -644,7 +643,10 @@ function LivePage() {
         </form>
       </section>
 
-      <Sheet open={Boolean(selectedProduct)} onOpenChange={(open) => !open && setSelectedProduct(null)}>
+      <Sheet
+        open={Boolean(selectedProduct)}
+        onOpenChange={(open) => !open && setSelectedProduct(null)}
+      >
         <SheetContent
           side="bottom"
           className="mx-auto max-h-[78dvh] w-full max-w-[480px] overflow-y-auto rounded-t-lg border-secondary-foreground/10 bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-5"
