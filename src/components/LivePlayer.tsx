@@ -135,6 +135,14 @@ export function LivePlayer({ liveId }: Props) {
           .eq("id", liveId)
           .maybeSingle();
         if (liveRow?.active_identity) activeIdentityRef.current = liveRow.active_identity;
+        // O token LiveKit exige sessão: sem utilizador autenticado não chamamos
+        // o endpoint protegido (evita "Unauthorized" e ecrã em branco).
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (!sessionData.session) {
+          setState("signin");
+          return;
+        }
         const { token, url } = await issue({ data: { liveId, canPublish: false } });
         if (cancelled) return;
         await room.connect(url, token, { autoSubscribe: true });
