@@ -422,6 +422,21 @@ function LivePage() {
         toast.error("Este produto não está disponível para compra.");
         return;
       }
+      if (checkout && !user) {
+        toast.error(t("s_faca_login_para_finalizar_a_compra"));
+        void navigate({ to: "/login" });
+        return;
+      }
+      // O checkout só cria encomendas de uma única loja (taxa de entrega e
+      // pagamento são calculados no servidor por loja). Se o carrinho tiver
+      // artigos de outra loja, ficamos apenas com o produto desta live.
+      const hasOtherStore = cartStore
+        .getSnapshot()
+        .some((item) => item.product.storeId !== product.store_id);
+      if (hasOtherStore) {
+        cartStore.clear();
+        toast.info("Carrinho ajustado para os produtos desta live.");
+      }
       cartStore.add(
         {
           id: product.id,
@@ -441,7 +456,7 @@ function LivePage() {
       if (checkout) void navigate({ to: "/checkout" });
       else toast.success(`${product.name} no carrinho`);
     },
-    [navigate],
+    [navigate, t, user],
   );
 
   const productItems = useMemo(
