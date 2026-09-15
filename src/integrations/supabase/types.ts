@@ -2945,6 +2945,32 @@ export type Database = {
         }
         Relationships: []
       }
+      store_follows: {
+        Row: {
+          created_at: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          store_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_follows_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_private: {
         Row: {
           bank_account: string | null
@@ -4275,6 +4301,7 @@ export type Database = {
       }
       store_balance: { Args: { _store_id: string }; Returns: Json }
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
+      store_follower_count: { Args: { _store_id: string }; Returns: number }
       store_live_usage: { Args: { _store_id: string }; Returns: Json }
       store_register_sale_document: {
         Args: {
