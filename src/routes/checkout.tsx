@@ -13,6 +13,7 @@ import { BrandLogo, getBrand } from "@/lib/payment-brands";
 import { useT } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 import { quoteDeliveryFee, QUOTE_REASON_LABEL, type DeliveryFeeQuote } from "@/lib/tariffs.functions";
+import { createMulticaixaExpressIntent } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
