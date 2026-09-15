@@ -163,6 +163,11 @@ function Checkout() {
         <h1 className="mt-5 text-2xl font-bold">{t("s_pedido_confirmado")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("s_voce_recebera_atualizacoes_pelo_chat_e_e_mail_ob")}</p>
         {orderId && <p className="mt-2 text-xs text-muted-foreground">Pedido nº <span className="font-mono">{orderId.slice(0, 8)}</span></p>}
+        {paymentRef && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Referência de pagamento: <span className="font-mono">{paymentRef}</span>
+          </p>
+        )}
         {gatewayPending && (
           <p className="mt-4 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200">
             {GATEWAY_PENDING_MESSAGE} O pedido fica com o estado <b>Aguardando pagamento</b> até a
@@ -327,9 +332,27 @@ function Checkout() {
               p_items: items.map((i) => ({ product_id: i.product.id, quantity: i.qty })),
               p_payment_method: selectedMethod.method_type,
             });
+            if (error) {
+              setSubmitting(false);
+              return toast.error(error.message || t("s_falha_ao_criar_pedido"));
+            }
+            const newOrderId = data as unknown as string;
+            // Pagamentos electrónicos: a intenção de pagamento (montantes e comissão)
+            // é criada e validada exclusivamente no servidor.
+            if (!selectedMethod.is_cash_on_delivery && selectedMethod.gateway_configured) {
+              try {
+                const res = await createExpressIntent({ data: { orderId: newOrderId } });
+                setPaymentRef(res.intent?.reference ?? null);
+              } catch (e: unknown) {
+                toast.error(
+                  e instanceof Error
+                    ? `Pedido criado, mas o pagamento não foi iniciado: ${e.message}`
+                    : "Pedido criado, mas o pagamento não foi iniciado.",
+                );
+              }
+            }
             setSubmitting(false);
-            if (error) return toast.error(error.message || t("s_falha_ao_criar_pedido"));
-            setOrderId(data as unknown as string);
+            setOrderId(newOrderId);
             setDone(true);
             cartStore.clear();
             toast.success(t("s_pedido_realizado"));
