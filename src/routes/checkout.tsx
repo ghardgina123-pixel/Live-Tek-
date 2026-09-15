@@ -60,6 +60,7 @@ function Checkout() {
   const currency = useCurrency();
   const [done, setDone] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [paymentRef, setPaymentRef] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addrLoading, setAddrLoading] = useState(true);
@@ -70,6 +71,7 @@ function Checkout() {
   const region = useRegion();
   const countryCode = region.code;
   const fetchQuote = useServerFn(quoteDeliveryFee);
+  const createExpressIntent = useServerFn(createMulticaixaExpressIntent);
   const [quote, setQuote] = useState<DeliveryFeeQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
