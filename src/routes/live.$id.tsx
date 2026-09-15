@@ -84,6 +84,7 @@ function LivePage() {
   const [products, setProducts] = useState<LiveProduct[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [msgs, setMsgs] = useState<LiveMsg[]>([]);
+  const [commentCount, setCommentCount] = useState(0);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [profiles, setProfiles] = useState<Record<string, PublicProfile>>({});
@@ -154,7 +155,7 @@ function LivePage() {
       const nextLive = (liveRow as unknown as Live) ?? null;
       setLive(nextLive);
 
-      const [{ data: liveProducts }, { data: messages }] = await Promise.all([
+      const [{ data: liveProducts }, { data: messages, count: messageCount }] = await Promise.all([
         supabase
           .from("live_products")
           .select(
@@ -166,12 +167,14 @@ function LivePage() {
           .select("id, sender_id, text, created_at")
           .eq("live_id", id)
           .order("created_at", { ascending: true })
+          .select("id, sender_id, text, created_at", { count: "exact" })
           .limit(100),
       ]);
       if (cancelled) return;
       setProducts((liveProducts as unknown as LiveProduct[]) ?? []);
       const initialMessages = (messages as LiveMsg[]) ?? [];
       setMsgs(initialMessages);
+      setCommentCount(messageCount ?? initialMessages.length);
       const senderIds = Array.from(new Set(initialMessages.map((message) => message.sender_id)));
       if (senderIds.length) {
         const { data: profileRows } = await supabase
@@ -204,6 +207,7 @@ function LivePage() {
               ? current
               : [...current, message].slice(-200),
           );
+          setCommentCount((count) => count + 1);
           setProfiles((current) => {
             if (!current[message.sender_id]) queueProfile(message.sender_id);
             return current;
@@ -563,7 +567,7 @@ function LivePage() {
         </SocialAction>
         <SocialAction
           label="Ver comentários"
-          count={msgs.length}
+          count={commentCount}
           onClick={() => chatRef.current?.focus()}
         >
           <MessageCircle />
