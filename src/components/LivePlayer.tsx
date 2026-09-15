@@ -15,7 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Props = { liveId: string };
 
-type State = "connecting" | "reconnecting" | "live" | "waiting" | "error" | "unconfigured";
+type State =
+  | "connecting"
+  | "reconnecting"
+  | "live"
+  | "waiting"
+  | "error"
+  | "unconfigured"
+  | "signin";
 
 /**
  * Player LiveKit isolado do chat — falhas/reconexões aqui não
@@ -128,6 +135,14 @@ export function LivePlayer({ liveId }: Props) {
           .eq("id", liveId)
           .maybeSingle();
         if (liveRow?.active_identity) activeIdentityRef.current = liveRow.active_identity;
+        // O token LiveKit exige sessão: sem utilizador autenticado não chamamos
+        // o endpoint protegido (evita "Unauthorized" e ecrã em branco).
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (cancelled) return;
+        if (!sessionData.session) {
+          setState("signin");
+          return;
+        }
         const { token, url } = await issue({ data: { liveId, canPublish: false } });
         if (cancelled) return;
         await room.connect(url, token, { autoSubscribe: true });
@@ -206,6 +221,13 @@ export function LivePlayer({ liveId }: Props) {
               <AlertTriangle className="text-yellow-400" />
               <p className="text-sm">Falha no stream</p>
               <p className="text-[11px] text-white/60">{errorMsg}</p>
+            </>
+          )}
+          {state === "signin" && (
+            <>
+              <Video />
+              <p className="text-sm">Entre na sua conta para assistir à live</p>
+              <p className="text-[11px] text-white/60">O chat e os produtos continuam visíveis.</p>
             </>
           )}
           {state === "unconfigured" && (
