@@ -17,6 +17,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const count = useCartCount();
   const { t } = useT();
+
+  // A experiência de transmissão ocupa todo o viewport e fornece os seus
+  // próprios controlos. A navegação global não deve competir com o vídeo.
+  if (/^\/live\/[^/]+\/?$/.test(pathname)) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background pb-20">
       <main>{children}</main>
