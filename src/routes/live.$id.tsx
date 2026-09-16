@@ -484,7 +484,7 @@ function LivePage() {
   }
 
   return (
-    <main className="fixed inset-0 z-40 mx-auto h-dvh w-full max-w-[480px] overflow-hidden bg-secondary text-secondary-foreground shadow-xl">
+    <main className="fixed inset-0 z-50 mx-auto isolate h-dvh w-full max-w-[480px] overflow-hidden overscroll-none bg-secondary text-secondary-foreground shadow-xl">
       <h1 className="sr-only">
         {live.store?.name
           ? `${live.store.name} ao vivo — ${live.title}`
@@ -597,7 +597,7 @@ function LivePage() {
         </SocialAction>
       </aside>
 
-      <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[62dvh] flex-col px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[62dvh] min-h-0 flex-col bg-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="mb-2 max-w-[calc(100%-4.5rem)]">
           <p className="text-sm font-bold">{live.store?.name ?? "Live Teká"}</p>
           <p className="line-clamp-2 text-xs leading-relaxed text-secondary-foreground/85">
