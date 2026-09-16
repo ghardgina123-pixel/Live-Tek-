@@ -27,7 +27,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background pb-20">
       <main>{children}</main>
-      <nav aria-label="Live Teká" className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background">
+      <nav
+        aria-label="Live Teká"
+        className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background"
+      >
         <ul className="grid grid-cols-6">
           {tabs.map((tab) => {
             const { to, icon: Icon, key } = tab;
@@ -35,7 +38,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             const active = pathname === to || (to !== "/home" && pathname.startsWith(to));
             return (
               <li key={to}>
-                <Link to={to} className="relative flex flex-col items-center gap-1 py-3 text-[10px]">
+                <Link
+                  to={to}
+                  className="relative flex flex-col items-center gap-1 py-3 text-[10px]"
+                >
                   <div className={active ? "text-primary" : "text-muted-foreground"}>
                     <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
                     {to === "/carrinho" && count > 0 && (
@@ -44,7 +50,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </span>
                     )}
                   </div>
-                  <span className={`truncate ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}>{label}</span>
+                  <span
+                    className={`truncate ${active ? "font-semibold text-primary" : "text-muted-foreground"}`}
+                  >
+                    {label}
+                  </span>
                 </Link>
               </li>
             );
@@ -55,7 +65,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function StoreCover({ gradient, emoji, className = "" }: { gradient: string; emoji: string; className?: string }) {
+export function StoreCover({
+  gradient,
+  emoji,
+  className = "",
+}: {
+  gradient: string;
+  emoji: string;
+  className?: string;
+}) {
   return (
     <div className={`flex items-center justify-center bg-gradient-to-br ${gradient} ${className}`}>
       <span className="text-5xl drop-shadow-lg">{emoji}</span>
