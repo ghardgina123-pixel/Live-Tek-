@@ -237,6 +237,15 @@ function LivesManager() {
 
   const activeLive = lives?.find((l) => l.id === activeId) ?? null;
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("lojista-live-panel-change", { detail: { open: Boolean(activeLive) } }),
+    );
+    return () => {
+      window.dispatchEvent(new CustomEvent("lojista-live-panel-change", { detail: { open: false } }));
+    };
+  }, [activeLive]);
+
   const shareLive = async (live: Live) => {
     const url = `${window.location.origin}/live/${live.id}`;
     try {
@@ -322,48 +331,11 @@ function LivesManager() {
 
       {/* Painel de transmissão da live activa */}
       {activeLive && (
-        <section className="fixed inset-x-0 bottom-16 top-0 z-30 mx-auto grid w-full max-w-[480px] grid-rows-[minmax(0,70%)_minmax(0,30%)] overflow-hidden bg-background shadow-xl">
-          <div className="relative min-h-0 overflow-hidden bg-foreground">
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/80 to-transparent" />
-            <div className="absolute inset-x-3 top-3 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 text-background">
-              <div className="flex min-w-0 items-center gap-2">
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-9 w-9 shrink-0 rounded-full bg-background/85 text-foreground backdrop-blur"
-                  onClick={() => setActiveId(null)}
-                  aria-label="Fechar painel"
-                >
-                  <X size={16} />
-                </Button>
-                <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold">{activeLive.title}</h2>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${activeLive.status === "live" ? "bg-destructive" : "bg-muted-foreground"}`}
-                    />
-                    {statusLabel(activeLive.status)}
-                  </span>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-1.5">
-                <span className="inline-flex h-9 items-center gap-1 rounded-full bg-background/85 px-3 text-xs font-semibold text-foreground backdrop-blur">
-                  <Users size={14} /> {activeViewers}
-                </span>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="h-9 w-9 rounded-full bg-background/85 text-foreground backdrop-blur"
-                  onClick={() => void shareLive(activeLive)}
-                  aria-label="Partilhar live"
-                >
-                  <Share2 size={15} />
-                </Button>
-              </div>
-            </div>
+        <section className="fixed inset-0 z-[60] h-dvh w-full overflow-hidden">
+          <div className="absolute inset-0 bg-foreground">
             <Suspense
               fallback={
-                <div className="flex justify-center py-8">
+                <div className="flex h-full items-center justify-center">
                   <Loader2 className="animate-spin text-primary" />
                 </div>
               }
@@ -392,9 +364,48 @@ function LivesManager() {
               />
             </Suspense>
           </div>
+
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/80 to-transparent" />
+          <div className="absolute inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 text-background">
+            <div className="flex min-w-0 items-center gap-2">
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-9 w-9 shrink-0 rounded-full bg-background/85 text-foreground backdrop-blur"
+                onClick={() => setActiveId(null)}
+                aria-label="Fechar painel"
+              >
+                <X size={16} />
+              </Button>
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold">{activeLive.title}</h2>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${activeLive.status === "live" ? "bg-destructive" : "bg-muted-foreground"}`}
+                  />
+                  {statusLabel(activeLive.status)}
+                </span>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="inline-flex h-9 items-center gap-1 rounded-full bg-background/85 px-3 text-xs font-semibold text-foreground backdrop-blur">
+                <Users size={14} /> {activeViewers}
+              </span>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-9 w-9 rounded-full bg-background/85 text-foreground backdrop-blur"
+                onClick={() => void shareLive(activeLive)}
+                aria-label="Partilhar live"
+              >
+                <Share2 size={15} />
+              </Button>
+            </div>
+          </div>
+
           <Suspense
             fallback={
-              <div className="mt-3 flex justify-center py-6">
+              <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center py-6">
                 <Loader2 className="animate-spin text-primary" size={16} />
               </div>
             }

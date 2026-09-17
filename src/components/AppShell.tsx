@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Home, Store, Play, ShoppingCart, User, Sparkles } from "lucide-react";
 import { useCartCount } from "@/lib/cart-store";
 import { useT } from "@/lib/i18n";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const tabs = [
   { to: "/home", icon: Home, key: "nav_home" },
@@ -17,10 +17,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const count = useCartCount();
   const { t } = useT();
+  const [lojistaLiveOpen, setLojistaLiveOpen] = useState(false);
+
+  useEffect(() => {
+    const handleLivePanelChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+      setLojistaLiveOpen(Boolean(detail?.open));
+    };
+    window.addEventListener("lojista-live-panel-change", handleLivePanelChange);
+    return () => window.removeEventListener("lojista-live-panel-change", handleLivePanelChange);
+  }, []);
 
   // A experiência de transmissão ocupa todo o viewport e fornece os seus
   // próprios controlos. A navegação global não deve competir com o vídeo.
-  if (/^\/live\/[^/]+\/?$/.test(pathname)) {
+  if (/^\/live\/[^/]+\/?$/.test(pathname) || (pathname === "/lojista/lives" && lojistaLiveOpen)) {
     return <>{children}</>;
   }
 
