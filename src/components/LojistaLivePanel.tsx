@@ -182,7 +182,7 @@ export function LojistaLivePanel({
     <div
       className={
         studio
-          ? "grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-1.5 border-t border-border bg-background/95 p-2 backdrop-blur-md"
+          ? "absolute inset-x-0 bottom-0 z-30 grid h-[42dvh] min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-1.5 bg-gradient-to-t from-foreground/80 via-foreground/45 to-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-12"
           : "mt-3 grid gap-3 rounded-2xl border border-border bg-muted/30 p-3"
       }
     >
@@ -208,7 +208,9 @@ export function LojistaLivePanel({
             {t("s_sem_mensagens_ainda_aguarde_a_interaccao_dos_cli")}
           </p>
         ) : (
-          rows.map((m) => <Row key={m.id} msg={m} profile={profiles[m.sender_id]} />)
+          rows.map((m) => (
+            <Row key={m.id} msg={m} profile={profiles[m.sender_id]} studio={studio} />
+          ))
         )}
         <div ref={endRef} />
       </div>
@@ -236,7 +238,15 @@ export function LojistaLivePanel({
   );
 }
 
-const Row = memo(function Row({ msg, profile }: { msg: Msg; profile?: Profile }) {
+const Row = memo(function Row({
+  msg,
+  profile,
+  studio,
+}: {
+  msg: Msg;
+  profile?: Profile;
+  studio?: boolean;
+}) {
   const { t } = useT();
   return (
     <div className="flex items-start gap-2">
@@ -251,10 +261,12 @@ const Row = memo(function Row({ msg, profile }: { msg: Msg; profile?: Profile })
         )}
       </div>
       <div className="min-w-0">
-        <span className="mr-1.5 text-[11px] font-bold text-primary">
+        <span
+          className={`mr-1.5 text-[11px] font-bold ${studio ? "text-background" : "text-primary"}`}
+        >
           {profile?.display_name ?? t("s_cliente")}
         </span>
-        <span className="text-foreground/90">{msg.text}</span>
+        <span className={studio ? "text-background" : "text-foreground/90"}>{msg.text}</span>
       </div>
     </div>
   );
