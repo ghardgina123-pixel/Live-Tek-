@@ -261,7 +261,9 @@ const Row = memo(function Row({
         )}
       </div>
       <div className="min-w-0">
-        <span className={`mr-1.5 text-[11px] font-bold ${studio ? "text-background" : "text-primary"}`}>
+        <span
+          className={`mr-1.5 text-[11px] font-bold ${studio ? "text-background" : "text-primary"}`}
+        >
           {profile?.display_name ?? t("s_cliente")}
         </span>
         <span className={studio ? "text-background" : "text-foreground/90"}>{msg.text}</span>

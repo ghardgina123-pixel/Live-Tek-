@@ -242,7 +242,9 @@ function LivesManager() {
       new CustomEvent("lojista-live-panel-change", { detail: { open: Boolean(activeLive) } }),
     );
     return () => {
-      window.dispatchEvent(new CustomEvent("lojista-live-panel-change", { detail: { open: false } }));
+      window.dispatchEvent(
+        new CustomEvent("lojista-live-panel-change", { detail: { open: false } }),
+      );
     };
   }, [activeLive]);
 
