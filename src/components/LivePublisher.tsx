@@ -498,7 +498,6 @@ export function LivePublisher({
         );
       }
 
-
       const publications = await withTimeout(
         Promise.all(
           tracksRef.current.map((track) =>
