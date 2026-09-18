@@ -714,7 +714,14 @@ export function LivePublisher({
       </div>
 
       {(state === "preflight" || state === "connecting") && (
-        <div className="space-y-2 rounded-xl border border-border bg-muted/40 p-3">
+        <div
+          className={
+            studio
+              ? "absolute inset-x-3 bottom-[calc(42dvh+4rem)] z-40 space-y-2 rounded-xl border border-border bg-card/90 p-3 backdrop-blur"
+              : "space-y-2 rounded-xl border border-border bg-muted/40 p-3"
+          }
+        >
+
           <div className="flex items-center gap-2 text-xs">
             <CheckCircle2 size={14} className="text-green-500" />
             <span>{t("s_camara_ativa_no_ecra")}</span>
@@ -741,7 +748,14 @@ export function LivePublisher({
 
       {!studio && secondaryControls}
 
-      <div className={studio ? "absolute inset-x-3 bottom-3 z-20 flex gap-2" : "flex gap-2"}>
+      <div
+        className={
+          studio
+            ? "absolute inset-x-3 bottom-[calc(42dvh+0.5rem)] z-40 flex gap-2"
+            : "flex gap-2"
+        }
+      >
+
         {state === "publishing" ? (
           <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
