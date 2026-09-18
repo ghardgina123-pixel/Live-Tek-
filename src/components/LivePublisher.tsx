@@ -469,18 +469,35 @@ export function LivePublisher({
         onDisconnected?.();
       });
 
-      await withTimeout(
-        room.connect(url, token, {
-          autoSubscribe: false,
-          // Redes móveis angolanas demoram a negociar ICE; damos tempo real
-          // e permitimos retentativas antes de desistir.
-          maxRetries: 3,
-          websocketTimeout: 20_000,
-          peerConnectionTimeout: 30_000,
-        }),
-        CONNECT_TIMEOUT_MS,
-        "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.",
-      );
+      const connectOpts = {
+        autoSubscribe: false,
+        // Redes móveis angolanas demoram a negociar ICE; damos tempo real
+        // e permitimos retentativas antes de desistir.
+        maxRetries: 3,
+        websocketTimeout: 20_000,
+        peerConnectionTimeout: 30_000,
+      } as const;
+      try {
+        await withTimeout(
+          room.connect(url, token, connectOpts),
+          CONNECT_TIMEOUT_MS,
+          "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.",
+        );
+      } catch (connectError) {
+        // Redes que bloqueiam UDP (dados móveis com firewall, Wi-Fi corporativo):
+        // segunda tentativa apenas por relay TURN/TCP antes de desistir.
+        console.warn("[LivePublisher] retry via relay TURN", connectError);
+        await room.disconnect().catch(() => undefined);
+        await withTimeout(
+          room.connect(url, token, {
+            ...connectOpts,
+            rtcConfig: { iceTransportPolicy: "relay" },
+          }),
+          CONNECT_TIMEOUT_MS,
+          "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.",
+        );
+      }
+
 
       const publications = await withTimeout(
         Promise.all(
