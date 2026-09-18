@@ -54,7 +54,9 @@ type State =
   | "unconfigured";
 
 const PREVIEW_TIMEOUT_MS = 3_000;
-const PUBLISH_TIMEOUT_MS = 8_000;
+// Ligar à sala (WebSocket + ICE) é a fase mais lenta em redes móveis.
+const CONNECT_TIMEOUT_MS = 35_000;
+const PUBLISH_TIMEOUT_MS = 20_000;
 
 const MIC_PREF_KEY = "liveteka.micDeviceId";
 
@@ -468,10 +470,18 @@ export function LivePublisher({
       });
 
       await withTimeout(
-        room.connect(url, token),
-        PUBLISH_TIMEOUT_MS,
+        room.connect(url, token, {
+          autoSubscribe: false,
+          // Redes móveis angolanas demoram a negociar ICE; damos tempo real
+          // e permitimos retentativas antes de desistir.
+          maxRetries: 3,
+          websocketTimeout: 20_000,
+          peerConnectionTimeout: 30_000,
+        }),
+        CONNECT_TIMEOUT_MS,
         "Erro no dispositivo: a ligação ao servidor de vídeo demorou demasiado.",
       );
+
       const publications = await withTimeout(
         Promise.all(
           tracksRef.current.map((track) =>
