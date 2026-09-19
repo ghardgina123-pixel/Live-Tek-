@@ -765,7 +765,7 @@ export function LivePublisher({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Button
           type="button"
           variant="outline"
@@ -795,7 +795,7 @@ export function LivePublisher({
           variant="outline"
           onClick={() => void switchCamera()}
           disabled={!cameraOk || state === "requesting" || state === "connecting"}
-          className="col-span-2 h-11 justify-start"
+          className="h-11 justify-start sm:col-span-2"
         >
           <SwitchCamera size={16} className="mr-2" /> Trocar câmara
         </Button>
