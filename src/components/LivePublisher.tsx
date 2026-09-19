@@ -919,11 +919,7 @@ export function LivePublisher({
 
       {!studio && secondaryControls}
 
-      <div
-        className={
-          studio ? "hidden" : "flex gap-2"
-        }
-      >
+      <div className={studio ? "hidden" : "flex gap-2"}>
         {state === "publishing" ? (
           <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
