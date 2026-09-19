@@ -16,6 +16,7 @@ import {
   Loader2,
   Video,
   VideoOff,
+  MicOff,
   Radio,
   AlertTriangle,
   Mic,
@@ -23,7 +24,8 @@ import {
   ShieldCheck,
   Activity,
   Bluetooth,
-  SlidersHorizontal,
+  Menu,
+  SwitchCamera,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
@@ -153,6 +155,9 @@ export function LivePublisher({
   const [audioLevel, setAudioLevel] = useState(0);
   const [micOk, setMicOk] = useState(false);
   const [cameraOk, setCameraOk] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [micEnabled, setMicEnabled] = useState(true);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [micId, setMicId] = useState<string>(() =>
     typeof window === "undefined" ? "" : (localStorage.getItem(MIC_PREF_KEY) ?? ""),
@@ -272,6 +277,8 @@ export function LivePublisher({
     setAudioLevel(0);
     setMicOk(false);
     setCameraOk(false);
+    setCameraEnabled(true);
+    setMicEnabled(true);
     setNet(null);
   };
 
@@ -398,8 +405,74 @@ export function LivePublisher({
       );
 
       setCameraOk(true);
+      setCameraEnabled(true);
+      setMicEnabled(true);
+      const activeFacing = videoTrack.mediaStreamTrack.getSettings().facingMode;
+      if (activeFacing === "user" || activeFacing === "environment") setFacingMode(activeFacing);
       setMicOk(audioTrack.mediaStreamTrack.readyState === "live");
       setState("preflight");
+    } catch (error) {
+      await fail(error);
+    }
+  };
+
+  const toggleCamera = async () => {
+    const track = tracksRef.current.find((item) => item.kind === Track.Kind.Video);
+    if (!track) {
+      await preflight();
+      return;
+    }
+    try {
+      if (track.isMuted) {
+        await track.unmute();
+        setCameraEnabled(true);
+      } else {
+        await track.mute();
+        setCameraEnabled(false);
+      }
+    } catch (error) {
+      await fail(error);
+    }
+  };
+
+  const toggleMicrophone = async () => {
+    const track = tracksRef.current.find((item) => item.kind === Track.Kind.Audio);
+    if (!track) {
+      await preflight();
+      return;
+    }
+    try {
+      if (track.isMuted) {
+        await track.unmute();
+        setMicEnabled(true);
+      } else {
+        await track.mute();
+        setMicEnabled(false);
+      }
+    } catch (error) {
+      await fail(error);
+    }
+  };
+
+  const switchCamera = async () => {
+    const track = tracksRef.current.find((item) => item.kind === Track.Kind.Video) as
+      | LocalVideoTrack
+      | undefined;
+    if (!track || state === "connecting") return;
+    const nextFacing = facingMode === "environment" ? "user" : "environment";
+    try {
+      await track.restartTrack({ facingMode: nextFacing, resolution: LOW_RES });
+      const video = videoRef.current;
+      if (video) {
+        track.attach(video);
+        await withTimeout(
+          waitForVideoReady(video),
+          PREVIEW_TIMEOUT_MS,
+          "Erro no dispositivo: a nova câmara não apresentou vídeo.",
+        );
+      }
+      setFacingMode(nextFacing);
+      setCameraEnabled(true);
     } catch (error) {
       await fail(error);
     }
@@ -663,6 +736,73 @@ export function LivePublisher({
     </>
   );
 
+  const studioTransmissionControls = (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground">Controlos da transmissão</p>
+        {state === "publishing" ? (
+          <Button onClick={stop} variant="destructive" className="h-11 w-full justify-start">
+            <VideoOff size={16} className="mr-2" /> {t("s_parar_transmissao")}
+          </Button>
+        ) : state === "preflight" ? (
+          <Button
+            onClick={publish}
+            disabled={!cameraOk}
+            variant="destructive"
+            className="h-11 w-full justify-start"
+          >
+            <Radio size={16} className="mr-2" /> {t("s_iniciar")}
+          </Button>
+        ) : state === "connecting" || state === "requesting" ? (
+          <Button disabled className="h-11 w-full justify-start">
+            <Loader2 size={16} className="mr-2 animate-spin" />
+            {state === "connecting" ? t("s_a_publicar") : t("s_a_ligar_camara_e_microfone")}
+          </Button>
+        ) : (
+          <Button onClick={preflight} className="h-11 w-full justify-start">
+            <Radio size={16} className="mr-2" /> {t("s_iniciar")}
+          </Button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void toggleCamera()}
+          disabled={state === "requesting" || state === "connecting"}
+          className="h-11 justify-start"
+        >
+          {cameraEnabled && cameraOk ? (
+            <Video size={16} className="mr-2" />
+          ) : (
+            <VideoOff size={16} className="mr-2" />
+          )}
+          {cameraEnabled && cameraOk ? "Desativar câmara" : "Ativar câmara"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void toggleMicrophone()}
+          disabled={!cameraOk || state === "requesting" || state === "connecting"}
+          className="h-11 justify-start"
+        >
+          {micEnabled ? <Mic size={16} className="mr-2" /> : <MicOff size={16} className="mr-2" />}
+          {micEnabled ? "Desativar microfone" : "Ativar microfone"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => void switchCamera()}
+          disabled={!cameraOk || state === "requesting" || state === "connecting"}
+          className="h-11 justify-start sm:col-span-2"
+        >
+          <SwitchCamera size={16} className="mr-2" /> Trocar câmara
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className={studio ? "relative h-full min-h-0" : "space-y-3"}>
       <div
@@ -724,16 +864,22 @@ export function LivePublisher({
                 size="icon"
                 variant="secondary"
                 className="absolute right-3 top-14 z-20 h-9 w-9 rounded-full bg-background/85 shadow-md backdrop-blur"
-                aria-label="Definições e estatísticas"
+                aria-label="Abrir controlos da transmissão"
               >
-                <SlidersHorizontal size={16} />
+                <Menu size={17} />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[min(92vw,420px)] overflow-y-auto p-4">
               <SheetHeader className="mb-4 pr-8 text-left">
-                <SheetTitle>Definições e estatísticas</SheetTitle>
+                <SheetTitle>Transmissão</SheetTitle>
               </SheetHeader>
-              <div className="space-y-3">{secondaryControls}</div>
+              <div className="space-y-4">
+                {studioTransmissionControls}
+                <div className="border-t border-border pt-4">
+                  <p className="mb-3 text-xs font-semibold text-muted-foreground">Definições</p>
+                  <div className="space-y-3">{secondaryControls}</div>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
         )}
@@ -773,11 +919,7 @@ export function LivePublisher({
 
       {!studio && secondaryControls}
 
-      <div
-        className={
-          studio ? "absolute inset-x-3 bottom-[calc(42dvh+0.5rem)] z-40 flex gap-2" : "flex gap-2"
-        }
-      >
+      <div className={studio ? "hidden" : "flex gap-2"}>
         {state === "publishing" ? (
           <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
