@@ -61,15 +61,22 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
   const [label, setLabel] = useState("");
   const [sourceType, setSourceType] = useState<"rtmp" | "whip">("rtmp");
   const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     try {
       const res = await list({ data: { liveId } });
       setCameras(res.cameras);
+      setNotice(null);
     } catch (e) {
       setCameras([]);
       const msg = e instanceof Error ? e.message : String(e);
-      if (!msg.includes("LIVEKIT_NOT_CONFIGURED")) toast.error(msg);
+      if (msg.includes("LIVEKIT_NOT_CONFIGURED")) {
+        setNotice("Streaming não configurado — as câmaras externas ficam indisponíveis.");
+      } else {
+        setNotice(msg);
+        toast.error(msg);
+      }
     }
   }, [list, liveId]);
 
