@@ -736,37 +736,6 @@ export function LivePublisher({
     </>
   );
 
-  const cameraStatusInfo = (
-    <div className="space-y-2 rounded-xl border border-border bg-card p-3">
-      <p className="text-xs font-semibold text-muted-foreground">Estado da câmara</p>
-      <div className="flex items-center gap-2 text-xs">
-        {cameraOk ? (
-          <CheckCircle2 size={14} className="text-green-500" />
-        ) : (
-          <Video size={14} className="text-muted-foreground" />
-        )}
-        <span>{cameraOk ? t("s_camara_ativa_no_ecra") : t("s_camara_desligada")}</span>
-      </div>
-      <div className="flex items-center gap-2 text-xs">
-        {micOk ? (
-          <CheckCircle2 size={14} className="text-green-500" />
-        ) : (
-          <Mic size={14} className="text-muted-foreground" />
-        )}
-        <span>{micOk ? t("s_microfone_ativo") : t("s_fale_para_testar_o_microfone")}</span>
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full transition-[width] duration-75 ${micOk ? "bg-green-500" : "bg-primary"}`}
-          style={{ width: `${Math.max(6, Math.round(audioLevel * 100))}%` }}
-        />
-      </div>
-      <p className="text-[11px] text-muted-foreground">
-        O estado AO VIVO só é gravado depois de o LiveKit confirmar a publicação do vídeo.
-      </p>
-    </div>
-  );
-
   const studioTransmissionControls = (
     <div className="space-y-3">
       <div className="space-y-2">
@@ -843,72 +812,46 @@ export function LivePublisher({
         {(state === "idle" ||
           state === "requesting" ||
           state === "error" ||
-          state === "unconfigured") &&
-          (studio ? (
-            <div className="absolute left-3 top-14 z-20 flex max-w-[60%] items-center gap-1.5 rounded-full bg-background/85 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm backdrop-blur">
-              {state === "requesting" ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : state === "error" ? (
-                <AlertTriangle size={12} className="text-destructive" />
-              ) : (
-                <Video size={12} />
-              )}
-              <span className="truncate">
-                {state === "idle"
-                  ? t("s_camara_desligada")
-                  : state === "requesting"
-                    ? t("s_a_ligar_camara_e_microfone")
-                    : state === "error"
-                      ? errorMsg || t("s_falha_ao_iniciar_video")
-                      : t("s_streaming_nao_configurado")}
-              </span>
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 px-4 text-center text-white/85">
-              {state === "idle" && (
-                <>
-                  <Video />
-                  <p className="text-sm">{t("s_camara_desligada")}</p>
-                </>
-              )}
-              {state === "requesting" && (
-                <>
-                  <Loader2 className="animate-spin" />
-                  <p className="text-sm">{t("s_a_ligar_camara_e_microfone")}</p>
-                </>
-              )}
-              {state === "error" && (
-                <>
-                  <AlertTriangle className="text-yellow-400" />
-                  <p className="text-sm font-medium">{t("s_falha_ao_iniciar_video")}</p>
-                  <p className="text-[11px] text-white/70">{errorMsg}</p>
-                </>
-              )}
-              {state === "unconfigured" && (
-                <>
-                  <Video />
-                  <p className="text-sm">{t("s_streaming_nao_configurado")}</p>
-                </>
-              )}
-            </div>
-          ))}
+          state === "unconfigured") && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 px-4 text-center text-white/85">
+            {state === "idle" && (
+              <>
+                <Video />
+                <p className="text-sm">{t("s_camara_desligada")}</p>
+              </>
+            )}
+            {state === "requesting" && (
+              <>
+                <Loader2 className="animate-spin" />
+                <p className="text-sm">{t("s_a_ligar_camara_e_microfone")}</p>
+              </>
+            )}
+            {state === "error" && (
+              <>
+                <AlertTriangle className="text-yellow-400" />
+                <p className="text-sm font-medium">{t("s_falha_ao_iniciar_video")}</p>
+                <p className="text-[11px] text-white/70">{errorMsg}</p>
+              </>
+            )}
+            {state === "unconfigured" && (
+              <>
+                <Video />
+                <p className="text-sm">{t("s_streaming_nao_configurado")}</p>
+              </>
+            )}
+          </div>
+        )}
         {state === "preflight" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white">
             <ShieldCheck size={11} /> {t("s_camara_ok")}
           </div>
         )}
-        {state === "connecting" &&
-          (studio ? (
-            <div className="absolute left-3 top-14 z-20 flex items-center gap-1.5 rounded-full bg-background/85 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm backdrop-blur">
-              <Loader2 size={12} className="animate-spin" />
-              <span>{t("s_a_publicar_transmissao")}</span>
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 text-white">
-              <Loader2 className="animate-spin" />
-              <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
-            </div>
-          ))}
+        {state === "connecting" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 text-white">
+            <Loader2 className="animate-spin" />
+            <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
+          </div>
+        )}
         {state === "publishing" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
             <Radio size={11} /> {t("s_ao_vivo")}
@@ -926,20 +869,14 @@ export function LivePublisher({
                 <Menu size={17} />
               </Button>
             </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="z-[90] w-[min(92vw,420px)] overflow-y-auto bg-background p-4"
-            >
+            <SheetContent side="right" className="w-[min(92vw,420px)] overflow-y-auto p-4">
               <SheetHeader className="mb-4 pr-8 text-left">
                 <SheetTitle>Transmissão</SheetTitle>
               </SheetHeader>
               <div className="space-y-4">
                 {studioTransmissionControls}
-                {cameraStatusInfo}
                 <div className="border-t border-border pt-4">
-                  <p className="mb-3 text-xs font-semibold text-muted-foreground">
-                    Microfone, qualidade, câmaras externas / CCTV e auditoria
-                  </p>
+                  <p className="mb-3 text-xs font-semibold text-muted-foreground">Definições</p>
                   <div className="space-y-3">{secondaryControls}</div>
                 </div>
               </div>
@@ -948,8 +885,14 @@ export function LivePublisher({
         )}
       </div>
 
-      {!studio && (state === "preflight" || state === "connecting") && (
-        <div className="space-y-2 rounded-xl border border-border bg-muted/40 p-3">
+      {(state === "preflight" || state === "connecting") && (
+        <div
+          className={
+            studio
+              ? "absolute inset-x-3 bottom-[calc(42dvh+4rem)] z-40 space-y-2 rounded-xl border border-border bg-card/90 p-3 backdrop-blur"
+              : "space-y-2 rounded-xl border border-border bg-muted/40 p-3"
+          }
+        >
           <div className="flex items-center gap-2 text-xs">
             <CheckCircle2 size={14} className="text-green-500" />
             <span>{t("s_camara_ativa_no_ecra")}</span>
