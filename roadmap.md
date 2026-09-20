@@ -6,3 +6,5 @@
 - [x] Apresentar produtos reais e ligar compra ao carrinho/checkout existente.
 - [x] Ligar o botão Acompanhar à relação persistente do utilizador com a loja.
 - [x] Validar ações e apresentação em dois tamanhos Android.
+
+- [ ] Restauro painel transmissao/cameras + correcao RLS live_messages (lojista)
