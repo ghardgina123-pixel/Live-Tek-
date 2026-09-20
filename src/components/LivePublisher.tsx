@@ -926,7 +926,10 @@ export function LivePublisher({
                 <Menu size={17} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(92vw,420px)] overflow-y-auto p-4">
+            <SheetContent
+              side="right"
+              className="z-[90] w-[min(92vw,420px)] overflow-y-auto bg-background p-4"
+            >
               <SheetHeader className="mb-4 pr-8 text-left">
                 <SheetTitle>Transmissão</SheetTitle>
               </SheetHeader>
