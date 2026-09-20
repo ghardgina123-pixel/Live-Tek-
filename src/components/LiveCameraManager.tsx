@@ -142,6 +142,12 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
         </div>
       )}
 
+      {notice && (
+        <p className="mb-2 rounded-lg bg-muted/60 p-2 text-[11px] text-muted-foreground">
+          {notice}
+        </p>
+      )}
+
       <ul className="space-y-2">
         {cameras?.map((cam) => (
           <li
