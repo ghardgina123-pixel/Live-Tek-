@@ -217,10 +217,18 @@ export function LojistaLivePanel({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={send} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+      <form
+        onSubmit={send}
+        className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 ${
+          studio ? "-mx-3 rounded-t-2xl bg-secondary/90 px-3 py-2" : ""
+        }`}
+      >
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onFocus={(e) =>
+            setTimeout(() => e.target.scrollIntoView({ block: "nearest", behavior: "smooth" }), 250)
+          }
           placeholder={t("s_responder_a_audiencia")}
           maxLength={500}
           disabled={!user || sending}
@@ -230,6 +238,7 @@ export function LojistaLivePanel({
               : "h-10 min-w-0 rounded-full"
           }
         />
+      
         <Button
           type="submit"
           size="icon"
