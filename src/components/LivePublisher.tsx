@@ -812,46 +812,59 @@ export function LivePublisher({
         {(state === "idle" ||
           state === "requesting" ||
           state === "error" ||
-          state === "unconfigured") && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 px-4 text-center text-white/85">
-            {state === "idle" && (
-              <>
-                <Video />
-                <p className="text-sm">{t("s_camara_desligada")}</p>
-              </>
-            )}
-            {state === "requesting" && (
-              <>
-                <Loader2 className="animate-spin" />
-                <p className="text-sm">{t("s_a_ligar_camara_e_microfone")}</p>
-              </>
-            )}
-            {state === "error" && (
-              <>
-                <AlertTriangle className="text-yellow-400" />
-                <p className="text-sm font-medium">{t("s_falha_ao_iniciar_video")}</p>
-                <p className="text-[11px] text-white/70">{errorMsg}</p>
-              </>
-            )}
-            {state === "unconfigured" && (
-              <>
-                <Video />
-                <p className="text-sm">{t("s_streaming_nao_configurado")}</p>
-              </>
-            )}
-          </div>
-        )}
+          state === "unconfigured") &&
+          (studio ? (
+            <div className="absolute left-3 top-14 z-20 max-w-[60%] rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
+              {state === "idle" && t("s_camara_desligada")}
+              {state === "requesting" && t("s_a_ligar_camara_e_microfone")}
+              {state === "error" && (errorMsg || t("s_falha_ao_iniciar_video"))}
+              {state === "unconfigured" && t("s_streaming_nao_configurado")}
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/75 px-4 text-center text-white/85">
+              {state === "idle" && (
+                <>
+                  <Video />
+                  <p className="text-sm">{t("s_camara_desligada")}</p>
+                </>
+              )}
+              {state === "requesting" && (
+                <>
+                  <Loader2 className="animate-spin" />
+                  <p className="text-sm">{t("s_a_ligar_camara_e_microfone")}</p>
+                </>
+              )}
+              {state === "error" && (
+                <>
+                  <AlertTriangle className="text-yellow-400" />
+                  <p className="text-sm font-medium">{t("s_falha_ao_iniciar_video")}</p>
+                  <p className="text-[11px] text-white/70">{errorMsg}</p>
+                </>
+              )}
+              {state === "unconfigured" && (
+                <>
+                  <Video />
+                  <p className="text-sm">{t("s_streaming_nao_configurado")}</p>
+                </>
+              )}
+            </div>
+          ))}
         {state === "preflight" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white">
             <ShieldCheck size={11} /> {t("s_camara_ok")}
           </div>
         )}
-        {state === "connecting" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 text-white">
-            <Loader2 className="animate-spin" />
-            <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
-          </div>
-        )}
+        {state === "connecting" &&
+          (studio ? (
+            <div className="absolute left-3 top-14 z-20 inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
+              <Loader2 className="animate-spin" size={12} /> {t("s_a_publicar_transmissao")}
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 text-white">
+              <Loader2 className="animate-spin" />
+              <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
+            </div>
+          ))}
         {state === "publishing" && (
           <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
             <Radio size={11} /> {t("s_ao_vivo")}
