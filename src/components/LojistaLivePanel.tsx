@@ -238,7 +238,7 @@ export function LojistaLivePanel({
               : "h-10 min-w-0 rounded-full"
           }
         />
-      
+
         <Button
           type="submit"
           size="icon"
