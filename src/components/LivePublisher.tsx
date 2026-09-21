@@ -800,6 +800,32 @@ export function LivePublisher({
           <SwitchCamera size={16} className="mr-2" /> Trocar câmara
         </Button>
       </div>
+
+      <div className="space-y-2 rounded-xl border border-border bg-muted/40 p-3">
+        <p className="text-xs font-semibold text-muted-foreground">Estado da câmara</p>
+        <div className="flex items-center gap-2 text-xs">
+          {cameraOk ? (
+            <CheckCircle2 size={14} className="text-green-500" />
+          ) : (
+            <VideoOff size={14} className="text-muted-foreground" />
+          )}
+          <span>{cameraOk ? t("s_camara_ativa_no_ecra") : t("s_camara_desligada")}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          {micOk ? (
+            <CheckCircle2 size={14} className="text-green-500" />
+          ) : (
+            <Mic size={14} className="text-muted-foreground" />
+          )}
+          <span>{micOk ? t("s_microfone_ativo") : t("s_fale_para_testar_o_microfone")}</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-background">
+          <div
+            className={`h-full transition-[width] duration-75 ${micOk ? "bg-green-500" : "bg-primary"}`}
+            style={{ width: `${Math.max(6, Math.round(audioLevel * 100))}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 
@@ -898,14 +924,8 @@ export function LivePublisher({
         )}
       </div>
 
-      {(state === "preflight" || state === "connecting") && (
-        <div
-          className={
-            studio
-              ? "absolute inset-x-3 bottom-[calc(42dvh+4rem)] z-40 space-y-2 rounded-xl border border-border bg-card/90 p-3 backdrop-blur"
-              : "space-y-2 rounded-xl border border-border bg-muted/40 p-3"
-          }
-        >
+      {!studio && (state === "preflight" || state === "connecting") && (
+        <div className="space-y-2 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex items-center gap-2 text-xs">
             <CheckCircle2 size={14} className="text-green-500" />
             <span>{t("s_camara_ativa_no_ecra")}</span>

@@ -204,9 +204,11 @@ export function LojistaLivePanel({
             <Loader2 className="animate-spin text-primary" size={16} />
           </div>
         ) : rows.length === 0 ? (
-          <p className="py-6 text-center text-xs text-muted-foreground">
-            {t("s_sem_mensagens_ainda_aguarde_a_interaccao_dos_cli")}
-          </p>
+          studio ? null : (
+            <p className="py-6 text-center text-xs text-muted-foreground">
+              {t("s_sem_mensagens_ainda_aguarde_a_interaccao_dos_cli")}
+            </p>
+          )
         ) : (
           rows.map((m) => (
             <Row key={m.id} msg={m} profile={profiles[m.sender_id]} studio={studio} />
@@ -222,13 +224,17 @@ export function LojistaLivePanel({
           placeholder={t("s_responder_a_audiencia")}
           maxLength={500}
           disabled={!user || sending}
-          className="h-10 min-w-0 rounded-full"
+          className={
+            studio
+              ? "h-11 min-w-0 rounded-full border-secondary-foreground/25 bg-secondary/70 px-4 text-sm text-secondary-foreground placeholder:text-secondary-foreground/60 focus-visible:ring-primary"
+              : "h-10 min-w-0 rounded-full"
+          }
         />
         <Button
           type="submit"
           size="icon"
           disabled={!user || !text.trim() || sending}
-          className="h-10 w-10 shrink-0 rounded-full"
+          className="h-11 w-11 shrink-0 rounded-full"
           aria-label={t("s_enviar_mensagem")}
         >
           {sending ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
