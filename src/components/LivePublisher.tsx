@@ -840,7 +840,7 @@ export function LivePublisher({
           state === "error" ||
           state === "unconfigured") &&
           (studio ? (
-            <div className="absolute left-3 top-14 z-20 max-w-[60%] rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
+            <div className="absolute left-3 top-14 z-40 max-w-[60%] rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
               {state === "idle" && t("s_camara_desligada")}
               {state === "requesting" && t("s_a_ligar_camara_e_microfone")}
               {state === "error" && (errorMsg || t("s_falha_ao_iniciar_video"))}
@@ -882,7 +882,7 @@ export function LivePublisher({
         )}
         {state === "connecting" &&
           (studio ? (
-            <div className="absolute left-3 top-14 z-20 inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
+            <div className="absolute left-3 top-14 z-40 inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-3 py-1.5 text-[11px] font-semibold text-secondary-foreground">
               <Loader2 className="animate-spin" size={12} /> {t("s_a_publicar_transmissao")}
             </div>
           ) : (
@@ -892,7 +892,9 @@ export function LivePublisher({
             </div>
           ))}
         {state === "publishing" && (
-          <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
+          <div
+            className={`absolute left-3 z-40 flex ${studio ? "top-14" : "top-3"} items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white`}
+          >
             <Radio size={11} /> {t("s_ao_vivo")}
           </div>
         )}
@@ -902,7 +904,7 @@ export function LivePublisher({
               <Button
                 size="icon"
                 variant="secondary"
-                className="absolute right-3 top-14 z-20 h-9 w-9 rounded-full bg-background/85 shadow-md backdrop-blur"
+                className="absolute right-3 top-14 z-40 h-9 w-9 rounded-full bg-background/85 shadow-md backdrop-blur"
                 aria-label="Abrir controlos da transmissão"
               >
                 <Menu size={17} />
