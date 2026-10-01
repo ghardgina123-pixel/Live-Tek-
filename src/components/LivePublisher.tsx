@@ -892,7 +892,9 @@ export function LivePublisher({
             </div>
           ))}
         {state === "publishing" && (
-          <div className={`absolute left-3 z-40 flex ${studio ? "top-14" : "top-3"} items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white`}>
+          <div
+            className={`absolute left-3 z-40 flex ${studio ? "top-14" : "top-3"} items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white`}
+          >
             <Radio size={11} /> {t("s_ao_vivo")}
           </div>
         )}
