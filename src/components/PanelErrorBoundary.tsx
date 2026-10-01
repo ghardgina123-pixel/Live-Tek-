@@ -4,7 +4,7 @@ import { AlertTriangle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 
-export function PanelErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+export function PanelErrorBoundary({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "panel_error_boundary" });
