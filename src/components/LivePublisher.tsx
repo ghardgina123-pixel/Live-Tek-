@@ -911,12 +911,6 @@ export function LivePublisher({
                   menuOpen ? "Fechar controlos da transmissão" : "Abrir controlos da transmissão"
                 }
                 aria-expanded={menuOpen}
-                onClick={(e) => {
-                  // Única função: abrir/fechar o painel. Não toca na transmissão.
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setMenuOpen((v) => !v);
-                }}
               >
                 <Menu size={17} />
               </Button>
