@@ -151,6 +151,7 @@ export function LivePublisher({
   const adaptiveStopRef = useRef<(() => void) | null>(null);
   const rawMicRef = useRef<LocalAudioTrack | null>(null);
   const [state, setState] = useState<State>("idle");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [micOk, setMicOk] = useState(false);
