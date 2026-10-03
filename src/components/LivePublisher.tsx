@@ -915,7 +915,12 @@ export function LivePublisher({
                 <Menu size={17} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(92vw,420px)] overflow-y-auto p-4">
+            {/* z-[70]: acima da camada fullscreen da live (z-[60]) para o painel ficar visível */}
+            <SheetContent
+              side="right"
+              className="z-[70] w-[min(92vw,420px)] overflow-y-auto p-4"
+              overlayClassName="z-[70]"
+            >
               <SheetHeader className="mb-4 pr-8 text-left">
                 <SheetTitle>Transmissão</SheetTitle>
               </SheetHeader>
