@@ -122,8 +122,22 @@ export const registerExternalInvoice = createServerFn({ method: "POST" })
     let pdfPath: string | null = null;
 
     if (data.pdfBase64) {
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: context.userId,
+        _role: "admin",
+      });
+      if (!isAdmin) throw new Error("Não autorizado.");
       const bytes = Uint8Array.from(atob(data.pdfBase64), (c) => c.charCodeAt(0));
-      const safeName = (data.pdfFileName ?? "factura-agt.pdf").replace(/[^\w.-]/g, "-");
+      const isPdf =
+        bytes.length > 4 &&
+        bytes[0] === 0x25 &&
+        bytes[1] === 0x50 &&
+        bytes[2] === 0x44 &&
+        bytes[3] === 0x46;
+      if (!isPdf || bytes.length > 10 * 1024 * 1024) throw new Error("Ficheiro PDF inválido.");
+      const safeName = (data.pdfFileName ?? "factura-agt.pdf")
+        .replace(/[^\w.-]/g, "-")
+        .replace(/(\.pdf)?$/i, ".pdf");
       const candidate = `agt/${data.invoiceId}/${Date.now()}-${safeName}`;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { error: upErr } = await supabaseAdmin.storage
