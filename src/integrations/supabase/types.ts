@@ -4433,6 +4433,7 @@ export type Database = {
           reserved: number
         }[]
       }
+      live_viewer_count: { Args: { _live_id: string }; Returns: number }
       load_capacity_rank: { Args: { _cap: string }; Returns: number }
       load_class_rank: { Args: { _class: string }; Returns: number }
       log_security_event: {
