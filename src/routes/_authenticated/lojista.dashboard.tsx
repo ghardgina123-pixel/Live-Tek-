@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Wallet, TrendingUp, Loader2 } from "lucide-react";
 import { LojistaShell, useLojistaStore } from "@/components/LojistaShell";
 import { PartnerSettlementCard } from "@/components/PartnerSettlementCard";
+import { StoreLedgerWallet } from "@/components/StoreLedgerWallet";
 import { supabase } from "@/integrations/supabase/client";
 import { computeDashboardStats } from "@/lib/settlement";
 import { useT } from "@/lib/i18n";
@@ -61,6 +62,7 @@ function DashboardContent() {
       </div>
 
       {store && <PartnerSettlementCard storeId={store.id} />}
+      {store && <StoreLedgerWallet storeId={store.id} />}
 
       <div className="rounded-2xl border border-border p-4">
         <div className="mb-3 flex items-center gap-2">

@@ -1061,6 +1061,48 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          new_state: string | null
+          operation_id: string | null
+          previous_state: string | null
+          resource: string
+          resource_id: string | null
+          result: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state?: string | null
+          operation_id?: string | null
+          previous_state?: string | null
+          resource: string
+          resource_id?: string | null
+          result: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state?: string | null
+          operation_id?: string | null
+          previous_state?: string | null
+          resource?: string
+          resource_id?: string | null
+          result?: string
+        }
+        Relationships: []
+      }
       global_notifications: {
         Row: {
           body: string | null
@@ -1297,6 +1339,84 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "store_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ledger_entries: {
+        Row: {
+          commission_aoa: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          delta_available: number
+          delta_pending: number
+          delta_reserved: number
+          event_ref: string | null
+          gross_aoa: number
+          id: string
+          idempotency_key: string
+          kind: string
+          net_aoa: number
+          order_id: string | null
+          origin: string
+          status: string
+          store_id: string
+          withdrawal_id: string | null
+        }
+        Insert: {
+          commission_aoa?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          delta_available?: number
+          delta_pending?: number
+          delta_reserved?: number
+          event_ref?: string | null
+          gross_aoa?: number
+          id?: string
+          idempotency_key: string
+          kind: string
+          net_aoa?: number
+          order_id?: string | null
+          origin: string
+          status?: string
+          store_id: string
+          withdrawal_id?: string | null
+        }
+        Update: {
+          commission_aoa?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          delta_available?: number
+          delta_pending?: number
+          delta_reserved?: number
+          event_ref?: string | null
+          gross_aoa?: number
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          net_aoa?: number
+          order_id?: string | null
+          origin?: string
+          status?: string
+          store_id?: string
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
@@ -3163,6 +3283,74 @@ export type Database = {
           },
         ]
       }
+      store_withdrawals: {
+        Row: {
+          amount_aoa: number
+          bank_reference: string | null
+          created_at: string
+          destination: Json | null
+          id: string
+          paid_at: string | null
+          paid_by: string | null
+          processed_at: string | null
+          processed_by: string | null
+          proof_path: string | null
+          rejection_reason: string | null
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_aoa: number
+          bank_reference?: string | null
+          created_at?: string
+          destination?: Json | null
+          id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          proof_path?: string | null
+          rejection_reason?: string | null
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_aoa?: number
+          bank_reference?: string | null
+          created_at?: string
+          destination?: Json | null
+          id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          proof_path?: string | null
+          rejection_reason?: string | null
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_withdrawals_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stores: {
         Row: {
           category: string | null
@@ -4025,6 +4213,16 @@ export type Database = {
         Args: { _reason: string; _store_id: string }
         Returns: undefined
       }
+      admin_withdrawal_action: {
+        Args: {
+          _action: string
+          _bank_reference?: string
+          _id: string
+          _proof_path?: string
+          _reason?: string
+        }
+        Returns: Json
+      }
       affiliate_dashboard: { Args: never; Returns: Json }
       affiliate_get_or_create_code: { Args: never; Returns: Json }
       affiliate_register_referral: { Args: { _code: string }; Returns: Json }
@@ -4190,6 +4388,19 @@ export type Database = {
         Returns: number
       }
       expire_due_subscriptions: { Args: never; Returns: number }
+      fin_audit: {
+        Args: {
+          _action: string
+          _meta?: Json
+          _new: string
+          _op: string
+          _prev: string
+          _resource: string
+          _result: string
+          _rid: string
+        }
+        Returns: undefined
+      }
       fiscal_snapshot_customer: { Args: { _user_id: string }; Returns: Json }
       fiscal_snapshot_platform: { Args: never; Returns: Json }
       fiscal_snapshot_store: { Args: { _store_id: string }; Returns: Json }
@@ -4214,6 +4425,14 @@ export type Database = {
         Returns: boolean
       }
       is_trusted_payment_source: { Args: { _source: string }; Returns: boolean }
+      ledger_balances: {
+        Args: { _store_id: string }
+        Returns: {
+          available: number
+          pending: number
+          reserved: number
+        }[]
+      }
       load_capacity_rank: { Args: { _cap: string }; Returns: number }
       load_class_rank: { Args: { _class: string }; Returns: number }
       log_security_event: {
@@ -4280,6 +4499,10 @@ export type Database = {
         Args: { _destination?: Json; _kind: string; _method?: string }
         Returns: Json
       }
+      request_store_withdrawal: {
+        Args: { _amount: number; _store_id: string }
+        Returns: Json
+      }
       seller_create_delivery: { Args: { _order_id: string }; Returns: string }
       seller_signup_status: { Args: never; Returns: Json }
       set_delivery_route: {
@@ -4302,6 +4525,7 @@ export type Database = {
       store_balance: { Args: { _store_id: string }; Returns: Json }
       store_commission_pct: { Args: { _store_id: string }; Returns: number }
       store_follower_count: { Args: { _store_id: string }; Returns: number }
+      store_ledger_summary: { Args: { _store_id: string }; Returns: Json }
       store_live_usage: { Args: { _store_id: string }; Returns: Json }
       store_register_sale_document: {
         Args: {
