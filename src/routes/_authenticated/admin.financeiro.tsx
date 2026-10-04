@@ -1,4 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { AdminWithdrawals } from "@/components/AdminWithdrawals";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, RefreshCw, Wallet, TrendingUp, Receipt, Banknote, CheckCircle2, XCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -328,6 +329,7 @@ function AdminFinance() {
           )}
         </section>
 
+        <AdminWithdrawals />
         <FiscalDocuments />
       </div>
     </AppShell>
