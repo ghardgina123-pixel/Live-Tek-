@@ -1,0 +1,1 @@
+- Store money owed is tracked only in append-only `ledger_entries` (fed by triggers on `payouts`) and withdrawals go through `request_store_withdrawal`/`admin_withdrawal_action` RPCs — why: the frontend must never write financial state.
