@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Anti-brute-force para o login. O contador vive na base de dados (worker é
 // stateless) e é manipulado apenas por este endpoint de servidor: 5 falhas em
@@ -13,7 +14,7 @@ export const checkLoginThrottle = createServerFn({ method: "POST" })
     const { getRequest } = await import("@tanstack/react-start/server");
     const { requestAuditMeta } = await import("./audit.server");
     const { ip } = requestAuditMeta(getRequest());
-    const keys = [`email:${data.email}`, ...(ip ? [`ip:${ip}`] : [])];
+    const keys = [`email_ip:${data.email}|${ip ?? "unknown"}`];
     const { data: res } = await supabaseAdmin.rpc("check_login_throttle", { _keys: keys });
     const out = (res ?? {}) as { blocked?: boolean; retry_after_seconds?: number };
     return { blocked: !!out.blocked, retryAfterSeconds: out.retry_after_seconds ?? 0 };
@@ -26,7 +27,7 @@ export const registerLoginFailure = createServerFn({ method: "POST" })
     const { getRequest } = await import("@tanstack/react-start/server");
     const { recordSecurityEvent, requestAuditMeta } = await import("./audit.server");
     const meta = requestAuditMeta(getRequest());
-    const keys = [`email:${data.email}`, ...(meta.ip ? [`ip:${meta.ip}`] : [])];
+    const keys = [`email_ip:${data.email}|${meta.ip ?? "unknown"}`];
     const { data: res } = await supabaseAdmin.rpc("register_login_failure", { _keys: keys });
     const out = (res ?? {}) as { blocked?: boolean; retry_after_seconds?: number };
     await recordSecurityEvent({
@@ -38,14 +39,18 @@ export const registerLoginFailure = createServerFn({ method: "POST" })
     return { blocked: !!out.blocked, retryAfterSeconds: out.retry_after_seconds ?? 0 };
   });
 
+// Só a própria conta, já autenticada, pode limpar os seus contadores.
 export const clearLoginThrottle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => emailInput.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const claimEmail = String((context.claims as { email?: string }).email ?? "").toLowerCase();
+    if (!claimEmail || claimEmail !== data.email) return { ok: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { getRequest } = await import("@tanstack/react-start/server");
     const { recordSecurityEvent, requestAuditMeta } = await import("./audit.server");
     const meta = requestAuditMeta(getRequest());
-    const keys = [`email:${data.email}`, ...(meta.ip ? [`ip:${meta.ip}`] : [])];
+    const keys = [`email_ip:${data.email}|${meta.ip ?? "unknown"}`];
     await supabaseAdmin.rpc("clear_login_attempts", { _keys: keys });
     await recordSecurityEvent({
       event: "auth.login_success",
@@ -79,7 +84,9 @@ export const checkActionThrottle = createServerFn({ method: "POST" })
     const [max, windowMin, blockMin] = limits[data.action] ?? [10, 60, 30];
     const keys = [
       `${data.action}:ip:${meta.ip ?? "unknown"}`,
-      ...(data.identifier ? [`${data.action}:id:${data.identifier}`] : []),
+      ...(data.identifier
+        ? [`${data.action}:id_ip:${data.identifier}|${meta.ip ?? "unknown"}`]
+        : []),
     ];
     let blocked = false;
     let retryAfterSeconds = 0;
