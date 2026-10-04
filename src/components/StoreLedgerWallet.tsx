@@ -14,10 +14,27 @@ type Summary = {
   withdrawn_aoa: number;
   min_withdrawal_aoa: number;
 };
-type Entry = { id: string; kind: string; net_aoa: number; delta_available: number; delta_pending: number; delta_reserved: number; created_at: string; order_id: string | null };
-type Withdrawal = { id: string; amount_aoa: number; status: string; created_at: string; bank_reference: string | null; rejection_reason: string | null };
+type Entry = {
+  id: string;
+  kind: string;
+  net_aoa: number;
+  delta_available: number;
+  delta_pending: number;
+  delta_reserved: number;
+  created_at: string;
+  order_id: string | null;
+};
+type Withdrawal = {
+  id: string;
+  amount_aoa: number;
+  status: string;
+  created_at: string;
+  bank_reference: string | null;
+  rejection_reason: string | null;
+};
 
-const kz = (n: number) => `Kz ${Number(n || 0).toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const kz = (n: number) =>
+  `Kz ${Number(n || 0).toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const KIND: Record<string, string> = {
   sale_credit: "Venda (pendente)",
   release: "Venda libertada",
@@ -45,8 +62,18 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
   const load = useCallback(async () => {
     const [a, b, c] = await Promise.all([
       supabase.rpc("store_ledger_summary", { _store_id: storeId }),
-      supabase.from("ledger_entries").select("id,kind,net_aoa,delta_available,delta_pending,delta_reserved,created_at,order_id").eq("store_id", storeId).order("created_at", { ascending: false }).limit(50),
-      supabase.from("store_withdrawals").select("id,amount_aoa,status,created_at,bank_reference,rejection_reason").eq("store_id", storeId).order("created_at", { ascending: false }).limit(20),
+      supabase
+        .from("ledger_entries")
+        .select("id,kind,net_aoa,delta_available,delta_pending,delta_reserved,created_at,order_id")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("store_withdrawals")
+        .select("id,amount_aoa,status,created_at,bank_reference,rejection_reason")
+        .eq("store_id", storeId)
+        .order("created_at", { ascending: false })
+        .limit(20),
     ]);
     if (a.error) return toast.error("Não foi possível carregar a carteira.");
     setS(a.data as unknown as Summary);
@@ -62,13 +89,22 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
     const v = Number(amount.replace(",", "."));
     if (!Number.isFinite(v) || v <= 0) return toast.error("Indique um valor válido.");
     setBusy(true);
-    const { data, error } = await supabase.rpc("request_store_withdrawal", { _store_id: storeId, _amount: v });
+    const { data, error } = await supabase.rpc("request_store_withdrawal", {
+      _store_id: storeId,
+      _amount: v,
+    });
     setBusy(false);
     if (error) return toast.error("Pedido não aceite.");
     const r = data as { ok: boolean; reason?: string };
     if (!r.ok) {
       toast.error(
-        r.reason === "below_minimum" ? `Mínimo de ${kz(s?.min_withdrawal_aoa ?? 50000)}.` : r.reason === "insufficient_balance" ? "Saldo disponível insuficiente." : r.reason === "open_request" ? "Já existe um levantamento em curso." : "Pedido não aceite.",
+        r.reason === "below_minimum"
+          ? `Mínimo de ${kz(s?.min_withdrawal_aoa ?? 50000)}.`
+          : r.reason === "insufficient_balance"
+            ? "Saldo disponível insuficiente."
+            : r.reason === "open_request"
+              ? "Já existe um levantamento em curso."
+              : "Pedido não aceite.",
       );
     } else {
       toast.success("Levantamento pedido. Aguarda aprovação manual.");
@@ -77,7 +113,12 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
     void load();
   };
 
-  if (!s) return <div className="flex justify-center rounded-2xl border border-border py-6"><Loader2 className="animate-spin text-primary" size={18} /></div>;
+  if (!s)
+    return (
+      <div className="flex justify-center rounded-2xl border border-border py-6">
+        <Loader2 className="animate-spin text-primary" size={18} />
+      </div>
+    );
 
   const stats: [string, number][] = [
     ["Disponível", s.available_aoa],
@@ -102,21 +143,38 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
       </div>
 
       <div className="flex gap-2">
-        <Input inputMode="decimal" placeholder="Valor (Kz)" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={open || busy} />
+        <Input
+          inputMode="decimal"
+          placeholder="Valor (Kz)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          disabled={open || busy}
+        />
         <Button onClick={request} disabled={open || busy} className="gap-2">
           {busy ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
           Solicitar Levantamento
         </Button>
       </div>
-      <p className="text-[11px] text-muted-foreground">Mínimo {kz(s.min_withdrawal_aoa)}. Cada pedido é revisto e transferido manualmente pela equipa financeira.</p>
+      <p className="text-[11px] text-muted-foreground">
+        Mínimo {kz(s.min_withdrawal_aoa)}. Cada pedido é revisto e transferido manualmente pela
+        equipa financeira.
+      </p>
 
       {wds.length > 0 && (
         <div>
           <p className="mb-1 text-xs font-semibold">Levantamentos</p>
           <ul className="space-y-1 text-xs">
             {wds.map((w) => (
-              <li key={w.id} className="flex justify-between rounded-lg border border-border px-2 py-1">
-                <span>{new Date(w.created_at).toLocaleDateString("pt-AO")} · {WSTATUS[w.status] ?? w.status}{w.bank_reference ? ` · Ref ${w.bank_reference}` : ""}{w.rejection_reason ? ` · ${w.rejection_reason}` : ""}</span>
+              <li
+                key={w.id}
+                className="flex justify-between rounded-lg border border-border px-2 py-1"
+              >
+                <span>
+                  {new Date(w.created_at).toLocaleDateString("pt-AO")} ·{" "}
+                  {WSTATUS[w.status] ?? w.status}
+                  {w.bank_reference ? ` · Ref ${w.bank_reference}` : ""}
+                  {w.rejection_reason ? ` · ${w.rejection_reason}` : ""}
+                </span>
                 <strong>{kz(w.amount_aoa)}</strong>
               </li>
             ))}
@@ -131,8 +189,14 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
         ) : (
           <ul className="max-h-64 space-y-1 overflow-y-auto text-xs">
             {entries.map((e) => (
-              <li key={e.id} className="flex justify-between rounded-lg border border-border px-2 py-1">
-                <span>{new Date(e.created_at).toLocaleString("pt-AO")} · {KIND[e.kind] ?? e.kind}{e.order_id ? ` #${e.order_id.slice(0, 8)}` : ""}</span>
+              <li
+                key={e.id}
+                className="flex justify-between rounded-lg border border-border px-2 py-1"
+              >
+                <span>
+                  {new Date(e.created_at).toLocaleString("pt-AO")} · {KIND[e.kind] ?? e.kind}
+                  {e.order_id ? ` #${e.order_id.slice(0, 8)}` : ""}
+                </span>
                 <strong>{kz(e.net_aoa)}</strong>
               </li>
             ))}
