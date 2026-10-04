@@ -9,151 +9,80 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermosRouteImport } from './routes/termos'
-import { Route as SobreRouteImport } from './routes/sobre'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ShortsRouteImport } from './routes/shorts'
-import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-password'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as NovaPasswordRouteImport } from './routes/nova-password'
-import { Route as LojasRouteImport } from './routes/lojas'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ImoveisRouteImport } from './routes/imoveis'
-import { Route as HomeRouteImport } from './routes/home'
-import { Route as ComoVenderRouteImport } from './routes/como-vender'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as CarrinhoRouteImport } from './routes/carrinho'
-import { Route as CadastroRouteImport } from './routes/cadastro'
-import { Route as AjudaRouteImport } from './routes/ajuda'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AjudaRouteImport } from './routes/ajuda'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ComoVenderRouteImport } from './routes/como-vender'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as ImoveisRouteImport } from './routes/imoveis'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LojasRouteImport } from './routes/lojas'
+import { Route as NovaPasswordRouteImport } from './routes/nova-password'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-password'
+import { Route as ShortsRouteImport } from './routes/shorts'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
+import { Route as AuthenticatedAfiliadosRouteImport } from './routes/_authenticated/afiliados'
+import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
+import { Route as AuthenticatedEditarPerfilRouteImport } from './routes/_authenticated/editar-perfil'
+import { Route as AuthenticatedEnderecosRouteImport } from './routes/_authenticated/enderecos'
+import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
+import { Route as AuthenticatedIdiomaRouteImport } from './routes/_authenticated/idioma'
+import { Route as AuthenticatedImobiliariaRouteImport } from './routes/_authenticated/imobiliaria'
+import { Route as AuthenticatedLojistaRouteImport } from './routes/_authenticated/lojista'
+import { Route as AuthenticatedLojistaCrmRouteImport } from './routes/_authenticated/lojista-crm'
+import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
+import { Route as AuthenticatedSegurancaRouteImport } from './routes/_authenticated/seguranca'
+import { Route as AuthenticatedTransportadorRouteImport } from './routes/_authenticated/transportador'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ImoveisIdRouteImport } from './routes/imoveis.$id'
+import { Route as LiveIdRouteImport } from './routes/live.$id'
+import { Route as LojaIdRouteImport } from './routes/loja.$id'
+import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as RastreioOrderIdRouteImport } from './routes/rastreio.$orderId'
 import { Route as ServicosIndexRouteImport } from './routes/servicos.index'
 import { Route as ServicosIdRouteImport } from './routes/servicos.$id'
-import { Route as RastreioOrderIdRouteImport } from './routes/rastreio.$orderId'
-import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
-import { Route as LojaIdRouteImport } from './routes/loja.$id'
-import { Route as LiveIdRouteImport } from './routes/live.$id'
-import { Route as ImoveisIdRouteImport } from './routes/imoveis.$id'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as AuthenticatedTransportadorRouteImport } from './routes/_authenticated/transportador'
-import { Route as AuthenticatedSegurancaRouteImport } from './routes/_authenticated/seguranca'
-import { Route as AuthenticatedPagamentosRouteImport } from './routes/_authenticated/pagamentos'
-import { Route as AuthenticatedLojistaCrmRouteImport } from './routes/_authenticated/lojista-crm'
-import { Route as AuthenticatedLojistaRouteImport } from './routes/_authenticated/lojista'
-import { Route as AuthenticatedImobiliariaRouteImport } from './routes/_authenticated/imobiliaria'
-import { Route as AuthenticatedIdiomaRouteImport } from './routes/_authenticated/idioma'
-import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
-import { Route as AuthenticatedEnderecosRouteImport } from './routes/_authenticated/enderecos'
-import { Route as AuthenticatedEditarPerfilRouteImport } from './routes/_authenticated/editar-perfil'
-import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
-import { Route as AuthenticatedAfiliadosRouteImport } from './routes/_authenticated/afiliados'
-import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin-dashboard'
-import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin-crm'
-import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
-import { Route as AuthenticatedEntregadorIndexRouteImport } from './routes/_authenticated/entregador.index'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicSubscriptionCronRouteImport } from './routes/api/public/subscription-cron'
-import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
-import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
-import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
-import { Route as ApiPublicExchangeRouteImport } from './routes/api/public/exchange'
-import { Route as AuthenticatedLojistaVideosRouteImport } from './routes/_authenticated/lojista.videos'
-import { Route as AuthenticatedLojistaSubscricaoRouteImport } from './routes/_authenticated/lojista.subscricao'
-import { Route as AuthenticatedLojistaProdutosRouteImport } from './routes/_authenticated/lojista.produtos'
-import { Route as AuthenticatedLojistaPedidosRouteImport } from './routes/_authenticated/lojista.pedidos'
-import { Route as AuthenticatedLojistaLivesRouteImport } from './routes/_authenticated/lojista.lives'
-import { Route as AuthenticatedLojistaDashboardRouteImport } from './routes/_authenticated/lojista.dashboard'
-import { Route as AuthenticatedEntregadorDeliveryIdRouteImport } from './routes/_authenticated/entregador.$deliveryId'
-import { Route as AuthenticatedAdminTarifarioRouteImport } from './routes/_authenticated/admin.tarifario'
-import { Route as AuthenticatedAdminSubscricoesRouteImport } from './routes/_authenticated/admin.subscricoes'
-import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
-import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin.financeiro'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
+import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
+import { Route as AuthenticatedAdminSubscricoesRouteImport } from './routes/_authenticated/admin.subscricoes'
+import { Route as AuthenticatedAdminTarifarioRouteImport } from './routes/_authenticated/admin.tarifario'
+import { Route as AuthenticatedEntregadorIndexRouteImport } from './routes/_authenticated/entregador.index'
+import { Route as AuthenticatedEntregadorDeliveryIdRouteImport } from './routes/_authenticated/entregador.$deliveryId'
+import { Route as AuthenticatedLojistaIndexRouteImport } from './routes/_authenticated/lojista.index'
+import { Route as AuthenticatedLojistaDashboardRouteImport } from './routes/_authenticated/lojista.dashboard'
+import { Route as AuthenticatedLojistaLivesRouteImport } from './routes/_authenticated/lojista.lives'
+import { Route as AuthenticatedLojistaPedidosRouteImport } from './routes/_authenticated/lojista.pedidos'
+import { Route as AuthenticatedLojistaProdutosRouteImport } from './routes/_authenticated/lojista.produtos'
+import { Route as AuthenticatedLojistaSubscricaoRouteImport } from './routes/_authenticated/lojista.subscricao'
+import { Route as AuthenticatedLojistaVideosRouteImport } from './routes/_authenticated/lojista.videos'
+import { Route as ApiPublicExchangeRouteImport } from './routes/api/public/exchange'
+import { Route as ApiPublicMulticaixaCallbackRouteImport } from './routes/api/public/multicaixa-callback'
+import { Route as ApiPublicMulticaixaSubscriptionCallbackRouteImport } from './routes/api/public/multicaixa-subscription-callback'
+import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push-dispatch'
+import { Route as ApiPublicSubscriptionCronRouteImport } from './routes/api/public/subscription-cron'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
-const TermosRoute = TermosRouteImport.update({
-  id: '/termos',
-  path: '/termos',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SobreRoute = SobreRouteImport.update({
-  id: '/sobre',
-  path: '/sobre',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShortsRoute = ShortsRouteImport.update({
-  id: '/shorts',
-  path: '/shorts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecuperarPasswordRoute = RecuperarPasswordRouteImport.update({
-  id: '/recuperar-password',
-  path: '/recuperar-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NovaPasswordRoute = NovaPasswordRouteImport.update({
-  id: '/nova-password',
-  path: '/nova-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LojasRoute = LojasRouteImport.update({
-  id: '/lojas',
-  path: '/lojas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImoveisRoute = ImoveisRouteImport.update({
-  id: '/imoveis',
-  path: '/imoveis',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComoVenderRoute = ComoVenderRouteImport.update({
-  id: '/como-vender',
-  path: '/como-vender',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarrinhoRoute = CarrinhoRouteImport.update({
-  id: '/carrinho',
-  path: '/carrinho',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CadastroRoute = CadastroRouteImport.update({
-  id: '/cadastro',
-  path: '/cadastro',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AjudaRoute = AjudaRouteImport.update({
@@ -161,13 +90,188 @@ const AjudaRoute = AjudaRouteImport.update({
   path: '/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoVenderRoute = ComoVenderRouteImport.update({
+  id: '/como-vender',
+  path: '/como-vender',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImoveisRoute = ImoveisRouteImport.update({
+  id: '/imoveis',
+  path: '/imoveis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojasRoute = LojasRouteImport.update({
+  id: '/lojas',
+  path: '/lojas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NovaPasswordRoute = NovaPasswordRouteImport.update({
+  id: '/nova-password',
+  path: '/nova-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuperarPasswordRoute = RecuperarPasswordRouteImport.update({
+  id: '/recuperar-password',
+  path: '/recuperar-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortsRoute = ShortsRouteImport.update({
+  id: '/shorts',
+  path: '/shorts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminCrmRoute = AuthenticatedAdminCrmRouteImport.update({
+  id: '/admin-crm',
+  path: '/admin-crm',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/admin-dashboard',
+    path: '/admin-dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAfiliadosRoute = AuthenticatedAfiliadosRouteImport.update({
+  id: '/afiliados',
+  path: '/afiliados',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedComprasRoute = AuthenticatedComprasRouteImport.update({
+  id: '/compras',
+  path: '/compras',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEditarPerfilRoute =
+  AuthenticatedEditarPerfilRouteImport.update({
+    id: '/editar-perfil',
+    path: '/editar-perfil',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEnderecosRoute = AuthenticatedEnderecosRouteImport.update({
+  id: '/enderecos',
+  path: '/enderecos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIdiomaRoute = AuthenticatedIdiomaRouteImport.update({
+  id: '/idioma',
+  path: '/idioma',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedImobiliariaRoute =
+  AuthenticatedImobiliariaRouteImport.update({
+    id: '/imobiliaria',
+    path: '/imobiliaria',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLojistaRoute = AuthenticatedLojistaRouteImport.update({
+  id: '/lojista',
+  path: '/lojista',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLojistaCrmRoute = AuthenticatedLojistaCrmRouteImport.update({
+  id: '/lojista-crm',
+  path: '/lojista-crm',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPagamentosRoute = AuthenticatedPagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSegurancaRoute = AuthenticatedSegurancaRouteImport.update({
+  id: '/seguranca',
+  path: '/seguranca',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTransportadorRoute =
+  AuthenticatedTransportadorRouteImport.update({
+    id: '/transportador',
+    path: '/transportador',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImoveisIdRoute = ImoveisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ImoveisRoute,
+} as any)
+const LiveIdRoute = LiveIdRouteImport.update({
+  id: '/live/$id',
+  path: '/live/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaIdRoute = LojaIdRouteImport.update({
+  id: '/loja/$id',
+  path: '/loja/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutoIdRoute = ProdutoIdRouteImport.update({
+  id: '/produto/$id',
+  path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RastreioOrderIdRoute = RastreioOrderIdRouteImport.update({
+  id: '/rastreio/$orderId',
+  path: '/rastreio/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicosIndexRoute = ServicosIndexRouteImport.update({
@@ -180,195 +284,27 @@ const ServicosIdRoute = ServicosIdRouteImport.update({
   path: '/servicos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RastreioOrderIdRoute = RastreioOrderIdRouteImport.update({
-  id: '/rastreio/$orderId',
-  path: '/rastreio/$orderId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProdutoIdRoute = ProdutoIdRouteImport.update({
-  id: '/produto/$id',
-  path: '/produto/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LojaIdRoute = LojaIdRouteImport.update({
-  id: '/loja/$id',
-  path: '/loja/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LiveIdRoute = LiveIdRouteImport.update({
-  id: '/live/$id',
-  path: '/live/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImoveisIdRoute = ImoveisIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ImoveisRoute,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedTransportadorRoute =
-  AuthenticatedTransportadorRouteImport.update({
-    id: '/transportador',
-    path: '/transportador',
+const AuthenticatedAdminFinanceiroRoute =
+  AuthenticatedAdminFinanceiroRouteImport.update({
+    id: '/admin/financeiro',
+    path: '/admin/financeiro',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedSegurancaRoute = AuthenticatedSegurancaRouteImport.update({
-  id: '/seguranca',
-  path: '/seguranca',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPagamentosRoute = AuthenticatedPagamentosRouteImport.update({
-  id: '/pagamentos',
-  path: '/pagamentos',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedLojistaCrmRoute = AuthenticatedLojistaCrmRouteImport.update({
-  id: '/lojista-crm',
-  path: '/lojista-crm',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedLojistaRoute = AuthenticatedLojistaRouteImport.update({
-  id: '/lojista',
-  path: '/lojista',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedImobiliariaRoute =
-  AuthenticatedImobiliariaRouteImport.update({
-    id: '/imobiliaria',
-    path: '/imobiliaria',
+const AuthenticatedAdminImobiliariasRoute =
+  AuthenticatedAdminImobiliariasRouteImport.update({
+    id: '/admin/imobiliarias',
+    path: '/admin/imobiliarias',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedIdiomaRoute = AuthenticatedIdiomaRouteImport.update({
-  id: '/idioma',
-  path: '/idioma',
+const AuthenticatedAdminLojasRoute = AuthenticatedAdminLojasRouteImport.update({
+  id: '/admin/lojas',
+  path: '/admin/lojas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
-  id: '/favoritos',
-  path: '/favoritos',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedEnderecosRoute = AuthenticatedEnderecosRouteImport.update({
-  id: '/enderecos',
-  path: '/enderecos',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedEditarPerfilRoute =
-  AuthenticatedEditarPerfilRouteImport.update({
-    id: '/editar-perfil',
-    path: '/editar-perfil',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedComprasRoute = AuthenticatedComprasRouteImport.update({
-  id: '/compras',
-  path: '/compras',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAfiliadosRoute = AuthenticatedAfiliadosRouteImport.update({
-  id: '/afiliados',
-  path: '/afiliados',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAdminDashboardRoute =
-  AuthenticatedAdminDashboardRouteImport.update({
-    id: '/admin-dashboard',
-    path: '/admin-dashboard',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminCrmRoute = AuthenticatedAdminCrmRouteImport.update({
-  id: '/admin-crm',
-  path: '/admin-crm',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedLojistaIndexRoute =
-  AuthenticatedLojistaIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedEntregadorIndexRoute =
-  AuthenticatedEntregadorIndexRouteImport.update({
-    id: '/entregador/',
-    path: '/entregador/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSubscriptionCronRoute =
-  ApiPublicSubscriptionCronRouteImport.update({
-    id: '/api/public/subscription-cron',
-    path: '/api/public/subscription-cron',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
-  id: '/api/public/push-dispatch',
-  path: '/api/public/push-dispatch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMulticaixaSubscriptionCallbackRoute =
-  ApiPublicMulticaixaSubscriptionCallbackRouteImport.update({
-    id: '/api/public/multicaixa-subscription-callback',
-    path: '/api/public/multicaixa-subscription-callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicMulticaixaCallbackRoute =
-  ApiPublicMulticaixaCallbackRouteImport.update({
-    id: '/api/public/multicaixa-callback',
-    path: '/api/public/multicaixa-callback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicExchangeRoute = ApiPublicExchangeRouteImport.update({
-  id: '/api/public/exchange',
-  path: '/api/public/exchange',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedLojistaVideosRoute =
-  AuthenticatedLojistaVideosRouteImport.update({
-    id: '/videos',
-    path: '/videos',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedLojistaSubscricaoRoute =
-  AuthenticatedLojistaSubscricaoRouteImport.update({
-    id: '/subscricao',
-    path: '/subscricao',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedLojistaProdutosRoute =
-  AuthenticatedLojistaProdutosRouteImport.update({
-    id: '/produtos',
-    path: '/produtos',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedLojistaPedidosRoute =
-  AuthenticatedLojistaPedidosRouteImport.update({
-    id: '/pedidos',
-    path: '/pedidos',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedLojistaLivesRoute =
-  AuthenticatedLojistaLivesRouteImport.update({
-    id: '/lives',
-    path: '/lives',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedLojistaDashboardRoute =
-  AuthenticatedLojistaDashboardRouteImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
-    getParentRoute: () => AuthenticatedLojistaRoute,
-  } as any)
-const AuthenticatedEntregadorDeliveryIdRoute =
-  AuthenticatedEntregadorDeliveryIdRouteImport.update({
-    id: '/entregador/$deliveryId',
-    path: '/entregador/$deliveryId',
+const AuthenticatedAdminSubscricoesRoute =
+  AuthenticatedAdminSubscricoesRouteImport.update({
+    id: '/admin/subscricoes',
+    path: '/admin/subscricoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminTarifarioRoute =
@@ -377,33 +313,107 @@ const AuthenticatedAdminTarifarioRoute =
     path: '/admin/tarifario',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminSubscricoesRoute =
-  AuthenticatedAdminSubscricoesRouteImport.update({
-    id: '/admin/subscricoes',
-    path: '/admin/subscricoes',
+const AuthenticatedEntregadorIndexRoute =
+  AuthenticatedEntregadorIndexRouteImport.update({
+    id: '/entregador/',
+    path: '/entregador/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminLojasRoute = AuthenticatedAdminLojasRouteImport.update({
-  id: '/admin/lojas',
-  path: '/admin/lojas',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const AuthenticatedEntregadorDeliveryIdRoute =
+  AuthenticatedEntregadorDeliveryIdRouteImport.update({
+    id: '/entregador/$deliveryId',
+    path: '/entregador/$deliveryId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLojistaIndexRoute =
+  AuthenticatedLojistaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaDashboardRoute =
+  AuthenticatedLojistaDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaLivesRoute =
+  AuthenticatedLojistaLivesRouteImport.update({
+    id: '/lives',
+    path: '/lives',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaPedidosRoute =
+  AuthenticatedLojistaPedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaProdutosRoute =
+  AuthenticatedLojistaProdutosRouteImport.update({
+    id: '/produtos',
+    path: '/produtos',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaSubscricaoRoute =
+  AuthenticatedLojistaSubscricaoRouteImport.update({
+    id: '/subscricao',
+    path: '/subscricao',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const AuthenticatedLojistaVideosRoute =
+  AuthenticatedLojistaVideosRouteImport.update({
+    id: '/videos',
+    path: '/videos',
+    getParentRoute: () => AuthenticatedLojistaRoute,
+  } as any)
+const ApiPublicExchangeRoute = ApiPublicExchangeRouteImport.update({
+  id: '/api/public/exchange',
+  path: '/api/public/exchange',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminImobiliariasRoute =
-  AuthenticatedAdminImobiliariasRouteImport.update({
-    id: '/admin/imobiliarias',
-    path: '/admin/imobiliarias',
-    getParentRoute: () => AuthenticatedRouteRoute,
+const ApiPublicMulticaixaCallbackRoute =
+  ApiPublicMulticaixaCallbackRouteImport.update({
+    id: '/api/public/multicaixa-callback',
+    path: '/api/public/multicaixa-callback',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedAdminFinanceiroRoute =
-  AuthenticatedAdminFinanceiroRouteImport.update({
-    id: '/admin/financeiro',
-    path: '/admin/financeiro',
-    getParentRoute: () => AuthenticatedRouteRoute,
+const ApiPublicMulticaixaSubscriptionCallbackRoute =
+  ApiPublicMulticaixaSubscriptionCallbackRouteImport.update({
+    id: '/api/public/multicaixa-subscription-callback',
+    path: '/api/public/multicaixa-subscription-callback',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
+const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
+  id: '/api/public/push-dispatch',
+  path: '/api/public/push-dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSubscriptionCronRoute =
+  ApiPublicSubscriptionCronRouteImport.update({
+    id: '/api/public/subscription-cron',
+    path: '/api/public/subscription-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
 const LovableEmailTransactionalPreviewRoute =
@@ -412,22 +422,12 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -877,123 +877,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/termos': {
-      id: '/termos'
-      path: '/termos'
-      fullPath: '/termos'
-      preLoaderRoute: typeof TermosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sobre': {
-      id: '/sobre'
-      path: '/sobre'
-      fullPath: '/sobre'
-      preLoaderRoute: typeof SobreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shorts': {
-      id: '/shorts'
-      path: '/shorts'
-      fullPath: '/shorts'
-      preLoaderRoute: typeof ShortsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recuperar-password': {
-      id: '/recuperar-password'
-      path: '/recuperar-password'
-      fullPath: '/recuperar-password'
-      preLoaderRoute: typeof RecuperarPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/nova-password': {
-      id: '/nova-password'
-      path: '/nova-password'
-      fullPath: '/nova-password'
-      preLoaderRoute: typeof NovaPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lojas': {
-      id: '/lojas'
-      path: '/lojas'
-      fullPath: '/lojas'
-      preLoaderRoute: typeof LojasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/imoveis': {
-      id: '/imoveis'
-      path: '/imoveis'
-      fullPath: '/imoveis'
-      preLoaderRoute: typeof ImoveisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/como-vender': {
-      id: '/como-vender'
-      path: '/como-vender'
-      fullPath: '/como-vender'
-      preLoaderRoute: typeof ComoVenderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carrinho': {
-      id: '/carrinho'
-      path: '/carrinho'
-      fullPath: '/carrinho'
-      preLoaderRoute: typeof CarrinhoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cadastro': {
-      id: '/cadastro'
-      path: '/cadastro'
-      fullPath: '/cadastro'
-      preLoaderRoute: typeof CadastroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ajuda': {
-      id: '/ajuda'
-      path: '/ajuda'
-      fullPath: '/ajuda'
-      preLoaderRoute: typeof AjudaRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -1003,11 +891,263 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ajuda': {
+      id: '/ajuda'
+      path: '/ajuda'
+      fullPath: '/ajuda'
+      preLoaderRoute: typeof AjudaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-vender': {
+      id: '/como-vender'
+      path: '/como-vender'
+      fullPath: '/como-vender'
+      preLoaderRoute: typeof ComoVenderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imoveis': {
+      id: '/imoveis'
+      path: '/imoveis'
+      fullPath: '/imoveis'
+      preLoaderRoute: typeof ImoveisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lojas': {
+      id: '/lojas'
+      path: '/lojas'
+      fullPath: '/lojas'
+      preLoaderRoute: typeof LojasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nova-password': {
+      id: '/nova-password'
+      path: '/nova-password'
+      fullPath: '/nova-password'
+      preLoaderRoute: typeof NovaPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recuperar-password': {
+      id: '/recuperar-password'
+      path: '/recuperar-password'
+      fullPath: '/recuperar-password'
+      preLoaderRoute: typeof RecuperarPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shorts': {
+      id: '/shorts'
+      path: '/shorts'
+      fullPath: '/shorts'
+      preLoaderRoute: typeof ShortsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin-crm': {
+      id: '/_authenticated/admin-crm'
+      path: '/admin-crm'
+      fullPath: '/admin-crm'
+      preLoaderRoute: typeof AuthenticatedAdminCrmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin-dashboard': {
+      id: '/_authenticated/admin-dashboard'
+      path: '/admin-dashboard'
+      fullPath: '/admin-dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/afiliados': {
+      id: '/_authenticated/afiliados'
+      path: '/afiliados'
+      fullPath: '/afiliados'
+      preLoaderRoute: typeof AuthenticatedAfiliadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/compras': {
+      id: '/_authenticated/compras'
+      path: '/compras'
+      fullPath: '/compras'
+      preLoaderRoute: typeof AuthenticatedComprasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/editar-perfil': {
+      id: '/_authenticated/editar-perfil'
+      path: '/editar-perfil'
+      fullPath: '/editar-perfil'
+      preLoaderRoute: typeof AuthenticatedEditarPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/enderecos': {
+      id: '/_authenticated/enderecos'
+      path: '/enderecos'
+      fullPath: '/enderecos'
+      preLoaderRoute: typeof AuthenticatedEnderecosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/favoritos': {
+      id: '/_authenticated/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof AuthenticatedFavoritosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/idioma': {
+      id: '/_authenticated/idioma'
+      path: '/idioma'
+      fullPath: '/idioma'
+      preLoaderRoute: typeof AuthenticatedIdiomaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/imobiliaria': {
+      id: '/_authenticated/imobiliaria'
+      path: '/imobiliaria'
+      fullPath: '/imobiliaria'
+      preLoaderRoute: typeof AuthenticatedImobiliariaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lojista': {
+      id: '/_authenticated/lojista'
+      path: '/lojista'
+      fullPath: '/lojista'
+      preLoaderRoute: typeof AuthenticatedLojistaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lojista-crm': {
+      id: '/_authenticated/lojista-crm'
+      path: '/lojista-crm'
+      fullPath: '/lojista-crm'
+      preLoaderRoute: typeof AuthenticatedLojistaCrmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pagamentos': {
+      id: '/_authenticated/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/pagamentos'
+      preLoaderRoute: typeof AuthenticatedPagamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seguranca': {
+      id: '/_authenticated/seguranca'
+      path: '/seguranca'
+      fullPath: '/seguranca'
+      preLoaderRoute: typeof AuthenticatedSegurancaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/transportador': {
+      id: '/_authenticated/transportador'
+      path: '/transportador'
+      fullPath: '/transportador'
+      preLoaderRoute: typeof AuthenticatedTransportadorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imoveis/$id': {
+      id: '/imoveis/$id'
+      path: '/$id'
+      fullPath: '/imoveis/$id'
+      preLoaderRoute: typeof ImoveisIdRouteImport
+      parentRoute: typeof ImoveisRoute
+    }
+    '/live/$id': {
+      id: '/live/$id'
+      path: '/live/$id'
+      fullPath: '/live/$id'
+      preLoaderRoute: typeof LiveIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja/$id': {
+      id: '/loja/$id'
+      path: '/loja/$id'
+      fullPath: '/loja/$id'
+      preLoaderRoute: typeof LojaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produto/$id': {
+      id: '/produto/$id'
+      path: '/produto/$id'
+      fullPath: '/produto/$id'
+      preLoaderRoute: typeof ProdutoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rastreio/$orderId': {
+      id: '/rastreio/$orderId'
+      path: '/rastreio/$orderId'
+      fullPath: '/rastreio/$orderId'
+      preLoaderRoute: typeof RastreioOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/servicos/': {
@@ -1024,270 +1164,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rastreio/$orderId': {
-      id: '/rastreio/$orderId'
-      path: '/rastreio/$orderId'
-      fullPath: '/rastreio/$orderId'
-      preLoaderRoute: typeof RastreioOrderIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/produto/$id': {
-      id: '/produto/$id'
-      path: '/produto/$id'
-      fullPath: '/produto/$id'
-      preLoaderRoute: typeof ProdutoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loja/$id': {
-      id: '/loja/$id'
-      path: '/loja/$id'
-      fullPath: '/loja/$id'
-      preLoaderRoute: typeof LojaIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/live/$id': {
-      id: '/live/$id'
-      path: '/live/$id'
-      fullPath: '/live/$id'
-      preLoaderRoute: typeof LiveIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/imoveis/$id': {
-      id: '/imoveis/$id'
-      path: '/$id'
-      fullPath: '/imoveis/$id'
-      preLoaderRoute: typeof ImoveisIdRouteImport
-      parentRoute: typeof ImoveisRoute
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/transportador': {
-      id: '/_authenticated/transportador'
-      path: '/transportador'
-      fullPath: '/transportador'
-      preLoaderRoute: typeof AuthenticatedTransportadorRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/seguranca': {
-      id: '/_authenticated/seguranca'
-      path: '/seguranca'
-      fullPath: '/seguranca'
-      preLoaderRoute: typeof AuthenticatedSegurancaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/pagamentos': {
-      id: '/_authenticated/pagamentos'
-      path: '/pagamentos'
-      fullPath: '/pagamentos'
-      preLoaderRoute: typeof AuthenticatedPagamentosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/lojista-crm': {
-      id: '/_authenticated/lojista-crm'
-      path: '/lojista-crm'
-      fullPath: '/lojista-crm'
-      preLoaderRoute: typeof AuthenticatedLojistaCrmRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/lojista': {
-      id: '/_authenticated/lojista'
-      path: '/lojista'
-      fullPath: '/lojista'
-      preLoaderRoute: typeof AuthenticatedLojistaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/imobiliaria': {
-      id: '/_authenticated/imobiliaria'
-      path: '/imobiliaria'
-      fullPath: '/imobiliaria'
-      preLoaderRoute: typeof AuthenticatedImobiliariaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/idioma': {
-      id: '/_authenticated/idioma'
-      path: '/idioma'
-      fullPath: '/idioma'
-      preLoaderRoute: typeof AuthenticatedIdiomaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/favoritos': {
-      id: '/_authenticated/favoritos'
-      path: '/favoritos'
-      fullPath: '/favoritos'
-      preLoaderRoute: typeof AuthenticatedFavoritosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/enderecos': {
-      id: '/_authenticated/enderecos'
-      path: '/enderecos'
-      fullPath: '/enderecos'
-      preLoaderRoute: typeof AuthenticatedEnderecosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/editar-perfil': {
-      id: '/_authenticated/editar-perfil'
-      path: '/editar-perfil'
-      fullPath: '/editar-perfil'
-      preLoaderRoute: typeof AuthenticatedEditarPerfilRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/compras': {
-      id: '/_authenticated/compras'
-      path: '/compras'
-      fullPath: '/compras'
-      preLoaderRoute: typeof AuthenticatedComprasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/afiliados': {
-      id: '/_authenticated/afiliados'
-      path: '/afiliados'
-      fullPath: '/afiliados'
-      preLoaderRoute: typeof AuthenticatedAfiliadosRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin-dashboard': {
-      id: '/_authenticated/admin-dashboard'
-      path: '/admin-dashboard'
-      fullPath: '/admin-dashboard'
-      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin-crm': {
-      id: '/_authenticated/admin-crm'
-      path: '/admin-crm'
-      fullPath: '/admin-crm'
-      preLoaderRoute: typeof AuthenticatedAdminCrmRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/lojista/': {
-      id: '/_authenticated/lojista/'
-      path: '/'
-      fullPath: '/lojista/'
-      preLoaderRoute: typeof AuthenticatedLojistaIndexRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/entregador/': {
-      id: '/_authenticated/entregador/'
-      path: '/entregador'
-      fullPath: '/entregador/'
-      preLoaderRoute: typeof AuthenticatedEntregadorIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/subscription-cron': {
-      id: '/api/public/subscription-cron'
-      path: '/api/public/subscription-cron'
-      fullPath: '/api/public/subscription-cron'
-      preLoaderRoute: typeof ApiPublicSubscriptionCronRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/push-dispatch': {
-      id: '/api/public/push-dispatch'
-      path: '/api/public/push-dispatch'
-      fullPath: '/api/public/push-dispatch'
-      preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/multicaixa-subscription-callback': {
-      id: '/api/public/multicaixa-subscription-callback'
-      path: '/api/public/multicaixa-subscription-callback'
-      fullPath: '/api/public/multicaixa-subscription-callback'
-      preLoaderRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/multicaixa-callback': {
-      id: '/api/public/multicaixa-callback'
-      path: '/api/public/multicaixa-callback'
-      fullPath: '/api/public/multicaixa-callback'
-      preLoaderRoute: typeof ApiPublicMulticaixaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/exchange': {
-      id: '/api/public/exchange'
-      path: '/api/public/exchange'
-      fullPath: '/api/public/exchange'
-      preLoaderRoute: typeof ApiPublicExchangeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/lojista/videos': {
-      id: '/_authenticated/lojista/videos'
-      path: '/videos'
-      fullPath: '/lojista/videos'
-      preLoaderRoute: typeof AuthenticatedLojistaVideosRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/lojista/subscricao': {
-      id: '/_authenticated/lojista/subscricao'
-      path: '/subscricao'
-      fullPath: '/lojista/subscricao'
-      preLoaderRoute: typeof AuthenticatedLojistaSubscricaoRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/lojista/produtos': {
-      id: '/_authenticated/lojista/produtos'
-      path: '/produtos'
-      fullPath: '/lojista/produtos'
-      preLoaderRoute: typeof AuthenticatedLojistaProdutosRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/lojista/pedidos': {
-      id: '/_authenticated/lojista/pedidos'
-      path: '/pedidos'
-      fullPath: '/lojista/pedidos'
-      preLoaderRoute: typeof AuthenticatedLojistaPedidosRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/lojista/lives': {
-      id: '/_authenticated/lojista/lives'
-      path: '/lives'
-      fullPath: '/lojista/lives'
-      preLoaderRoute: typeof AuthenticatedLojistaLivesRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/lojista/dashboard': {
-      id: '/_authenticated/lojista/dashboard'
-      path: '/dashboard'
-      fullPath: '/lojista/dashboard'
-      preLoaderRoute: typeof AuthenticatedLojistaDashboardRouteImport
-      parentRoute: typeof AuthenticatedLojistaRoute
-    }
-    '/_authenticated/entregador/$deliveryId': {
-      id: '/_authenticated/entregador/$deliveryId'
-      path: '/entregador/$deliveryId'
-      fullPath: '/entregador/$deliveryId'
-      preLoaderRoute: typeof AuthenticatedEntregadorDeliveryIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/tarifario': {
-      id: '/_authenticated/admin/tarifario'
-      path: '/admin/tarifario'
-      fullPath: '/admin/tarifario'
-      preLoaderRoute: typeof AuthenticatedAdminTarifarioRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/subscricoes': {
-      id: '/_authenticated/admin/subscricoes'
-      path: '/admin/subscricoes'
-      fullPath: '/admin/subscricoes'
-      preLoaderRoute: typeof AuthenticatedAdminSubscricoesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/lojas': {
-      id: '/_authenticated/admin/lojas'
-      path: '/admin/lojas'
-      fullPath: '/admin/lojas'
-      preLoaderRoute: typeof AuthenticatedAdminLojasRouteImport
+    '/_authenticated/admin/financeiro': {
+      id: '/_authenticated/admin/financeiro'
+      path: '/admin/financeiro'
+      fullPath: '/admin/financeiro'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/imobiliarias': {
@@ -1297,32 +1178,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminImobiliariasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/financeiro': {
-      id: '/_authenticated/admin/financeiro'
-      path: '/admin/financeiro'
-      fullPath: '/admin/financeiro'
-      preLoaderRoute: typeof AuthenticatedAdminFinanceiroRouteImport
+    '/_authenticated/admin/lojas': {
+      id: '/_authenticated/admin/lojas'
+      path: '/admin/lojas'
+      fullPath: '/admin/lojas'
+      preLoaderRoute: typeof AuthenticatedAdminLojasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/_authenticated/admin/subscricoes': {
+      id: '/_authenticated/admin/subscricoes'
+      path: '/admin/subscricoes'
+      fullPath: '/admin/subscricoes'
+      preLoaderRoute: typeof AuthenticatedAdminSubscricoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/tarifario': {
+      id: '/_authenticated/admin/tarifario'
+      path: '/admin/tarifario'
+      fullPath: '/admin/tarifario'
+      preLoaderRoute: typeof AuthenticatedAdminTarifarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/entregador/': {
+      id: '/_authenticated/entregador/'
+      path: '/entregador'
+      fullPath: '/entregador/'
+      preLoaderRoute: typeof AuthenticatedEntregadorIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/entregador/$deliveryId': {
+      id: '/_authenticated/entregador/$deliveryId'
+      path: '/entregador/$deliveryId'
+      fullPath: '/entregador/$deliveryId'
+      preLoaderRoute: typeof AuthenticatedEntregadorDeliveryIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lojista/': {
+      id: '/_authenticated/lojista/'
+      path: '/'
+      fullPath: '/lojista/'
+      preLoaderRoute: typeof AuthenticatedLojistaIndexRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/dashboard': {
+      id: '/_authenticated/lojista/dashboard'
+      path: '/dashboard'
+      fullPath: '/lojista/dashboard'
+      preLoaderRoute: typeof AuthenticatedLojistaDashboardRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/lives': {
+      id: '/_authenticated/lojista/lives'
+      path: '/lives'
+      fullPath: '/lojista/lives'
+      preLoaderRoute: typeof AuthenticatedLojistaLivesRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/pedidos': {
+      id: '/_authenticated/lojista/pedidos'
+      path: '/pedidos'
+      fullPath: '/lojista/pedidos'
+      preLoaderRoute: typeof AuthenticatedLojistaPedidosRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/produtos': {
+      id: '/_authenticated/lojista/produtos'
+      path: '/produtos'
+      fullPath: '/lojista/produtos'
+      preLoaderRoute: typeof AuthenticatedLojistaProdutosRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/subscricao': {
+      id: '/_authenticated/lojista/subscricao'
+      path: '/subscricao'
+      fullPath: '/lojista/subscricao'
+      preLoaderRoute: typeof AuthenticatedLojistaSubscricaoRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/_authenticated/lojista/videos': {
+      id: '/_authenticated/lojista/videos'
+      path: '/videos'
+      fullPath: '/lojista/videos'
+      preLoaderRoute: typeof AuthenticatedLojistaVideosRouteImport
+      parentRoute: typeof AuthenticatedLojistaRoute
+    }
+    '/api/public/exchange': {
+      id: '/api/public/exchange'
+      path: '/api/public/exchange'
+      fullPath: '/api/public/exchange'
+      preLoaderRoute: typeof ApiPublicExchangeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/api/public/multicaixa-callback': {
+      id: '/api/public/multicaixa-callback'
+      path: '/api/public/multicaixa-callback'
+      fullPath: '/api/public/multicaixa-callback'
+      preLoaderRoute: typeof ApiPublicMulticaixaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/api/public/multicaixa-subscription-callback': {
+      id: '/api/public/multicaixa-subscription-callback'
+      path: '/api/public/multicaixa-subscription-callback'
+      fullPath: '/api/public/multicaixa-subscription-callback'
+      preLoaderRoute: typeof ApiPublicMulticaixaSubscriptionCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/push-dispatch': {
+      id: '/api/public/push-dispatch'
+      path: '/api/public/push-dispatch'
+      fullPath: '/api/public/push-dispatch'
+      preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/subscription-cron': {
+      id: '/api/public/subscription-cron'
+      path: '/api/public/subscription-cron'
+      fullPath: '/api/public/subscription-cron'
+      preLoaderRoute: typeof ApiPublicSubscriptionCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/webhook': {
@@ -1332,11 +1318,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
