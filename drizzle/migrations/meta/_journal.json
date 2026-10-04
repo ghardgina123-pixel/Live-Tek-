@@ -8,6 +8,13 @@
       "when": 1791096047095,
       "tag": "0000_store_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791098635773,
+      "tag": "0001_tighten_viewers_property_images",
+      "breakpoints": true
     }
   ]
 }

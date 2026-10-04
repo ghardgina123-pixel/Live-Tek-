@@ -100,14 +100,15 @@ function LivePage() {
   const profileFlushRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refreshViewerCount = useCallback(async () => {
-    const cutoff = new Date(Date.now() - 60_000).toISOString();
-    const { count } = await supabase
-      .from("live_viewers")
-      .select("*", { count: "exact", head: true })
-      .eq("live_id", id)
-      .gte("last_seen_at", cutoff);
-    setViewerCount(count ?? 0);
+    // Contagem agregada no servidor: o cliente não lê quem está a assistir.
+    const { data: count } = await supabase.rpc("live_viewer_count", { _live_id: id });
+    setViewerCount(Number(count ?? 0));
   }, [id]);
+
+  useEffect(() => {
+    const t = setInterval(() => void refreshViewerCount(), 20_000);
+    return () => clearInterval(t);
+  }, [refreshViewerCount]);
 
   const flushProfileFetch = useCallback(() => {
     const ids = Array.from(pendingProfileIds.current);
