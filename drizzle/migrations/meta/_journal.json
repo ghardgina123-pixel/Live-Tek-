@@ -15,6 +15,13 @@
       "when": 1791098635773,
       "tag": "0001_tighten_viewers_property_images",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791194088714,
+      "tag": "0002_harden_ledger_grants",
+      "breakpoints": true
     }
   ]
 }
