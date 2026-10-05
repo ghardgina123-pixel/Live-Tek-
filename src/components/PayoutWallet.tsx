@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const PAYOUT_MIN_AOA = 50000;
 export const PAYOUT_SLA_HOURS = 72;
 
 type OpenRequest = { id: string; amount_aoa: number; status: string; due_at: string; created_at: string };
@@ -51,7 +50,7 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
     if (error) { toast.error("Não foi possível registar o pedido."); return; }
     const res = data as unknown as { ok: boolean; reason?: string; due_at?: string };
     if (!res?.ok) {
-      if (res?.reason === "below_minimum") toast.error(`Saldo mínimo de ${kz(PAYOUT_MIN_AOA)} não atingido.`);
+      if (res?.reason === "below_minimum") toast.error(`Saldo mínimo de ${kz(state?.min_aoa ?? 0)} não atingido.`);
       else if (res?.reason === "open_request") toast.error("Já existe um pedido em processamento.");
       else toast.error("Pedido não aceite.");
       await load();
@@ -70,10 +69,10 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
   }
 
   const available = state?.available_aoa ?? 0;
-  const min = state?.min_aoa ?? PAYOUT_MIN_AOA;
+  const min = state?.min_aoa ?? Number.POSITIVE_INFINITY;
   const open = state?.open_request ?? null;
   const canRequest = !state?.has_open_request && available >= min;
-  const progress = Math.min(100, Math.round((available / min) * 100));
+  const progress = Math.min(100, Number.isFinite(min) ? Math.round((available / min) * 100) : 0);
 
   return (
     <section className="mt-4 rounded-2xl border border-border p-4">
