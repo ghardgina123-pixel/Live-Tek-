@@ -29,6 +29,13 @@
       "when": 1791194973270,
       "tag": "0003_min_withdrawal_200k",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791195179329,
+      "tag": "0004_lock_financial_settings",
+      "breakpoints": true
     }
   ]
 }
