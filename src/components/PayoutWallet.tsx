@@ -6,7 +6,13 @@ import { toast } from "sonner";
 
 export const PAYOUT_SLA_HOURS = 72;
 
-type OpenRequest = { id: string; amount_aoa: number; status: string; due_at: string; created_at: string };
+type OpenRequest = {
+  id: string;
+  amount_aoa: number;
+  status: string;
+  due_at: string;
+  created_at: string;
+};
 type State = {
   available_aoa: number;
   min_aoa: number;
@@ -18,7 +24,8 @@ type State = {
 };
 
 const kz = (v: number) =>
-  "Kz " + Number(v || 0).toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  "Kz " +
+  Number(v || 0).toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Em fila de processamento",
@@ -27,7 +34,13 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
-export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"; subtitle?: string }) {
+export function PayoutWallet({
+  kind,
+  subtitle,
+}: {
+  kind: "affiliate" | "courier";
+  subtitle?: string;
+}) {
   const [state, setState] = useState<State | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -36,21 +49,31 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc(rpcName as never);
-    if (error) { toast.error("Não foi possível carregar a carteira."); setLoading(false); return; }
+    if (error) {
+      toast.error("Não foi possível carregar a carteira.");
+      setLoading(false);
+      return;
+    }
     setState(data as unknown as State);
     setLoading(false);
   }, [rpcName]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const request = async () => {
     setBusy(true);
     const { data, error } = await supabase.rpc("request_payout" as never, { _kind: kind } as never);
     setBusy(false);
-    if (error) { toast.error("Não foi possível registar o pedido."); return; }
+    if (error) {
+      toast.error("Não foi possível registar o pedido.");
+      return;
+    }
     const res = data as unknown as { ok: boolean; reason?: string; due_at?: string };
     if (!res?.ok) {
-      if (res?.reason === "below_minimum") toast.error(`Saldo mínimo de ${kz(state?.min_aoa ?? 0)} não atingido.`);
+      if (res?.reason === "below_minimum")
+        toast.error(`Saldo mínimo de ${kz(state?.min_aoa ?? 0)} não atingido.`);
       else if (res?.reason === "open_request") toast.error("Já existe um pedido em processamento.");
       else toast.error("Pedido não aceite.");
       await load();
@@ -85,12 +108,16 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
 
       {kind === "courier" && (
         <p className="mt-1 text-[11px] text-muted-foreground">
-          {state?.deliveries_done ?? 0} entregas concluídas · {kz(state?.earned_aoa ?? 0)} ganhos totais · {kz(state?.withdrawn_aoa ?? 0)} levantados
+          {state?.deliveries_done ?? 0} entregas concluídas · {kz(state?.earned_aoa ?? 0)} ganhos
+          totais · {kz(state?.withdrawn_aoa ?? 0)} levantados
         </p>
       )}
 
       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-accent">
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+        <div
+          className="h-full rounded-full bg-primary transition-all"
+          style={{ width: `${progress}%` }}
+        />
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">
         {available >= min
@@ -102,9 +129,12 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
         <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3">
           <Clock size={16} className="mt-0.5 text-primary" />
           <div className="text-xs">
-            <p className="font-semibold">{kz(open.amount_aoa)} · {STATUS_LABEL[open.status] ?? open.status}</p>
+            <p className="font-semibold">
+              {kz(open.amount_aoa)} · {STATUS_LABEL[open.status] ?? open.status}
+            </p>
             <p className="text-muted-foreground">
-              Processamento até {new Date(open.due_at).toLocaleString("pt-AO")} ({PAYOUT_SLA_HOURS}h).
+              Processamento até {new Date(open.due_at).toLocaleString("pt-AO")} ({PAYOUT_SLA_HOURS}
+              h).
             </p>
           </div>
         </div>
@@ -116,8 +146,8 @@ export function PayoutWallet({ kind, subtitle }: { kind: "affiliate" | "courier"
       )}
 
       <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-        O levantamento é autónomo: pede diretamente aqui, sem aprovação manual. O valor é processado num prazo
-        máximo de {PAYOUT_SLA_HOURS} horas após o pedido.
+        O levantamento é autónomo: pede diretamente aqui, sem aprovação manual. O valor é processado
+        num prazo máximo de {PAYOUT_SLA_HOURS} horas após o pedido.
       </p>
     </section>
   );

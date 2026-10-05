@@ -99,7 +99,9 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
     if (!r.ok) {
       toast.error(
         r.reason === "below_minimum"
-          ? s?.min_withdrawal_aoa ? `Mínimo de ${kz(s.min_withdrawal_aoa)}.` : "Valor abaixo do mínimo."
+          ? s?.min_withdrawal_aoa
+            ? `Mínimo de ${kz(s.min_withdrawal_aoa)}.`
+            : "Valor abaixo do mínimo."
           : r.reason === "insufficient_balance"
             ? "Saldo disponível insuficiente."
             : r.reason === "open_request"
