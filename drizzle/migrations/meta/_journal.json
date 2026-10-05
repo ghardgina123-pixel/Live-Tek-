@@ -22,6 +22,13 @@
       "when": 1791194088714,
       "tag": "0002_harden_ledger_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791194973270,
+      "tag": "0003_min_withdrawal_200k",
+      "breakpoints": true
     }
   ]
 }
