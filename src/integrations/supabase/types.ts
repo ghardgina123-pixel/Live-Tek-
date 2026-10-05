@@ -1103,6 +1103,24 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_settings: {
+        Row: {
+          id: boolean
+          min_withdrawal_aoa: number
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          min_withdrawal_aoa: number
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          min_withdrawal_aoa?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       global_notifications: {
         Row: {
           body: string | null
@@ -4446,6 +4464,7 @@ export type Database = {
         }
         Returns: string
       }
+      min_withdrawal_aoa: { Args: never; Returns: number }
       move_to_dlq: {
         Args: {
           dlq_name: string
