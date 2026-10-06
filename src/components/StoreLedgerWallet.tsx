@@ -12,7 +12,9 @@ type Summary = {
   sales_aoa: number;
   commissions_aoa: number;
   withdrawn_aoa: number;
-  min_withdrawal_aoa: number;
+  max_daily_withdrawal_aoa: number;
+  withdrawn_today_aoa: number;
+  remaining_today_aoa: number;
 };
 type Entry = {
   id: string;
@@ -98,15 +100,15 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
     const r = data as { ok: boolean; reason?: string };
     if (!r.ok) {
       toast.error(
-        r.reason === "below_minimum"
-          ? s?.min_withdrawal_aoa
-            ? `Mínimo de ${kz(s.min_withdrawal_aoa)}.`
-            : "Valor abaixo do mínimo."
-          : r.reason === "insufficient_balance"
-            ? "Saldo disponível insuficiente."
-            : r.reason === "open_request"
-              ? "Já existe um levantamento em curso."
-              : "Pedido não aceite.",
+        r.reason === "daily_limit"
+          ? `Limite máximo diário: ${kz(s?.max_daily_withdrawal_aoa ?? 0)}. Ainda pode levantar hoje ${kz(s?.remaining_today_aoa ?? 0)}.`
+          : r.reason === "invalid_amount"
+            ? "Indique um valor válido."
+            : r.reason === "insufficient_balance"
+              ? "Saldo disponível insuficiente."
+              : r.reason === "open_request"
+                ? "Já existe um levantamento em curso."
+                : "Pedido não aceite.",
       );
     } else {
       toast.success("Levantamento pedido. Aguarda aprovação manual.");
@@ -158,8 +160,9 @@ export function StoreLedgerWallet({ storeId }: { storeId: string }) {
         </Button>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Mínimo {kz(s.min_withdrawal_aoa)}. Cada pedido é revisto e transferido manualmente pela
-        equipa financeira.
+        Limite máximo diário: {kz(s.max_daily_withdrawal_aoa)} (disponível hoje:{" "}
+        {kz(s.remaining_today_aoa)}). Cada pedido é revisto e transferido manualmente pela equipa
+        financeira.
       </p>
 
       {wds.length > 0 && (

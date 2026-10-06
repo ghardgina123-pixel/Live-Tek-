@@ -3982,6 +3982,27 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_limits: {
+        Row: {
+          currency: string
+          max_daily_amount: number
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          currency: string
+          max_daily_amount: number
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          currency?: string
+          max_daily_amount?: number
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -4464,6 +4485,7 @@ export type Database = {
         }
         Returns: string
       }
+      max_daily_withdrawal_aoa: { Args: never; Returns: number }
       min_withdrawal_aoa: { Args: never; Returns: number }
       move_to_dlq: {
         Args: {
@@ -4484,6 +4506,10 @@ export type Database = {
           total_volume_cm3: number
           total_weight_kg: number
         }[]
+      }
+      payout_withdrawn_today: {
+        Args: { _kind: string; _user_id: string }
+        Returns: number
       }
       rate_limit_hit: {
         Args: {
@@ -4557,7 +4583,9 @@ export type Database = {
         Returns: string
       }
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
+      store_withdrawn_today: { Args: { _store_id: string }; Returns: number }
       subscription_renewal_notices: { Args: never; Returns: number }
+      withdrawal_day_start: { Args: { _currency?: string }; Returns: string }
     }
     Enums: {
       affiliate_commission_status: "pending" | "released" | "paid" | "cancelled"
