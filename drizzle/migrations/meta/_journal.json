@@ -43,6 +43,13 @@
       "when": 1791273590146,
       "tag": "0005_max_daily_withdrawal_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791273744545,
+      "tag": "0006_lock_withdrawal_limits",
+      "breakpoints": true
     }
   ]
 }
