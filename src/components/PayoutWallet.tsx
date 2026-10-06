@@ -15,7 +15,8 @@ type OpenRequest = {
 };
 type State = {
   available_aoa: number;
-  min_aoa: number;
+  max_daily_aoa: number;
+  remaining_today_aoa: number;
   has_open_request: boolean;
   open_request: OpenRequest | null;
   earned_aoa?: number;
@@ -72,8 +73,9 @@ export function PayoutWallet({
     }
     const res = data as unknown as { ok: boolean; reason?: string; due_at?: string };
     if (!res?.ok) {
-      if (res?.reason === "below_minimum")
-        toast.error(`Saldo mínimo de ${kz(state?.min_aoa ?? 0)} não atingido.`);
+      if (res?.reason === "daily_limit")
+        toast.error(`Limite máximo diário de ${kz(state?.max_daily_aoa ?? 0)} atingido.`);
+      else if (res?.reason === "insufficient_balance") toast.error("Sem saldo disponível.");
       else if (res?.reason === "open_request") toast.error("Já existe um pedido em processamento.");
       else toast.error("Pedido não aceite.");
       await load();
@@ -92,10 +94,13 @@ export function PayoutWallet({
   }
 
   const available = state?.available_aoa ?? 0;
-  const min = state?.min_aoa ?? Number.POSITIVE_INFINITY;
+  const maxDaily = state?.max_daily_aoa ?? 0;
+  const remainingToday = state?.remaining_today_aoa ?? 0;
+  const amountNow = Math.min(available, remainingToday);
   const open = state?.open_request ?? null;
-  const canRequest = !state?.has_open_request && available >= min;
-  const progress = Math.min(100, Number.isFinite(min) ? Math.round((available / min) * 100) : 0);
+  const canRequest = !state?.has_open_request && amountNow > 0;
+  const usedToday = Math.max(maxDaily - remainingToday, 0);
+  const progress = maxDaily > 0 ? Math.min(100, Math.round((usedToday / maxDaily) * 100)) : 0;
 
   return (
     <section className="mt-4 rounded-2xl border border-border p-4">
@@ -120,9 +125,7 @@ export function PayoutWallet({
         />
       </div>
       <p className="mt-1 text-[11px] text-muted-foreground">
-        {available >= min
-          ? `Mínimo de ${kz(min)} atingido — saque disponível.`
-          : `Faltam ${kz(min - available)} para atingir o mínimo de ${kz(min)}.`}
+        Limite máximo diário: {kz(maxDaily)} · disponível hoje: {kz(remainingToday)}
       </p>
 
       {open ? (
@@ -141,7 +144,7 @@ export function PayoutWallet({
       ) : (
         <Button onClick={request} disabled={!canRequest || busy} className="mt-3 w-full gap-2">
           {busy ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
-          {available >= min ? `Sacar ${kz(available)}` : `Saque a partir de ${kz(min)}`}
+          {canRequest ? `Sacar ${kz(amountNow)}` : "Sem valor para sacar hoje"}
         </Button>
       )}
 
