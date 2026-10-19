@@ -2,7 +2,7 @@
 
 - [x] Rever migrations 0005/0006 e funções financeiras ativas sem criar saldos ou pagamentos.
 - [x] Preparar SQL completo das quatro correções e revisão independente sem aplicar; aguardar autorização.
-- [ ] Aplicar migration autorizada e verificar funções, permissões, RLS e caminhos administrativos; bloqueado até autorização.
+- [ ] Aplicar as quatro correções e verificar funções, permissões, RLS e painel administrativo; bloqueado porque a migration autorizada abortou em executor_membership_not_isolated. Não enfraquecer isolamento nem aplicar correções parciais.
 - [ ] Validar concorrência, total diário e duplicação com saldo/transações reais ou ambiente oficial; bloqueado por ausência desses dados.
 
 - [x] Transformar o ecrã público da LIVE numa experiência vertical em ecrã completo.
