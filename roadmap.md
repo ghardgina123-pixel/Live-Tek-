@@ -1,7 +1,8 @@
 # Roadmap
 
 - [x] Rever migrations 0005/0006 e funções financeiras ativas sem criar saldos ou pagamentos.
-- [ ] Corrigir estados finais e alterações diretas de payout_requests; bloqueado porque a migration proposta foi recusada, nenhuma correção aplicada.
+- [ ] Preparar SQL completo das quatro correções sem aplicar; aguardar autorização após revisão.
+- [ ] Aplicar migration autorizada e verificar funções, permissões, RLS e caminhos administrativos; bloqueado até autorização.
 - [ ] Validar concorrência, total diário e duplicação com saldo/transações reais ou ambiente oficial; bloqueado por ausência desses dados.
 
 - [x] Transformar o ecrã público da LIVE numa experiência vertical em ecrã completo.
