@@ -9,7 +9,7 @@
 1. **Estados finais reversíveis:** proteger `paid`/`cancelled`; nenhum destes estados volta a disponibilizar saldo por outra transição.
 2. **Confirmação repetida:** bloquear por utilizador/tipo e por linha; repetição do mesmo estado retorna `already_processed`, sem UPDATE, notificação ou auditoria adicional.
 3. **Escrita direta:** retirar escrita de visitantes, utilizadores e service_role; trigger valida uma identidade PostgreSQL isolada, não um parâmetro manipulável. Só as duas funções autorizadas recebem essa identidade. Campos financeiros ficam imutáveis e DELETE bloqueado. RLS permanece ativo.
-4. **Limite ausente/inválido:** helper rejeita configuração ausente, nula, não finita, não positiva ou timezone inválido; leitura bloqueia a configuração durante a operação. Valor atual 200000 não é alterado nem duplicado no frontend.
+4. **Limite ausente/inválido:** helper rejeita configuração ausente, nula, não finita, não positiva ou timezone inválido. Valor atual 200000 não é alterado nem duplicado no frontend. Preservar leituras de carteira em transações somente de leitura.
 
 ## Compatibilidade necessária após autorização
 O painel administrativo atualmente envia `rejected`, mas a função aceita `cancelled`; também ignora `ok:false`. Corrigir esse caminho no mesmo trabalho autorizado: enviar `cancelled`, respeitar a resposta e não anunciar sucesso quando recusado. Não alterar design.
@@ -76,10 +76,10 @@ FOR EACH ROW EXECUTE FUNCTION public.guard_payout_request_write();
 REVOKE EXECUTE ON FUNCTION public.guard_payout_request_write() FROM PUBLIC,anon,authenticated,service_role;
 
 CREATE OR REPLACE FUNCTION public.max_daily_withdrawal_aoa() RETURNS numeric
-LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=public AS $$
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
 DECLARE v numeric; tz text;
 BEGIN
- SELECT max_daily_amount,timezone INTO v,tz FROM public.withdrawal_limits WHERE currency='AOA' FOR SHARE;
+ SELECT max_daily_amount,timezone INTO v,tz FROM public.withdrawal_limits WHERE currency='AOA';
  IF NOT FOUND OR v IS NULL OR v<=0 OR v::text IN ('NaN','Infinity','-Infinity')
   OR tz IS NULL OR NOT EXISTS(SELECT 1 FROM pg_timezone_names WHERE name=tz)
  THEN RAISE EXCEPTION 'withdrawal_limit_not_configured'; END IF;
