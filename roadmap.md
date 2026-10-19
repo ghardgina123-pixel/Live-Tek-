@@ -1,6 +1,8 @@
 # Roadmap
 
-- [ ] Rever migrations 0005/0006 e regras financeiras ativas, corrigir falhas comprovadas e distinguir testes executados de pendentes.
+- [x] Rever migrations 0005/0006 e funções financeiras ativas sem criar saldos ou pagamentos.
+- [ ] Corrigir estados finais e alterações diretas de payout_requests; bloqueado porque a migration proposta foi recusada, nenhuma correção aplicada.
+- [ ] Validar concorrência, total diário e duplicação com saldo/transações reais ou ambiente oficial; bloqueado por ausência desses dados.
 
 - [x] Transformar o ecrã público da LIVE numa experiência vertical em ecrã completo.
 - [x] Sobrepor dados reais da loja, estado, audiência e ações sociais.
