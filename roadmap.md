@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Rever migrations 0005/0006 e regras financeiras ativas, corrigir falhas comprovadas e distinguir testes executados de pendentes.
+
 - [x] Transformar o ecrã público da LIVE numa experiência vertical em ecrã completo.
 - [x] Sobrepor dados reais da loja, estado, audiência e ações sociais.
 - [x] Manter comentários Realtime e campo de mensagem sobre o vídeo.
