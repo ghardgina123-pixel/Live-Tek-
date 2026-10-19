@@ -19,6 +19,16 @@ O SQL será entregue à ferramenta de migrations somente após autorização. N�
 
 ```sql
 -- Sem UPDATE/DELETE de dados financeiros existentes.
+-- Preflight: stop instead of applying over a different configuration or role.
+DO $$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='liveteka_payout_executor') THEN
+  RAISE EXCEPTION 'executor_role_already_exists_review_required';
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.withdrawal_limits
+  WHERE currency='AOA' AND max_daily_amount=200000 AND timezone='Africa/Luanda') THEN
+  RAISE EXCEPTION 'unexpected_aoa_limit_review_required';
+ END IF;
+END $$;
 CREATE ROLE liveteka_payout_executor NOLOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 GRANT USAGE ON SCHEMA public,auth TO liveteka_payout_executor;
 GRANT SELECT,INSERT ON public.payout_requests TO liveteka_payout_executor;
@@ -144,6 +154,12 @@ REVOKE CREATE ON SCHEMA public FROM liveteka_payout_executor;
 REVOKE liveteka_payout_executor FROM postgres;
 REVOKE EXECUTE ON FUNCTION public.request_payout(text,text,jsonb),public.admin_settle_payout(uuid,text,text) FROM PUBLIC,anon,service_role;
 GRANT EXECUTE ON FUNCTION public.request_payout(text,text,jsonb),public.admin_settle_payout(uuid,text,text) TO authenticated;
+-- Abort the whole migration if the executor can be assumed by another role.
+DO $$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_auth_members WHERE roleid=(SELECT oid FROM pg_roles WHERE rolname='liveteka_payout_executor')) THEN
+  RAISE EXCEPTION 'executor_membership_not_isolated';
+ END IF;
+END $$;
 ```
 
 ## Verificações e resultados

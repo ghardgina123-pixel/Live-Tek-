@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] Rever migrations 0005/0006 e funções financeiras ativas sem criar saldos ou pagamentos.
-- [ ] Preparar SQL completo das quatro correções sem aplicar; aguardar autorização após revisão.
+- [x] Preparar SQL completo das quatro correções e revisão independente sem aplicar; aguardar autorização.
 - [ ] Aplicar migration autorizada e verificar funções, permissões, RLS e caminhos administrativos; bloqueado até autorização.
 - [ ] Validar concorrência, total diário e duplicação com saldo/transações reais ou ambiente oficial; bloqueado por ausência desses dados.
 
