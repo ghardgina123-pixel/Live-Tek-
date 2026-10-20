@@ -89,7 +89,13 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       setLabel("");
       await reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha ao adicionar câmara");
+      const msg = e instanceof Error ? e.message : "Falha ao adicionar câmara";
+      toast.error(
+        msg.includes("ingress object limit")
+          ? "Limite de fontes externas da conta de streaming atingido. Remova uma fonte antes de adicionar outra."
+          : msg,
+      );
+      await reload();
     } finally {
       setSaving(false);
     }
