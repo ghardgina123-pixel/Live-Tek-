@@ -367,13 +367,13 @@ function LivesManager() {
             </Suspense>
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/80 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-foreground/40 to-transparent" />
           <div className="absolute inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 text-background">
             <div className="flex min-w-0 items-center gap-2">
               <Button
                 size="icon"
-                variant="secondary"
-                className="h-9 w-9 shrink-0 rounded-full bg-background/85 text-foreground backdrop-blur"
+                variant="ghost"
+                className="h-9 w-9 shrink-0 rounded-full text-background"
                 onClick={() => setActiveId(null)}
                 aria-label="Fechar painel"
               >
@@ -390,13 +390,13 @@ function LivesManager() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className="inline-flex h-9 items-center gap-1 rounded-full bg-background/85 px-3 text-xs font-semibold text-foreground backdrop-blur">
+              <span className="inline-flex h-9 items-center gap-1 px-1 text-xs font-semibold text-background">
                 <Users size={14} /> {activeViewers}
               </span>
               <Button
                 size="icon"
-                variant="secondary"
-                className="h-9 w-9 rounded-full bg-background/85 text-foreground backdrop-blur"
+                variant="ghost"
+                className="h-9 w-9 rounded-full text-background"
                 onClick={() => void shareLive(activeLive)}
                 aria-label="Partilhar live"
               >
