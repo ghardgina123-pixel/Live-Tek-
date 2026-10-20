@@ -279,7 +279,7 @@ function LivesManager() {
             </Link>
           </div>
         )}
-        {usage && !blocked && (
+        {usage && !blocked && subStatus?.subscription_required && (
           <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3 text-xs">
             <p className="font-medium">
               Lives usadas este mês: {usage.used}
