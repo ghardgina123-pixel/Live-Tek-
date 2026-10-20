@@ -742,11 +742,11 @@ export function LivePublisher({
       <div className="space-y-2">
         <p className="text-xs font-semibold text-muted-foreground">Controlos da transmissão</p>
         {state === "publishing" ? (
-          <Button onClick={stop} variant="destructive" className="h-11 w-full justify-start">
+          <Button type="button" onClick={stop} variant="destructive" className="h-11 w-full justify-start">
             <VideoOff size={16} className="mr-2" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
-          <Button
+          <Button type="button"
             onClick={publish}
             disabled={!cameraOk}
             variant="destructive"
@@ -755,12 +755,12 @@ export function LivePublisher({
             <Radio size={16} className="mr-2" /> {t("s_iniciar")}
           </Button>
         ) : state === "connecting" || state === "requesting" ? (
-          <Button disabled className="h-11 w-full justify-start">
+          <Button type="button" disabled className="h-11 w-full justify-start">
             <Loader2 size={16} className="mr-2 animate-spin" />
             {state === "connecting" ? t("s_a_publicar") : t("s_a_ligar_camara_e_microfone")}
           </Button>
         ) : (
-          <Button onClick={preflight} className="h-11 w-full justify-start">
+          <Button type="button" onClick={preflight} className="h-11 w-full justify-start">
             <Radio size={16} className="mr-2" /> {t("s_iniciar")}
           </Button>
         )}
@@ -920,6 +920,7 @@ export function LivePublisher({
               side="right"
               className="z-[70] w-[min(92vw,420px)] overflow-y-auto p-4"
               overlayClassName="z-[70]"
+              onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <SheetHeader className="mb-4 pr-8 text-left">
                 <SheetTitle>Transmissão</SheetTitle>
@@ -966,15 +967,15 @@ export function LivePublisher({
 
       <div className={studio ? "hidden" : "flex gap-2"}>
         {state === "publishing" ? (
-          <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
+          <Button type="button" onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
           <>
-            <Button onClick={stop} variant="secondary" className="h-11 rounded-full">
+            <Button type="button" onClick={stop} variant="secondary" className="h-11 rounded-full">
               Cancelar
             </Button>
-            <Button
+            <Button type="button"
               onClick={publish}
               disabled={!cameraOk}
               variant="destructive"
@@ -984,11 +985,11 @@ export function LivePublisher({
             </Button>
           </>
         ) : state === "connecting" ? (
-          <Button disabled className="h-11 flex-1 rounded-full">
+          <Button type="button" disabled className="h-11 flex-1 rounded-full">
             <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
           </Button>
         ) : (
-          <Button
+          <Button type="button"
             onClick={preflight}
             disabled={state === "requesting"}
             className="h-11 flex-1 rounded-full"

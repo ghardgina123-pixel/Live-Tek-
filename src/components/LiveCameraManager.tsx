@@ -115,7 +115,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           <Cctv size={15} className="text-primary" /> {t("s_camaras_da_live")}
         </h3>
         <div className="flex items-center gap-1">
-          <Button
+          <Button type="button"
             size="sm"
             variant="ghost"
             onClick={() => void reload()}
@@ -123,7 +123,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           >
             <RefreshCw size={14} />
           </Button>
-          <Button size="sm" onClick={() => setOpen(true)}>
+          <Button type="button" size="sm" onClick={() => setOpen(true)}>
             <Plus size={14} className="mr-1" /> Adicionar fonte
           </Button>
         </div>
@@ -189,7 +189,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <Button
+              <Button type="button"
                 size="sm"
                 variant={cam.isActive ? "secondary" : "default"}
                 disabled={cam.isActive || busyId === cam.id}
@@ -211,7 +211,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
               {cam.sourceType !== "phone" && (
                 <>
                   {cam.ingressId ? (
-                    <Button
+                    <Button type="button"
                       size="sm"
                       variant="outline"
                       disabled={busyId === cam.id}
@@ -226,7 +226,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                       <Power size={13} className="mr-1" /> {t("s_parar")}
                     </Button>
                   ) : (
-                    <Button
+                    <Button type="button"
                       size="sm"
                       variant="outline"
                       disabled={busyId === cam.id}
@@ -241,7 +241,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                       <Power size={13} className="mr-1" /> {t("s_ligar")}
                     </Button>
                   )}
-                  <Button
+                  <Button type="button"
                     size="sm"
                     variant="ghost"
                     className="text-destructive"
@@ -303,10 +303,10 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => void add()} disabled={saving}>
+            <Button type="button" onClick={() => void add()} disabled={saving}>
               {saving && <Loader2 size={14} className="mr-1 animate-spin" />} Ligar câmara
             </Button>
           </DialogFooter>
