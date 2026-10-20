@@ -16,6 +16,7 @@ export type LojistaStore = {
   logo_url: string | null;
   cover_url: string | null;
   rejection_reason: string | null;
+  partner_type: "retail" | "service";
 };
 
 const NAV = [
@@ -36,7 +37,7 @@ export function useLojistaStore() {
     if (!user) return;
     supabase
       .from("stores")
-      .select("id, name, status, logo_url, cover_url, rejection_reason")
+      .select("id, name, status, logo_url, cover_url, rejection_reason, partner_type")
       .eq("owner_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -90,7 +91,7 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
               <p className="text-xs text-muted-foreground">{t("s_painel_do_lojista")}</p>
             </SheetHeader>
             <nav className="p-2">
-              {NAV.map((item) => {
+              {NAV.filter((item) => item.to !== "/lojista/subscricao" || store.partner_type === "service").map((item) => {
                 const active = pathname === item.to || pathname.startsWith(item.to + "/");
                 const Icon = item.icon;
                 return (
