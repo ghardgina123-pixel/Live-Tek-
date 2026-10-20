@@ -47,6 +47,10 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
   --color-live: var(--live);
+  --color-gold: var(--gold);
+  --color-gold-strong: var(--gold-strong);
+  --color-gold-light: var(--gold-light);
+  --color-gold-foreground: var(--gold-foreground);
   --color-primary-glow: var(--primary-glow);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -89,6 +93,12 @@
   --gradient-brand: linear-gradient(110deg, oklch(0.58 0.19 145) 0%, oklch(0.68 0.20 145) 45%, oklch(0.88 0.10 140) 100%);
   --gradient-brand-soft: linear-gradient(110deg, oklch(0.72 0.17 145) 0%, oklch(0.92 0.07 140) 70%, oklch(0.99 0.01 140) 100%);
   --gradient-live: linear-gradient(135deg, oklch(0.62 0.24 22), oklch(0.55 0.22 350));
+  --gold: oklch(0.773 0.139 78.4);
+  --gold-strong: oklch(0.767 0.139 91.1);
+  --gold-light: oklch(0.834 0.141 85.4);
+  --gold-foreground: oklch(0.218 0 89.9);
+  --gradient-gold: linear-gradient(135deg, oklch(0.834 0.141 85.4) 0%, oklch(0.773 0.139 78.4) 55%, oklch(0.767 0.139 91.1) 100%);
+  --shadow-gold: 0 6px 18px -6px oklch(0.7 0.14 85 / 0.6);
   --shadow-soft: 0 4px 20px -8px oklch(0.22 0.06 255 / 0.18);
   --shadow-glow: 0 10px 40px -12px oklch(0.62 0.18 152 / 0.5);
   --chart-1: oklch(0.646 0.222 41.116);
