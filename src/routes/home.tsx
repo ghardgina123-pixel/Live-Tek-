@@ -171,7 +171,7 @@ function Home() {
             <Link
               to="/lojista"
               aria-label="Painel do Lojista"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-3 py-2 text-[11px] font-semibold text-white ring-1 ring-white/25 transition active:scale-95 active:bg-white/25"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-strong px-3 py-2 text-[11px] font-bold text-gold-foreground shadow-md ring-1 ring-gold-strong/60 transition active:scale-95 active:brightness-95"
               style={{ touchAction: "manipulation" }}
             >
               <StoreIcon size={14} />
