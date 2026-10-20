@@ -36,6 +36,7 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
 type Props = {
   liveId: string;
@@ -757,11 +758,17 @@ export function LivePublisher({
       <div className="space-y-2">
         <p className="text-xs font-semibold text-muted-foreground">Controlos da transmissão</p>
         {state === "publishing" ? (
-          <Button type="button" onClick={stop} variant="destructive" className="h-11 w-full justify-start">
+          <Button
+            type="button"
+            onClick={stop}
+            variant="destructive"
+            className="h-11 w-full justify-start"
+          >
             <VideoOff size={16} className="mr-2" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
-          <Button type="button"
+          <Button
+            type="button"
             onClick={publish}
             disabled={!cameraOk}
             variant="destructive"
@@ -982,7 +989,12 @@ export function LivePublisher({
 
       <div className={studio ? "hidden" : "flex gap-2"}>
         {state === "publishing" ? (
-          <Button type="button" onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
+          <Button
+            type="button"
+            onClick={stop}
+            variant="destructive"
+            className="h-11 flex-1 rounded-full"
+          >
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
@@ -990,7 +1002,8 @@ export function LivePublisher({
             <Button type="button" onClick={stop} variant="secondary" className="h-11 rounded-full">
               Cancelar
             </Button>
-            <Button type="button"
+            <Button
+              type="button"
               onClick={publish}
               disabled={!cameraOk}
               variant="destructive"
@@ -1004,7 +1017,8 @@ export function LivePublisher({
             <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
           </Button>
         ) : (
-          <Button type="button"
+          <Button
+            type="button"
             onClick={preflight}
             disabled={state === "requesting"}
             className="h-11 flex-1 rounded-full"

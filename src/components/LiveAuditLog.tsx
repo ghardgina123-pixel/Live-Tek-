@@ -85,7 +85,8 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
           <ScrollText size={15} className="text-primary" /> {t("s_auditoria_da_live")}
         </h3>
         <div className="flex items-center gap-1">
-          <Button type="button"
+          <Button
+            type="button"
             size="sm"
             variant="ghost"
             aria-label={t("s_atualizar_registo")}
@@ -93,7 +94,13 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
           >
             <RefreshCw size={14} />
           </Button>
-          <Button type="button" size="sm" variant="outline" onClick={exportCsv} disabled={!rows?.length}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={exportCsv}
+            disabled={!rows?.length}
+          >
             <Download size={14} className="mr-1" /> {t("s_csv")}
           </Button>
         </div>
@@ -116,7 +123,9 @@ export function LiveAuditLog({ liveId }: { liveId: string }) {
         ))}
       </ul>
       {rows?.length === 0 && (
-        <p className="py-2 text-center text-xs text-muted-foreground">{t("s_sem_eventos_registados")}</p>
+        <p className="py-2 text-center text-xs text-muted-foreground">
+          {t("s_sem_eventos_registados")}
+        </p>
       )}
     </section>
   );
