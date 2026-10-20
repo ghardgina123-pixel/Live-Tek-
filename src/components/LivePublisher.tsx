@@ -927,8 +927,8 @@ export function LivePublisher({
               <Button
                 type="button"
                 size="icon"
-                variant="secondary"
-                className="absolute right-3 top-14 z-40 h-9 w-9 rounded-full bg-background/85 shadow-md backdrop-blur"
+                variant="ghost"
+                className="absolute right-3 top-14 z-40 h-9 w-9 rounded-full text-background"
                 aria-label={
                   menuOpen ? "Fechar controlos da transmissão" : "Abrir controlos da transmissão"
                 }
