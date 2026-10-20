@@ -455,12 +455,16 @@ export function LivePublisher({
     }
   };
 
-  const switchCamera = async () => {
+  const switchCamera = async (target?: "user" | "environment") => {
     const track = tracksRef.current.find((item) => item.kind === Track.Kind.Video) as
       | LocalVideoTrack
       | undefined;
-    if (!track || state === "connecting") return;
-    const nextFacing = facingMode === "environment" ? "user" : "environment";
+    if (!track || state === "connecting") {
+      if (target) toast.error("Prepare a câmara do telemóvel primeiro (Iniciar).");
+      return;
+    }
+    const nextFacing = target ?? (facingMode === "environment" ? "user" : "environment");
+    if (nextFacing === facingMode) return;
     try {
       await track.restartTrack({ facingMode: nextFacing, resolution: LOW_RES });
       const video = videoRef.current;
@@ -478,6 +482,17 @@ export function LivePublisher({
       await fail(error);
     }
   };
+
+  const switchCameraRef = useRef(switchCamera);
+  switchCameraRef.current = switchCamera;
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const facing = (e as CustomEvent<"user" | "environment">).detail;
+      if (facing === "user" || facing === "environment") void switchCameraRef.current(facing);
+    };
+    window.addEventListener("live:phone-camera", onPick);
+    return () => window.removeEventListener("live:phone-camera", onPick);
+  }, []);
 
   const publish = async () => {
     if (state !== "preflight" || !cameraOk || tracksRef.current.length === 0) return;
