@@ -89,7 +89,13 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       setLabel("");
       await reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha ao adicionar câmara");
+      const msg = e instanceof Error ? e.message : "Falha ao adicionar câmara";
+      toast.error(
+        msg.includes("ingress object limit")
+          ? "Limite de fontes externas da conta de streaming atingido. Remova uma fonte antes de adicionar outra."
+          : msg,
+      );
+      await reload();
     } finally {
       setSaving(false);
     }
@@ -116,6 +122,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
         </h3>
         <div className="flex items-center gap-1">
           <Button
+            type="button"
             size="sm"
             variant="ghost"
             onClick={() => void reload()}
@@ -123,7 +130,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
           >
             <RefreshCw size={14} />
           </Button>
-          <Button size="sm" onClick={() => setOpen(true)}>
+          <Button type="button" size="sm" onClick={() => setOpen(true)}>
             <Plus size={14} className="mr-1" /> Adicionar fonte
           </Button>
         </div>
@@ -190,6 +197,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <Button
+                type="button"
                 size="sm"
                 variant={cam.isActive ? "secondary" : "default"}
                 disabled={cam.isActive || busyId === cam.id}
@@ -212,6 +220,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 <>
                   {cam.ingressId ? (
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
                       disabled={busyId === cam.id}
@@ -227,6 +236,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                     </Button>
                   ) : (
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
                       disabled={busyId === cam.id}
@@ -242,6 +252,7 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                     </Button>
                   )}
                   <Button
+                    type="button"
                     size="sm"
                     variant="ghost"
                     className="text-destructive"
@@ -270,17 +281,44 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        {/* z-[80]: acima do painel lateral (z-[70]) e da camada fullscreen da live */}
+        <DialogContent
+          className="z-[80] max-h-[90dvh] overflow-y-auto"
+          overlayClassName="z-[80]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
-            <DialogTitle>Adicionar fonte externa</DialogTitle>
+            <DialogTitle>Adicionar fonte</DialogTitle>
             <DialogDescription>
-              Ligue um encoder ou câmara profissional. O sistema gera automaticamente o endereço e a
-              chave temporária — não precisa de abrir portas do router nem de expor a câmara à
-              internet.
+              Escolha a câmara do telemóvel ou ligue uma fonte externa. Para fontes externas o
+              sistema gera um endereço e uma chave temporária — sem abrir portas do router nem expor
+              a câmara à internet.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
+              <p className="mb-1 text-xs font-semibold">Câmara deste telemóvel</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(["user", "environment"] as const).map((facing) => (
+                  <Button
+                    key={facing}
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      window.dispatchEvent(
+                        new CustomEvent("live:phone-camera", { detail: facing }),
+                      );
+                      setOpen(false);
+                    }}
+                  >
+                    <Camera size={14} className="mr-1" />
+                    {facing === "user" ? "Frontal" : "Traseira"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="border-t pt-3">
+              <p className="mb-2 text-xs font-semibold">Fonte externa</p>
               <Label htmlFor="cam-label">{t("s_nome")}</Label>
               <Input
                 id="cam-label"
@@ -297,17 +335,22 @@ export function LiveCameraManager({ liveId }: { liveId: string }) {
                 onChange={(e) => setSourceType(e.target.value as typeof sourceType)}
                 className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
               >
-                <option value="rtmp">Encoder / câmara profissional (RTMPS)</option>
-                <option value="whip">Encoder WHIP (WebRTC)</option>
+                <option value="rtmp">CCTV / câmara IP / encoder (RTMPS)</option>
+                <option value="whip">Dispositivo secundário / OBS (WHIP WebRTC)</option>
               </select>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {sourceType === "rtmp"
+                  ? "Câmaras que só enviam RTSP precisam de um gateway local (ex.: MediaMTX ou ffmpeg) que reencaminhe para o endereço RTMPS gerado. O navegador não reproduz RTSP diretamente."
+                  : "Use OBS ou outro dispositivo com suporte WHIP; cole o endereço e a chave gerados."}
+              </p>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => void add()} disabled={saving}>
-              {saving && <Loader2 size={14} className="mr-1 animate-spin" />} Ligar câmara
+            <Button type="button" onClick={() => void add()} disabled={saving}>
+              {saving && <Loader2 size={14} className="mr-1 animate-spin" />} Guardar fonte
             </Button>
           </DialogFooter>
         </DialogContent>

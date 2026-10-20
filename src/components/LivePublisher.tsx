@@ -36,6 +36,7 @@ import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 
 type Props = {
   liveId: string;
@@ -455,12 +456,16 @@ export function LivePublisher({
     }
   };
 
-  const switchCamera = async () => {
+  const switchCamera = async (target?: "user" | "environment") => {
     const track = tracksRef.current.find((item) => item.kind === Track.Kind.Video) as
       | LocalVideoTrack
       | undefined;
-    if (!track || state === "connecting") return;
-    const nextFacing = facingMode === "environment" ? "user" : "environment";
+    if (!track || state === "connecting") {
+      if (target) toast.error("Prepare a câmara do telemóvel primeiro (Iniciar).");
+      return;
+    }
+    const nextFacing = target ?? (facingMode === "environment" ? "user" : "environment");
+    if (nextFacing === facingMode) return;
     try {
       await track.restartTrack({ facingMode: nextFacing, resolution: LOW_RES });
       const video = videoRef.current;
@@ -478,6 +483,17 @@ export function LivePublisher({
       await fail(error);
     }
   };
+
+  const switchCameraRef = useRef(switchCamera);
+  switchCameraRef.current = switchCamera;
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const facing = (e as CustomEvent<"user" | "environment">).detail;
+      if (facing === "user" || facing === "environment") void switchCameraRef.current(facing);
+    };
+    window.addEventListener("live:phone-camera", onPick);
+    return () => window.removeEventListener("live:phone-camera", onPick);
+  }, []);
 
   const publish = async () => {
     if (state !== "preflight" || !cameraOk || tracksRef.current.length === 0) return;
@@ -742,11 +758,17 @@ export function LivePublisher({
       <div className="space-y-2">
         <p className="text-xs font-semibold text-muted-foreground">Controlos da transmissão</p>
         {state === "publishing" ? (
-          <Button onClick={stop} variant="destructive" className="h-11 w-full justify-start">
+          <Button
+            type="button"
+            onClick={stop}
+            variant="destructive"
+            className="h-11 w-full justify-start"
+          >
             <VideoOff size={16} className="mr-2" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
           <Button
+            type="button"
             onClick={publish}
             disabled={!cameraOk}
             variant="destructive"
@@ -755,12 +777,12 @@ export function LivePublisher({
             <Radio size={16} className="mr-2" /> {t("s_iniciar")}
           </Button>
         ) : state === "connecting" || state === "requesting" ? (
-          <Button disabled className="h-11 w-full justify-start">
+          <Button type="button" disabled className="h-11 w-full justify-start">
             <Loader2 size={16} className="mr-2 animate-spin" />
             {state === "connecting" ? t("s_a_publicar") : t("s_a_ligar_camara_e_microfone")}
           </Button>
         ) : (
-          <Button onClick={preflight} className="h-11 w-full justify-start">
+          <Button type="button" onClick={preflight} className="h-11 w-full justify-start">
             <Radio size={16} className="mr-2" /> {t("s_iniciar")}
           </Button>
         )}
@@ -920,6 +942,7 @@ export function LivePublisher({
               side="right"
               className="z-[70] w-[min(92vw,420px)] overflow-y-auto p-4"
               overlayClassName="z-[70]"
+              onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <SheetHeader className="mb-4 pr-8 text-left">
                 <SheetTitle>Transmissão</SheetTitle>
@@ -966,15 +989,21 @@ export function LivePublisher({
 
       <div className={studio ? "hidden" : "flex gap-2"}>
         {state === "publishing" ? (
-          <Button onClick={stop} variant="destructive" className="h-11 flex-1 rounded-full">
+          <Button
+            type="button"
+            onClick={stop}
+            variant="destructive"
+            className="h-11 flex-1 rounded-full"
+          >
             <VideoOff size={16} className="mr-2 inline" /> {t("s_parar_transmissao")}
           </Button>
         ) : state === "preflight" ? (
           <>
-            <Button onClick={stop} variant="secondary" className="h-11 rounded-full">
+            <Button type="button" onClick={stop} variant="secondary" className="h-11 rounded-full">
               Cancelar
             </Button>
             <Button
+              type="button"
               onClick={publish}
               disabled={!cameraOk}
               variant="destructive"
@@ -984,11 +1013,12 @@ export function LivePublisher({
             </Button>
           </>
         ) : state === "connecting" ? (
-          <Button disabled className="h-11 flex-1 rounded-full">
+          <Button type="button" disabled className="h-11 flex-1 rounded-full">
             <Loader2 size={16} className="mr-2 inline animate-spin" /> {t("s_a_publicar")}
           </Button>
         ) : (
           <Button
+            type="button"
             onClick={preflight}
             disabled={state === "requesting"}
             className="h-11 flex-1 rounded-full"
