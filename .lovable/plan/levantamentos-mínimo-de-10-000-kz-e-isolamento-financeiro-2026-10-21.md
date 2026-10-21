@@ -7,7 +7,7 @@
 - Concluir conjuntamente as quatro correções anteriores: estados finais irreversíveis, repetição idempotente, escrita financeira apenas pelas funções controladas e configuração inválida recusada.
 
 ## Estado verificado e autorização
-- **Nada aplicado.** Esta proposta precisa de autorização após a revisão do SQL completo abaixo; as migrations 0005/0006 ficam intactas.
+- **Tentativa autorizada revertida integralmente:** `min_withdrawal_aoa()` já existe, embora esteja descontinuada desde a migration 0005. A revisão usa `CREATE OR REPLACE` e atualiza o comentário; não lê o mínimo antigo de financial_settings. SQL revisto abaixo para autorização; nada aplicado e migrations 0005/0006 intactas.
 - Consultas atuais: PostgreSQL 17.6; `postgres` não é superuser, mas tem CREATEROLE; a role reservada não existe; zero lançamentos, levantamentos de loja e pedidos de payout; limite AOA = 200000, Africa/Luanda.
 - A hipótese do bloqueio é uma pertença automática ao criador da role: o SQL anterior já revogava `postgres`, mas não enumerava os outros membros. Não foi possível observar os membros da transação abortada.
 - O novo SQL revoga todos os membros encontrados depois de transferir as funções, mantendo a verificação final. Se o executor não tiver autoridade suficiente ou sobrar qualquer pertença, **a operação inteira deve abortar**, sem baixar a proteção ou inventar acesso de superuser.
@@ -52,7 +52,7 @@ GRANT EXECUTE ON FUNCTION auth.uid(),public.has_role(uuid,public.app_role),
 ALTER TABLE public.withdrawal_limits ADD COLUMN min_amount numeric;
 UPDATE public.withdrawal_limits SET min_amount=10000 WHERE currency='AOA';
 COMMENT ON COLUMN public.withdrawal_limits.min_amount IS 'Minimum per withdrawal in currency units; NULL is unconfigured and fails closed.';
-CREATE FUNCTION public.min_withdrawal_aoa() RETURNS numeric
+CREATE OR REPLACE FUNCTION public.min_withdrawal_aoa() RETURNS numeric
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
 DECLARE v numeric; mx numeric;
 BEGIN
@@ -62,6 +62,7 @@ BEGIN
  THEN RAISE EXCEPTION 'withdrawal_minimum_not_configured'; END IF;
  RETURN v;
 END $$;
+COMMENT ON FUNCTION public.min_withdrawal_aoa() IS 'Configured minimum from withdrawal_limits; legacy financial_settings is not used.';
 REVOKE EXECUTE ON FUNCTION public.min_withdrawal_aoa() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.min_withdrawal_aoa() TO service_role,liveteka_payout_executor;
 
