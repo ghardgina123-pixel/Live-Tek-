@@ -318,13 +318,15 @@ REVOKE CREATE ON SCHEMA public FROM liveteka_payout_executor;
 -- PostgreSQL 17 may auto-grant membership to the role creator.
 -- Revoke all discovered incoming memberships, not just the explicit postgres grant.
 -- CASCADE removes dependent grants. Insufficient authority aborts the transaction.
-DO $$ DECLARE member_name text; BEGIN
- FOR member_name IN
-  SELECT DISTINCT m.rolname FROM pg_auth_members a
+DO $$ DECLARE membership record; BEGIN
+ FOR membership IN
+  SELECT DISTINCT m.rolname AS member_name,g.rolname AS grantor_name FROM pg_auth_members a
   JOIN pg_roles r ON r.oid=a.roleid JOIN pg_roles m ON m.oid=a.member
+  JOIN pg_roles g ON g.oid=a.grantor
   WHERE r.rolname='liveteka_payout_executor'
+  ORDER BY member_name,grantor_name
  LOOP
-  EXECUTE format('REVOKE liveteka_payout_executor FROM %I CASCADE',member_name);
+  EXECUTE format('REVOKE liveteka_payout_executor FROM %I GRANTED BY %I CASCADE',membership.member_name,membership.grantor_name);
  END LOOP;
 END $$;
 REVOKE EXECUTE ON FUNCTION public.request_payout(text,text,jsonb),public.admin_settle_payout(uuid,text,text) FROM PUBLIC,anon,service_role;
