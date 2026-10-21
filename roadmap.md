@@ -7,6 +7,8 @@
 - [ ] Após aplicação bem-sucedida, refletir o mínimo nos botões e testar recusas sem criar dinheiro no ambiente partilhado; bloqueado pela permissão da migration.
 - [ ] Validar saques com saldo fictício de 50.000 Kz exclusivamente num ambiente de teste isolado; nunca na base partilhada de produção/pré-visualização.
 - [ ] Validar concorrência, total diário e duplicação com saldo/transações reais ou ambiente oficial; bloqueado por ausência desses dados.
+- [ ] Criar ambiente de teste isolado (schema `test_env` + página admin `/admin/sandbox`) para injetar saldos fictícios e exercer saques com regras corrigidas (mín. 10.000 AOA, teto diário, idempotência) sem tocar em dados reais.
+- [ ] Após o sandbox validado, aplicar as correções equivalentes ao sistema real (funções public.*) — aguarda autorização explícita do utilizador.
 
 - [x] Transformar o ecrã público da LIVE numa experiência vertical em ecrã completo.
 - [x] Sobrepor dados reais da loja, estado, audiência e ações sociais.
