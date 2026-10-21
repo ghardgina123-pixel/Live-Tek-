@@ -216,7 +216,7 @@ BEGIN
   VALUES (_store_id, v_id, 'withdrawal_reserve', v_amt, -v_amt, v_amt, 'withdrawal_request', 'withdrawal:'||v_id, 'wd_reserve:'||v_id, auth.uid());
   PERFORM public.fin_audit('withdrawal_request','withdrawal',v_id::text,NULL,'PENDING_REVIEW','ok','wd_reserve:'||v_id, jsonb_build_object('amount',v_amt));
   RETURN jsonb_build_object('ok',true,'id',v_id);
-END $function$
+END $function$;
 
 CREATE OR REPLACE FUNCTION public.affiliate_withdrawable()
  RETURNS jsonb
@@ -245,7 +245,7 @@ BEGIN
       'id', v_open.id, 'amount_aoa', v_open.amount_aoa, 'status', v_open.status,
       'due_at', v_open.due_at, 'created_at', v_open.created_at) END
   );
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION public.courier_withdrawable()
  RETURNS jsonb
@@ -282,7 +282,7 @@ BEGIN
       'id', v_open.id, 'amount_aoa', v_open.amount_aoa, 'status', v_open.status,
       'due_at', v_open.due_at, 'created_at', v_open.created_at) END
   );
-END; $function$
+END; $function$;
 
 CREATE OR REPLACE FUNCTION public.store_ledger_summary(_store_id uuid)
  RETURNS jsonb
@@ -305,7 +305,7 @@ BEGIN
     'sales_aoa', v_sales, 'commissions_aoa', v_comm, 'withdrawn_aoa', v_withdrawn,
     'max_daily_withdrawal_aoa', v_max, 'withdrawn_today_aoa', v_today,
     'remaining_today_aoa', GREATEST(v_max - v_today, 0));
-END $function$
+END $function$;
 
 
 
