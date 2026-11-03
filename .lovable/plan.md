@@ -376,6 +376,8 @@ GRANT EXECUTE ON FUNCTION public.verify_withdrawal_payment(text,text,numeric,tex
 - Correr o security scan completo do projeto e verificar as policies/GRANTs criadas ou alteradas por estas migrations.
 - Confirmar que o ledger continua append-only, que nenhuma tabela financeira ficou com escrita direta, e reportar as novas notas de auditoria junto com o resumo PASS/FAIL/MANUAL ACTION REQUIRED.
 
+## 5) Verificações após aplicação
+
 - `withdrawal_limits` AOA: min 10000, max 200000; `min_withdrawal_aoa()` devolve 10000.
 - Políticas: admins sem UPDATE direta em `payout_requests`; RPCs exigem admin.
 - Playwright na pré-visualização: mensagens de mínimo nos três ecrãs (com contas reais, sem criar saldos); auditoria admin lista vazia mas funcional.
