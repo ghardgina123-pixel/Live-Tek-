@@ -371,6 +371,11 @@ GRANT EXECUTE ON FUNCTION public.verify_withdrawal_payment(text,text,numeric,tex
 - MANUAL ACTION REQUIRED (não invento nada): documentação oficial do Banco Atlântico (formato do payload, nome do cabeçalho de assinatura, URL de registo do webhook) + segredo oficial para configurar. A pesquisa pública não encontrou API/documentação de developers do banco; até os documentos chegarem, a autorização manual com referência bancária e comprovativo continua a ser a única via, e o saque fica com selo "manual".
 - Testes do circuito de verificação com chamadas reais: só quando o webhook do banco estiver registado.
 
+## 6) Auditoria final (no fim de tudo)
+
+- Correr o security scan completo do projeto e verificar as policies/GRANTs criadas ou alteradas por estas migrations.
+- Confirmar que o ledger continua append-only, que nenhuma tabela financeira ficou com escrita direta, e reportar as novas notas de auditoria junto com o resumo PASS/FAIL/MANUAL ACTION REQUIRED.
+
 ## 5) Verificações após aplicação
 
 - `withdrawal_limits` AOA: min 10000, max 200000; `min_withdrawal_aoa()` devolve 10000.
