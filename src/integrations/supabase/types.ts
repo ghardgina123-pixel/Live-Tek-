@@ -3986,18 +3986,21 @@ export type Database = {
         Row: {
           currency: string
           max_daily_amount: number
+          min_amount: number | null
           timezone: string
           updated_at: string
         }
         Insert: {
           currency: string
           max_daily_amount: number
+          min_amount?: number | null
           timezone?: string
           updated_at?: string
         }
         Update: {
           currency?: string
           max_daily_amount?: number
+          min_amount?: number | null
           timezone?: string
           updated_at?: string
         }
@@ -4228,7 +4231,12 @@ export type Database = {
         Returns: undefined
       }
       admin_settle_payout: {
-        Args: { _note?: string; _payout_id: string; _status?: string }
+        Args: {
+          _bank_reference?: string
+          _note?: string
+          _payout_id: string
+          _status?: string
+        }
         Returns: Json
       }
       admin_signup_fees: {
