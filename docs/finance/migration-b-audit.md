@@ -47,7 +47,7 @@ SQL completo: `docs/finance/migration-b-review.sql` (fora de drizzle/migrations;
 - Parser PostgreSQL local: 67 statements e 16 definições PL/pgSQL analisados sem erro sintático; **não valida resolução de tabelas/tipos, privilégios nem execução**.
 - Revisão independente do SQL: motivou correções de mapping de destino, retries pagos, snapshots e permissões. Alguns apontamentos do revisor usavam migrations antigas; catálogo ativo/Migration A prevalecem.
 - Scan básico: 16 resultados ativos — 3 erros, 7 avisos, 6 informativos. Não alterados/dispensados nesta revisão; resultados dispensados anteriormente não foram reabertos. Leituras amplas sinalizadas não demonstram por si só exploração.
-- Scan aprofundado iniciado: **PENDENTE**, será entregue quando terminar; não aguardado nem contado como aprovado.
+- Scan aprofundado concluído: **1 aviso** — em caso de falha ao cancelar emails, o link/token reutilizável pode ser gravado nos logs do servidor e utilizado por alguém com acesso aos logs. Não corrigido neste pedido de revisão; não é prova de exploração nem validação financeira. Nenhuma indicação de checks aprofundados desligados no resultado consultado.
 - Nenhum teste financeiro nem saldo fictício criado. Nenhuma migration aplicada.
 
 ## Os 12 testes obrigatórios — todos PENDENTES
@@ -74,3 +74,5 @@ Testes adicionais necessários: valor 9.999,99 recusado, 10.000 elegível com sa
 ## Decisão
 
 Proposta completa entregue para revisão, **não recomendada para aplicação em produção até os riscos de concorrência/integração serem resolvidos e ensaiados**. Nenhuma autorização anterior cobre este SQL novo. Aplicação exige autorização expressa de António Garcia; os ecrãs não foram alterados.
+
+O plano foi ignorado na apresentação; isso não constitui autorização. Nenhuma implementação ou reformulação do plano ocorreu depois dessa decisão.
