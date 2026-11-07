@@ -22,7 +22,6 @@ type Delivery = {
   order_id: string;
   status: string;
   order_status: string;
-  payment_method: string | null;
   shipping_aoa: number;
   subtotal_aoa: number;
   total_aoa: number;
