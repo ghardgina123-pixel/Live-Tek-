@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
  * - Toasts on new orders for stores the user owns.
  * RLS guarantees the user only receives events for rows they can see.
  */
+const announcedPaid = new Set<string>();
+
 export function RealtimeNotifier() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +43,29 @@ export function RealtimeNotifier() {
             description: `Kz ${Number(o.total_aoa).toLocaleString("pt-AO")}`,
             action: { label: "Ver", onClick: () => navigate({ to: "/lojista/pedidos" }) },
           });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload) => {
+          const o = payload.new as { id: string; customer_id: string; total_aoa: number; status: string };
+          if (o.status !== "paid" || announcedPaid.has(o.id)) return;
+          announcedPaid.add(o.id);
+          const amount = `Kz ${Number(o.total_aoa).toLocaleString("pt-AO")}`;
+          if (o.customer_id === user.id) {
+            toast.success("Pagamento foi aceite ✅", {
+              description: `Valor pago: ${amount}`,
+              action: { label: "Ver compra", onClick: () => navigate({ to: "/compras" }) },
+            });
+          } else {
+            // Lojista (pedido da sua loja) ou gestão — RLS só entrega pedidos visíveis.
+            toast.success("O cliente efetuou o pagamento com sucesso 💰", {
+              description: `Valor exato: ${amount} · Pedido #${o.id.slice(0, 8)}`,
+              duration: 10000,
+              action: { label: "Ver", onClick: () => navigate({ to: "/lojista/pedidos" }) },
+            });
+          }
         },
       )
       .subscribe();

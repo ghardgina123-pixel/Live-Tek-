@@ -201,7 +201,7 @@ function EntregadorPage() {
             <div className="rounded-2xl border border-border p-4 text-sm">
               <p className="font-semibold">Pedido #{delivery.order_id.slice(0, 8)}</p>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Package size={13} /> {delivery.items_count} item(ns) · {delivery.payment_method ?? "pagamento"}
+                <Package size={13} /> {delivery.items_count} item(ns)
               </p>
               <div className="mt-3 space-y-2 text-xs">
                 <div>
