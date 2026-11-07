@@ -1,8 +1,9 @@
 # Roadmap
 
-- [ ] Implementar exclusivamente limites e equipa sobre withdrawal_limits, autenticação/papéis e operações existentes; inventariar equivalentes e apresentar plano/SQL mínimo antes de aplicação financeira.
-- [ ] Retirar da proposta ativa os mecanismos financeiros v2 paralelos; preservar contratos, dados e limites Angola 10.000/200.000 AOA.
-- [ ] Preparar apenas pontos de integração Banco Atlântico que aguardam documentação/credenciais oficiais; não ativar pagamentos nem declarar os 55 testes aprovados.
+- [x] Inventariar equivalentes e apresentar plano/SQL v3 limitado sobre withdrawal_limits, autenticação/papéis e histórico existentes; não aplicar.
+- [x] Retirar da proposta ativa os mecanismos financeiros v2 paralelos e arquivar referência/matriz; preservar dados e Angola 10.000/200.000 AOA.
+- [ ] Integrar UI, permissões granulares, soma diária conjunta e corrigir incompatibilidades de liquidação existentes; bloqueado por revisão/autorização do SQL e ensaio isolado ainda não autorizado.
+- [ ] Implementar adaptador interno Banco Atlântico sobre os fluxos existentes; bloqueado por protocolo/documentação/credenciais oficiais. Nenhum pagamento ativado, 55 testes PENDENTES.
 
 - [x] Corrigir os três documentos de proposta M1/M2: fundação dormente, dependências/owner, RBAC, quota conjunta privada, mercados, histórico e contrato de cutover/repli; sem executar SQL ou alterar funcionalidades. Integração financeira completa não incluída nem autorizada.
 - [x] Consolidar matriz dos 12 testes financeiros/bancários e 43 cenários adicionais; todos os 55 testes e reversão permanecem PENDENTES, exigem ambiente isolado e integração oficial quando aplicável.

@@ -4,7 +4,7 @@
 
 ## Decisão de âmbito
 
-As propostas `proposta-m1-limites.sql` e `proposta-m2-equipa.sql` não fazem parte do pacote a implementar. Permanecem preservadas para rastreabilidade, mas NÃO devem ser executadas, copiadas para migrations ou aceites através do rascunho financeiro. Este documento substitui o seu desenho de implementação; não substitui os 55 critérios de teste.
+As versões v2 de M1/M2 foram preservadas em `*-v2-retirada.sql` para rastreabilidade e NÃO devem ser executadas, copiadas para migrations ou aceites através do rascunho financeiro. Os nomes originais contêm agora propostas v3 limitadas de configuração/vínculo sobre estruturas existentes, ainda NÃO aplicáveis à produção. Este documento substitui o desenho paralelo; não substitui os 55 critérios de teste.
 
 Não criar `lt_limit_rules_v2`, mercados financeiros paralelos, contas de liquidação, reservas/eventos de quota, gates ou gestores raiz paralelos. Não reconstruir checkout, pedidos, carteiras, Ledger, comissões, saques ou painéis existentes. Gestão da equipa exige apenas os metadados de autorização ausentes, ligados à identidade e papéis atuais, não outra autenticação.
 
@@ -30,7 +30,7 @@ Não criar `lt_limit_rules_v2`, mercados financeiros paralelos, contas de liquid
 3. `request_payout` bloqueia por utilizador **e tipo**, e calcula restante por tipo. Não garante teto conjunto afiliado/entregador/lojas. Usar as fontes de pedidos existentes e um lock comum por beneficiário, sem tabela de quota paralela. Todos os writers/transições relacionados precisam de ordem de locks consistente.
 4. Guards do painel e funções atuais verificam admin. Dar permissões a um funcionário não basta: adaptar cada leitura/ação e políticas correspondentes; nunca adicionar um `admin OU permissão` que contorne suspensão.
 5. A chamada ativa `admin_settle_payout` ainda tem EXECUTE para PUBLIC/anon, embora faça verificação interna de admin. Reduzir a superfície por assinatura exata no pacote aprovado. Não alterar privilégios de outras funções fora do âmbito.
-6. O corpo ativo de `admin_settle_payout` considera referência manual suficiente para verification_source=manual e não contém verificação explícita de autoaprovação. Não é prova bancária oficial. Compatibilidade das colunas/statuses e triggers ainda exige inspeção completa antes de corrigir.
+6. O corpo ativo de `admin_settle_payout` considera referência manual suficiente para verification_source=manual e não contém verificação explícita de autoaprovação. Não é prova bancária oficial. A inspeção confirmou que `payout_requests` não contém as colunas bank_reference/verification_state/verification_source/verified_at usadas pelo corpo, e que a constraint de status não aceita rejected. Portanto o fluxo de liquidação contém incompatibilidades reais, ainda sem correção aplicada.
 7. `admin_withdrawal_action` também usa referência manual para pay. Referência não substitui autenticação e confirmação final do banco. Preparação de integração não autoriza estes pagamentos nem os declara seguros.
 8. A consulta `information_schema.role_table_grants` não devolveu linhas para as três tabelas inspecionadas. Isso não prova ausência de privilégios efetivos: inspecionar ACL nativas, memberships e ownership no SQL de preflight.
 
@@ -52,4 +52,4 @@ Na reversão, preservar estados terminais, história, reservas, suspensão e lim
 
 ## Estado da entrega
 
-Inventário e correção de âmbito concluídos; interfaces novas, migrações, permissões e integração bancária NÃO implementadas nesta preparação. F1–F12 originais e S1–S15/L1–L15/I1–I5/R1–R8 continuam **PENDENTES**, inclusive reversão. Nenhum resultado PASS é reivindicado.
+Inventário, correção de âmbito e propostas SQL mínimas v3 concluídos; interfaces novas, migrações, permissões e integração bancária NÃO implementadas nesta preparação. Parser local: M1 21 statements/5 definições PL/pgSQL; M2 21/6, sem erro de gramática. Não prova execução, privilégios nem concorrência. Matriz de 55 casos preservada exatamente no documento ativo e na referência histórica. F1–F12 originais e S1–S15/L1–L15/I1–I5/R1–R8 continuam **PENDENTES**, inclusive reversão. Nenhum resultado PASS é reivindicado.
