@@ -1,2 +1,3 @@
 - Store money owed is tracked only in append-only `ledger_entries` (fed by triggers on `payouts`) and withdrawals go through `request_store_withdrawal`/`admin_withdrawal_action` RPCs — why: the frontend must never write financial state.
 - Withdrawal limits live in the `withdrawal_limits` table (per currency, with timezone) and are enforced inside the withdrawal RPCs — why: limits must be configurable per market without code changes and never trusted from the frontend.
+- Unapproved financial SQL proposals stay in `docs/finance`, outside executable migration directories — why: review must never apply a database change accidentally.

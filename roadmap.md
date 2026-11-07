@@ -1,5 +1,10 @@
 # Roadmap
 
+- [x] Concluir proposta completa e aditiva da Migration B, com estados terminais, identidade bancária conjunta, idempotência, auditoria de saldos e permissões; somente revisão, sem aplicar nem modificar dados.
+- [x] Preparar riscos, evidências de inspeção e matriz dos 12 testes obrigatórios; todos PENDENTES, sem execução financeira.
+- [ ] Aplicar Migration B somente após nova autorização expressa; proposta não pronta para produção, concorrência e integração oficial por validar.
+- [ ] Concluir scan aprofundado iniciado em 07/11/2026; aguarda resultado externo.
+
 - [x] Rever migrations 0005/0006 e funções financeiras ativas sem criar saldos ou pagamentos.
 - [x] Preparar SQL completo das quatro correções e revisão independente sem aplicar; aguardar autorização.
 - [ ] Aplicar conjuntamente as quatro correções e o mínimo, verificar permissões/RLS/painel; SQL autorizado, mas tentativa integralmente revertida: o executor não pode revogar a pertença concedida por supabase_admin. Requer executor privilegiado da plataforma; não baixar isolamento nem aplicar correções parciais.
