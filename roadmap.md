@@ -1,5 +1,11 @@
 # Roadmap
 
+- [ ] Pedido 07/11: acrescentar áreas reais de consulta de equipa/permissões e limites/histórico ao painel; edição e convites dependem de aprovação do SQL completo revisto.
+- [ ] Rever convite por token vinculado à identidade no SQL M2, sem aplicar na base partilhada.
+- [ ] Preparar confirmação Banco Atlântico sem inventar protocolo; aguarda documentação e credenciais oficiais.
+- [ ] Ensaio de levantamento fictício autorizado apenas no isolado; verificar existência do ambiente e dependências antes de executar.
+- [ ] Publicar metadados Live Teká após verificação de segurança; atualização no Google depende de nova indexação.
+
 - [x] Atualizar metadados de todas as páginas para a marca oficial e imagem de partilha verde com logótipo existente; preservar domínio e funcionalidades. Verificado SSR/navegador; publicação não solicitada.
 
 - [x] Inventariar equivalentes e apresentar plano/SQL v3 limitado sobre withdrawal_limits, autenticação/papéis e histórico existentes; não aplicar.
