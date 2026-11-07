@@ -2,19 +2,22 @@ import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { cartStore, useCart, useCartTotal } from "@/lib/cart-store";
+import { useCart, useCartTotal } from "@/lib/cart-store";
 import { formatPrice, fromAoa, useCurrency } from "@/lib/currency";
-import { GATEWAY_PENDING_MESSAGE, formatAoa } from "@/lib/commerce";
+import { formatAoa } from "@/lib/commerce";
 import { regionStore, useRegion } from "@/lib/region";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { BrandLogo, getBrand } from "@/lib/payment-brands";
+import { BrandLogo } from "@/lib/payment-brands";
 import { useT } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 import { quoteDeliveryFee, QUOTE_REASON_LABEL, type DeliveryFeeQuote } from "@/lib/tariffs.functions";
-import { createMulticaixaExpressIntent } from "@/lib/payments.functions";
+import { confirmDigitalCheckout } from "@/lib/payments.functions";
+import { ANGOLA_CHECKOUT_METHODS, type CheckoutPaymentType } from "@/lib/checkout-payment";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -40,18 +43,6 @@ type Address = {
   municipalities: { name: string; shipping_fee_aoa: number } | null;
 };
 
-type PaymentMethod = {
-  id: string;
-  method_type: string;
-  display_name: string;
-  description: string | null;
-  icon: string | null;
-  requires_proof_upload: boolean;
-  is_cash_on_delivery: boolean;
-  gateway_configured: boolean;
-  sort_order: number;
-};
-
 function Checkout() {
   const { t } = useT();
   const nav = useNavigate();
@@ -59,20 +50,14 @@ function Checkout() {
   const items = useCart();
   const subtotal = useCartTotal();
   const currency = useCurrency();
-  const [done, setDone] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
-  const [paymentRef, setPaymentRef] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addrLoading, setAddrLoading] = useState(true);
   const [selectedAddrId, setSelectedAddrId] = useState<string | null>(null);
-  const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [methodsLoading, setMethodsLoading] = useState(true);
-  const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
   const region = useRegion();
-  const countryCode = region.code;
   const fetchQuote = useServerFn(quoteDeliveryFee);
-  const createExpressIntent = useServerFn(createMulticaixaExpressIntent);
+  const confirmCheckout = useServerFn(confirmDigitalCheckout);
+  const [selectedMethod, setSelectedMethod] = useState<CheckoutPaymentType | null>(null);
   const [quote, setQuote] = useState<DeliveryFeeQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -98,22 +83,6 @@ function Checkout() {
       });
   }, [user?.id]);
 
-  useEffect(() => {
-    setMethodsLoading(true);
-    supabase.from("payment_methods")
-      .select("id, method_type, display_name, description, icon, requires_proof_upload, is_cash_on_delivery, gateway_configured, sort_order")
-      .eq("country_code", countryCode)
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .then(({ data }) => {
-        const list = (data as PaymentMethod[]) ?? [];
-        setMethods(list);
-        const usable = list.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
-        setSelectedMethodId((prev) => (prev && usable.some((m) => m.id === prev) ? prev : usable[0]?.id ?? null));
-        setMethodsLoading(false);
-      });
-  }, [countryCode]);
-
   const selectedAddr = addresses.find((a) => a.id === selectedAddrId) ?? null;
 
   // A taxa de entrega vem exclusivamente do cálculo server-side, o mesmo usado
@@ -121,13 +90,14 @@ function Checkout() {
   useEffect(() => {
     if (!user || !selectedAddrId || items.length === 0) { setQuote(null); return; }
     const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
-    if (storeIds.length !== 1) { setQuote(null); return; }
+    const storeId = storeIds[0];
+    if (storeIds.length !== 1 || !storeId) { setQuote(null); return; }
     let cancelled = false;
     setQuoteLoading(true);
     setQuoteError(null);
     fetchQuote({
       data: {
-        storeId: storeIds[0]!,
+        storeId,
         addressId: selectedAddrId,
         items: items.map((i) => ({ productId: i.product.id, quantity: i.qty })),
       },
@@ -142,50 +112,14 @@ function Checkout() {
     return () => { cancelled = true; };
   }, [user?.id, selectedAddrId, itemsKey, fetchQuote]);
 
-  // Só métodos com gateway realmente configurado (ou pagamento na entrega) são operacionais.
-  const availableMethods = methods.filter((m) => m.gateway_configured || m.is_cash_on_delivery);
-  const pendingMethods = methods.filter((m) => !m.gateway_configured && !m.is_cash_on_delivery);
-  const selectedMethod = availableMethods.find((m) => m.id === selectedMethodId) ?? null;
   const feeAvailable = !!quote?.available && quote.fee_aoa != null;
-  const shippingAoa = feeAvailable ? Number(quote!.fee_aoa) : null;
+  const shippingAoa = feeAvailable ? Number(quote?.fee_aoa) : null;
   const shippingBrl = shippingAoa == null ? null : fromAoa(shippingAoa);
   const totalBrl = shippingBrl == null ? subtotal : subtotal + shippingBrl;
-  // Pagamento na entrega: o pedido fica pendente até a confirmação do recebimento.
-  const gatewayPending = !!selectedMethod && !selectedMethod.gateway_configured;
-  
-  
-
-  if (done) {
-    return (
-      <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col items-center justify-center bg-background px-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-glow)]">
-          <Check size={40} strokeWidth={3} />
-        </div>
-        <h1 className="mt-5 text-2xl font-bold">{t("s_pedido_confirmado")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t("s_voce_recebera_atualizacoes_pelo_chat_e_e_mail_ob")}</p>
-        {orderId && <p className="mt-2 text-xs text-muted-foreground">Pedido nº <span className="font-mono">{orderId.slice(0, 8)}</span></p>}
-        {paymentRef && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            Referência de pagamento: <span className="font-mono">{paymentRef}</span>
-          </p>
-        )}
-        {gatewayPending && (
-          <p className="mt-4 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200">
-            {GATEWAY_PENDING_MESSAGE} O pedido fica com o estado <b>Aguardando pagamento</b> até a
-            transação real ser confirmada.
-          </p>
-        )}
-        <button onClick={() => nav({ to: "/home" })} className="mt-8 h-12 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">
-          Voltar para o início
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-32">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-5 py-4">
-        <button aria-label="Voltar" onClick={() => history.back()}><ArrowLeft size={20} /></button>
+        <Button variant="ghost" size="icon" aria-label="Voltar" onClick={() => history.back()}><ArrowLeft size={20} /></Button>
         <h1 className="flex-1 text-lg font-bold">{t("s_finalizar_compra")}</h1>
         <div className="rounded-full bg-muted px-2 py-1 text-xs font-semibold">
           {currency.flag} {currency.code}
@@ -206,7 +140,8 @@ function Checkout() {
         ) : (
           <div className="mt-2 space-y-2">
             {addresses.map((a) => (
-              <button
+              <Button
+                variant="outline"
                 key={a.id}
                 onClick={() => setSelectedAddrId(a.id)}
                 className={`flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition ${selectedAddrId === a.id ? "border-primary bg-accent" : "border-border"}`}
@@ -222,7 +157,7 @@ function Checkout() {
                 <div className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${selectedAddrId === a.id ? "border-primary bg-primary" : "border-border"}`}>
                   {selectedAddrId === a.id && <Check size={10} className="m-auto text-primary-foreground" strokeWidth={3} />}
                 </div>
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -249,33 +184,18 @@ function Checkout() {
         <div className="mt-2">
           <CurrencySelector variant="row" />
         </div>
-        <div className="mt-2 space-y-2">
-          {methodsLoading ? (
-            <div className="flex justify-center py-4"><Loader2 className="animate-spin text-primary" size={18} /></div>
-          ) : availableMethods.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-              Nenhum método de pagamento disponível para {countryCode}.
-            </p>
-          ) : (
-            availableMethods.map((m) => (
-              <PayOption
-                key={m.id}
-                methodType={m.method_type}
-                active={selectedMethodId === m.id}
-                onClick={() => setSelectedMethodId(m.id)}
-                label={m.display_name}
-                desc={m.description ?? ""}
-                badge={m.is_cash_on_delivery ? "Pagar na entrega" : null}
-              />
-            ))
-          )}
-        </div>
-        {pendingMethods.length > 0 && (
-          <div className="mt-2 rounded-xl bg-muted p-3 text-[11px] text-muted-foreground">
-            {GATEWAY_PENDING_MESSAGE} Indisponíveis até a integração real do gateway:{" "}
-            {pendingMethods.map((m) => m.display_name).join(", ")}.
-          </div>
-        )}
+        <RadioGroup aria-label="Método de pagamento" value={selectedMethod ?? ""} onValueChange={(value) => {
+          const method = ANGOLA_CHECKOUT_METHODS.find((item) => item.type === value);
+          if (method) setSelectedMethod(method.type);
+        }} className="mt-3">
+          {ANGOLA_CHECKOUT_METHODS.map((method) => (
+            <label key={method.type} htmlFor={`payment-${method.type}`} className={`flex min-h-16 cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${selectedMethod === method.type ? "border-primary bg-accent" : "border-border bg-background"}`}>
+              <BrandLogo methodType={method.type} rounded="rounded-lg" />
+              <span className="min-w-0 flex-1 text-sm font-semibold">{method.name}</span>
+              <RadioGroupItem id={`payment-${method.type}`} value={method.type} aria-label={method.name} />
+            </label>
+          ))}
+        </RadioGroup>
       </section>
 
       <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
@@ -318,82 +238,34 @@ function Checkout() {
       </div>
 
       <div className="fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background p-3">
-        <button
+        <Button
           onClick={async () => {
             if (!user) return toast.error(t("s_faca_login_para_finalizar_a_compra"));
             if (!selectedAddr) return toast.error(t("s_selecione_um_endereco_de_entrega"));
             if (!selectedMethod) return toast.error(t("s_selecione_um_metodo_de_pagamento"));
             if (!feeAvailable) return toast.error("Taxa de entrega não calculada — não é possível criar o pedido.");
-            const storeIds = Array.from(new Set(items.map((i) => i.product.storeId)));
-            if (storeIds.length !== 1) return toast.error(t("s_carrinho_com_lojas_diferentes_nao_e_suportado"));
+            const storeIds = Array.from(new Set(items.map((item) => item.product.storeId)));
+            const storeId = storeIds[0];
+            if (storeIds.length !== 1 || !storeId) return toast.error(t("s_carrinho_com_lojas_diferentes_nao_e_suportado"));
+            if (submitting) return;
             setSubmitting(true);
-            const { data, error } = await supabase.rpc("create_order_with_items", {
-              p_store_id: storeIds[0],
-              p_address_id: selectedAddr.id,
-              p_items: items.map((i) => ({ product_id: i.product.id, quantity: i.qty })),
-              p_payment_method: selectedMethod.method_type,
-            });
-            if (error) {
+            try {
+              await confirmCheckout({ data: {
+                storeId, addressId: selectedAddr.id, paymentMethod: selectedMethod,
+                items: items.map((item) => ({ productId: item.product.id, quantity: item.qty })),
+              } });
+            } catch (error: unknown) {
+              toast.error(error instanceof Error ? error.message : "Não foi possível iniciar o pagamento. Tente novamente.");
+            } finally {
               setSubmitting(false);
-              return toast.error(error.message || t("s_falha_ao_criar_pedido"));
             }
-            const newOrderId = data as unknown as string;
-            // Pagamentos electrónicos: a intenção de pagamento (montantes e comissão)
-            // é criada e validada exclusivamente no servidor.
-            if (!selectedMethod.is_cash_on_delivery && selectedMethod.gateway_configured) {
-              try {
-                const res = await createExpressIntent({ data: { orderId: newOrderId } });
-                setPaymentRef(res.intent?.reference ?? null);
-              } catch (e: unknown) {
-                toast.error(
-                  e instanceof Error
-                    ? `Pedido criado, mas o pagamento não foi iniciado: ${e.message}`
-                    : "Pedido criado, mas o pagamento não foi iniciado.",
-                );
-              }
-            }
-            setSubmitting(false);
-            setOrderId(newOrderId);
-            setDone(true);
-            cartStore.clear();
-            toast.success(t("s_pedido_realizado"));
           }}
-          disabled={submitting || !selectedAddr || !selectedMethod || items.length === 0 || !feeAvailable || quoteLoading}
-          className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]"
+          disabled={submitting || !user || !selectedAddr || !selectedMethod || items.length === 0 || !feeAvailable || quoteLoading}
+          className="h-12 w-full rounded-lg text-sm font-semibold"
         >
-          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>{selectedMethod?.is_cash_on_delivery ? t("s_confirmar_pedido") : gatewayPending ? "Registar pedido" : t("s_pagar")} {formatPrice(totalBrl, currency)}</>}
-        </button>
+          {submitting ? <Loader2 className="animate-spin" size={18} /> : <>Confirmar pedido · {formatPrice(totalBrl, currency)}</>}
+        </Button>
       </div>
     </div>
-  );
-}
-
-function PayOption({ active, onClick, methodType, label, desc, badge }: { active: boolean; onClick: () => void; methodType: string; label: string; desc: string; badge?: string | null }) {
-  const brand = getBrand(methodType);
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition"
-      style={{
-        borderColor: active ? brand.bg : "hsl(var(--border))",
-        background: active ? brand.tint : "transparent",
-        boxShadow: active ? `0 0 0 2px ${brand.ring}` : undefined,
-      }}
-    >
-      <BrandLogo methodType={methodType} />
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold">{label}</p>
-          {badge && <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">{badge}</span>}
-        </div>
-        <p className="text-[11px] text-muted-foreground">{desc || brand.tagline}</p>
-      </div>
-      <div
-        className="h-5 w-5 rounded-full border-2"
-        style={{ borderColor: active ? brand.bg : "hsl(var(--border))", background: active ? brand.bg : "transparent" }}
-      >
-        {active && <Check size={14} className="m-auto text-white" strokeWidth={3} />}
-      </div>
-    </button>
   );
 }

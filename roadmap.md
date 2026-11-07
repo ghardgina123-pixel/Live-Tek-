@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Pedido 07/11 22:32: eliminar pagamento na entrega do checkout e exigir seleção explícita entre seis métodos digitais, com validação autenticada e sem referências fictícias.
+- [ ] Pedido 07/11 22:32: bloquear também chamadas diretas à base: SQL completo em docs/finance/checkout-digital-only-review.sql aguarda aprovação expressa e ensaio isolado.
+- [ ] Pedido 07/11 22:32: iniciar os seis fluxos nativos reais e notificações: nenhum adaptador de checkout ativo ou credencial existente; aguarda contratos oficiais, credenciais e homologação dos fornecedores.
+
 - [x] Pedido 07/11 14:39: proposta completa de vínculo entregador/empresa e titularidade de ganhos/saques em docs/finance/proposta-entregadores-empresa.md; não aplicada, SQL de implementação e aprovação ainda necessários.
 - [x] Pedido 07/11 14:39: método de pagamento removido do retorno courier na base principal pela migration 0008; caminhos alternativos inspecionados, testes PostgreSQL locais antes/depois. Sem mudanças financeiras.
 

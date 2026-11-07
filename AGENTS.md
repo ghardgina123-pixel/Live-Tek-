@@ -6,3 +6,4 @@
 - Management consultation uses authenticated server functions and existing roles/RLS; no write controls are enabled before approved financial SQL and isolated validation — why: the panel must not imply unimplemented authority.
 - Bank identity comparison is a pure internal module, never payment evidence or a provider adapter — why: only officially authenticated bank evidence can authorize settlement.
 - Courier logistics RPCs project no customer payment method; orders retain existing customer/seller/admin RLS — why: hiding a label does not prevent data disclosure to the courier device.
+- Checkout submits through authenticated digital-method validation and fails before order/intent writes until official provider initiation exists; catalog flags and locally generated references never prove integration — why: prevent false payment success and stock reservations without a real payment flow.

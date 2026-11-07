@@ -1,53 +1,29 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+import { assertCheckoutGateway, checkoutPaymentTypeSchema } from "@/lib/checkout-payment";
 
-/**
- * Cria um Payment Intent (Multicaixa Express) para um pedido do cliente.
- * O split (comissão da plataforma vs. líquido da loja) é calculado
- * exclusivamente na base de dados (`calc_transaction_split` sobre o subtotal
- * de produtos, entrega excluída). Não existe aqui qualquer percentagem fixa.
- * Grava o intent como "pending" até confirmação do gateway.
- */
+export const confirmDigitalCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({
+    storeId: z.string().uuid(),
+    addressId: z.string().uuid(),
+    paymentMethod: checkoutPaymentTypeSchema,
+    items: z.array(z.object({ productId: z.string().uuid(), quantity: z.number().int().positive().max(999) })).min(1),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: method, error } = await context.supabase.from("payment_methods")
+      .select("id, is_cash_on_delivery, is_active")
+      .eq("method_type", data.paymentMethod).eq("country_code", "AO").eq("is_active", true).maybeSingle();
+    if (error) throw new Error("Não foi possível verificar o método de pagamento. Tente novamente.");
+    if (!method || method.is_cash_on_delivery) throw new Error("Método de pagamento inválido.");
+    // Fail before reserving stock, creating orders, intents or notifications.
+    // Official provider contracts and credentials have not been supplied.
+    assertCheckoutGateway(data.paymentMethod);
+  });
+
+/** Legacy entry point remains fail-closed until a real Express adapter exists. */
 export const createMulticaixaExpressIntent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { orderId: string }) => {
-    if (!input?.orderId || typeof input.orderId !== "string") throw new Error("invalid_input");
-    return input;
-  })
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-
-    const { data: order, error: orderErr } = await supabase
-      .from("orders")
-      .select("id, customer_id, store_id, total_aoa, status")
-      .eq("id", data.orderId)
-      .maybeSingle();
-    if (orderErr) throw new Error(orderErr.message);
-    if (!order) throw new Error("order_not_found");
-    if (order.customer_id !== userId) throw new Error("not_authorized");
-    if (order.status !== "pending") throw new Error("order_not_payable");
-
-    const reference = `LM-${order.id.slice(0, 8).toUpperCase()}-${Date.now().toString().slice(-5)}`;
-
-    // Montantes e comissão são recalculados pelo trigger `enforce_payment_intent_integrity`
-    // a partir do pedido (subtotal de produtos), pelo que não são enviados daqui.
-    const { data: intent, error: insertErr } = await supabase
-      .from("payment_intents")
-      .insert({
-        order_id: order.id,
-        provider: "multicaixa_express",
-        amount_aoa: 0,
-        platform_fee_aoa: 0,
-        store_amount_aoa: 0,
-        reference,
-        status: "pending",
-      })
-      .select("id, reference, amount_aoa, store_amount_aoa, platform_fee_aoa, commission_pct, status")
-      .single();
-    if (insertErr) throw new Error(insertErr.message);
-
-    // TODO: quando MULTICAIXA_EXPRESS_MERCHANT_ID / TOKEN estiverem configurados,
-    // chamar aqui o SDK do provedor para gerar o token de checkout one-tap
-    // e devolvê-lo no campo `checkoutToken`.
-    return { intent, checkoutToken: null as string | null };
-  });
+  .inputValidator((input: unknown) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .handler(async () => assertCheckoutGateway("multicaixa_express"));
