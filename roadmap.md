@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Pedido 07/11 14:39: proposta completa de vínculo entregador/empresa e titularidade de ganhos/saques; não aplicar antes de aprovação.
-- [ ] Pedido 07/11 14:39: remover método de pagamento do retorno de entregas na base de dados e verificar acessos alternativos; alteração de privacidade autorizada, sem mudanças financeiras.
+- [x] Pedido 07/11 14:39: proposta completa de vínculo entregador/empresa e titularidade de ganhos/saques em docs/finance/proposta-entregadores-empresa.md; não aplicada, SQL de implementação e aprovação ainda necessários.
+- [x] Pedido 07/11 14:39: método de pagamento removido do retorno courier na base principal pela migration 0008; caminhos alternativos inspecionados, testes PostgreSQL locais antes/depois. Sem mudanças financeiras.
 
 - [x] Pedido 07/11: acrescentar áreas de consulta administrativa de equipa e limites/histórico; recusa verificada na conta customer. Leitura numa conta admin ainda requer sessão dessa conta; escrita desativada.
 - [x] Rever convite por token vinculado à identidade no SQL M2 v4, incluindo cancelamento e hash fora da auditoria; sem aplicar na base partilhada, aguarda aprovação e ensaio.

@@ -5,3 +5,4 @@
 - Every content route completes its own metadata through brandMeta; root holds only sitewide defaults and no social image — why: consistent branding without inherited images overriding entity previews.
 - Management consultation uses authenticated server functions and existing roles/RLS; no write controls are enabled before approved financial SQL and isolated validation — why: the panel must not imply unimplemented authority.
 - Bank identity comparison is a pure internal module, never payment evidence or a provider adapter — why: only officially authenticated bank evidence can authorize settlement.
+- Courier logistics RPCs project no customer payment method; orders retain existing customer/seller/admin RLS — why: hiding a label does not prevent data disclosure to the courier device.

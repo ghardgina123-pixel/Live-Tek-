@@ -57,6 +57,13 @@
       "when": 1793773142982,
       "tag": "0007_withdrawal_rules_min_daily_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794062593690,
+      "tag": "0008_courier_delivery_payment_privacy",
+      "breakpoints": true
     }
   ]
 }
