@@ -3,3 +3,5 @@
 - Unapproved financial SQL proposals stay in `docs/finance`, outside executable migration directories — why: review must never apply a database change accidentally.
 - Financial limits/team changes must extend existing configuration, auth roles, audit and administrative RPCs, not install the retired parallel v2 financial foundation — why: a single authority preserves current financial contracts and data.
 - Every content route completes its own metadata through brandMeta; root holds only sitewide defaults and no social image — why: consistent branding without inherited images overriding entity previews.
+- Management consultation uses authenticated server functions and existing roles/RLS; no write controls are enabled before approved financial SQL and isolated validation — why: the panel must not imply unimplemented authority.
+- Bank identity comparison is a pure internal module, never payment evidence or a provider adapter — why: only officially authenticated bank evidence can authorize settlement.

@@ -192,6 +192,7 @@ function AdminFinance() {
       </header>
 
       <div className="cv-auto space-y-5 px-5 py-4">
+        <Button variant="outline" asChild className="h-auto w-full whitespace-normal py-3"><Link to="/admin/limites"><Wallet size={16} /> Gestão de Limites Financeiros</Link></Button>
         {summary === null ? (
           <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" /></div>
         ) : (

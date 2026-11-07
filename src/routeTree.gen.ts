@@ -50,8 +50,10 @@ import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as RastreioOrderIdRouteImport } from './routes/rastreio.$orderId'
 import { Route as ServicosIndexRouteImport } from './routes/servicos.index'
 import { Route as ServicosIdRouteImport } from './routes/servicos.$id'
+import { Route as AuthenticatedAdminEquipaRouteImport } from './routes/_authenticated/admin.equipa'
 import { Route as AuthenticatedAdminFinanceiroRouteImport } from './routes/_authenticated/admin.financeiro'
 import { Route as AuthenticatedAdminImobiliariasRouteImport } from './routes/_authenticated/admin.imobiliarias'
+import { Route as AuthenticatedAdminLimitesRouteImport } from './routes/_authenticated/admin.limites'
 import { Route as AuthenticatedAdminLojasRouteImport } from './routes/_authenticated/admin.lojas'
 import { Route as AuthenticatedAdminSubscricoesRouteImport } from './routes/_authenticated/admin.subscricoes'
 import { Route as AuthenticatedAdminTarifarioRouteImport } from './routes/_authenticated/admin.tarifario'
@@ -284,6 +286,12 @@ const ServicosIdRoute = ServicosIdRouteImport.update({
   path: '/servicos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminEquipaRoute =
+  AuthenticatedAdminEquipaRouteImport.update({
+    id: '/admin/equipa',
+    path: '/admin/equipa',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceiroRoute =
   AuthenticatedAdminFinanceiroRouteImport.update({
     id: '/admin/financeiro',
@@ -294,6 +302,12 @@ const AuthenticatedAdminImobiliariasRoute =
   AuthenticatedAdminImobiliariasRouteImport.update({
     id: '/admin/imobiliarias',
     path: '/admin/imobiliarias',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminLimitesRoute =
+  AuthenticatedAdminLimitesRouteImport.update({
+    id: '/admin/limites',
+    path: '/admin/limites',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminLojasRoute = AuthenticatedAdminLojasRouteImport.update({
@@ -470,8 +484,10 @@ export interface FileRoutesByFullPath {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos/': typeof ServicosIndexRoute
+  '/admin/equipa': typeof AuthenticatedAdminEquipaRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
+  '/admin/limites': typeof AuthenticatedAdminLimitesRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
   '/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
@@ -536,8 +552,10 @@ export interface FileRoutesByTo {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos': typeof ServicosIndexRoute
+  '/admin/equipa': typeof AuthenticatedAdminEquipaRoute
   '/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
+  '/admin/limites': typeof AuthenticatedAdminLimitesRoute
   '/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
   '/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
@@ -605,8 +623,10 @@ export interface FileRoutesById {
   '/rastreio/$orderId': typeof RastreioOrderIdRoute
   '/servicos/$id': typeof ServicosIdRoute
   '/servicos/': typeof ServicosIndexRoute
+  '/_authenticated/admin/equipa': typeof AuthenticatedAdminEquipaRoute
   '/_authenticated/admin/financeiro': typeof AuthenticatedAdminFinanceiroRoute
   '/_authenticated/admin/imobiliarias': typeof AuthenticatedAdminImobiliariasRoute
+  '/_authenticated/admin/limites': typeof AuthenticatedAdminLimitesRoute
   '/_authenticated/admin/lojas': typeof AuthenticatedAdminLojasRoute
   '/_authenticated/admin/subscricoes': typeof AuthenticatedAdminSubscricoesRoute
   '/_authenticated/admin/tarifario': typeof AuthenticatedAdminTarifarioRoute
@@ -674,8 +694,10 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos/'
+    | '/admin/equipa'
     | '/admin/financeiro'
     | '/admin/imobiliarias'
+    | '/admin/limites'
     | '/admin/lojas'
     | '/admin/subscricoes'
     | '/admin/tarifario'
@@ -740,8 +762,10 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos'
+    | '/admin/equipa'
     | '/admin/financeiro'
     | '/admin/imobiliarias'
+    | '/admin/limites'
     | '/admin/lojas'
     | '/admin/subscricoes'
     | '/admin/tarifario'
@@ -808,8 +832,10 @@ export interface FileRouteTypes {
     | '/rastreio/$orderId'
     | '/servicos/$id'
     | '/servicos/'
+    | '/_authenticated/admin/equipa'
     | '/_authenticated/admin/financeiro'
     | '/_authenticated/admin/imobiliarias'
+    | '/_authenticated/admin/limites'
     | '/_authenticated/admin/lojas'
     | '/_authenticated/admin/subscricoes'
     | '/_authenticated/admin/tarifario'
@@ -1164,6 +1190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/equipa': {
+      id: '/_authenticated/admin/equipa'
+      path: '/admin/equipa'
+      fullPath: '/admin/equipa'
+      preLoaderRoute: typeof AuthenticatedAdminEquipaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/financeiro': {
       id: '/_authenticated/admin/financeiro'
       path: '/admin/financeiro'
@@ -1176,6 +1209,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/imobiliarias'
       fullPath: '/admin/imobiliarias'
       preLoaderRoute: typeof AuthenticatedAdminImobiliariasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/limites': {
+      id: '/_authenticated/admin/limites'
+      path: '/admin/limites'
+      fullPath: '/admin/limites'
+      preLoaderRoute: typeof AuthenticatedAdminLimitesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/lojas': {
@@ -1380,8 +1420,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPagamentosRoute: typeof AuthenticatedPagamentosRoute
   AuthenticatedSegurancaRoute: typeof AuthenticatedSegurancaRoute
   AuthenticatedTransportadorRoute: typeof AuthenticatedTransportadorRoute
+  AuthenticatedAdminEquipaRoute: typeof AuthenticatedAdminEquipaRoute
   AuthenticatedAdminFinanceiroRoute: typeof AuthenticatedAdminFinanceiroRoute
   AuthenticatedAdminImobiliariasRoute: typeof AuthenticatedAdminImobiliariasRoute
+  AuthenticatedAdminLimitesRoute: typeof AuthenticatedAdminLimitesRoute
   AuthenticatedAdminLojasRoute: typeof AuthenticatedAdminLojasRoute
   AuthenticatedAdminSubscricoesRoute: typeof AuthenticatedAdminSubscricoesRoute
   AuthenticatedAdminTarifarioRoute: typeof AuthenticatedAdminTarifarioRoute
@@ -1404,8 +1446,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPagamentosRoute: AuthenticatedPagamentosRoute,
   AuthenticatedSegurancaRoute: AuthenticatedSegurancaRoute,
   AuthenticatedTransportadorRoute: AuthenticatedTransportadorRoute,
+  AuthenticatedAdminEquipaRoute: AuthenticatedAdminEquipaRoute,
   AuthenticatedAdminFinanceiroRoute: AuthenticatedAdminFinanceiroRoute,
   AuthenticatedAdminImobiliariasRoute: AuthenticatedAdminImobiliariasRoute,
+  AuthenticatedAdminLimitesRoute: AuthenticatedAdminLimitesRoute,
   AuthenticatedAdminLojasRoute: AuthenticatedAdminLojasRoute,
   AuthenticatedAdminSubscricoesRoute: AuthenticatedAdminSubscricoesRoute,
   AuthenticatedAdminTarifarioRoute: AuthenticatedAdminTarifarioRoute,

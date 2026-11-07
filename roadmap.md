@@ -1,10 +1,12 @@
 # Roadmap
 
-- [ ] Pedido 07/11: acrescentar áreas reais de consulta de equipa/permissões e limites/histórico ao painel; edição e convites dependem de aprovação do SQL completo revisto.
-- [ ] Rever convite por token vinculado à identidade no SQL M2, sem aplicar na base partilhada.
-- [ ] Preparar confirmação Banco Atlântico sem inventar protocolo; aguarda documentação e credenciais oficiais.
-- [ ] Ensaio de levantamento fictício autorizado apenas no isolado; verificar existência do ambiente e dependências antes de executar.
-- [ ] Publicar metadados Live Teká após verificação de segurança; atualização no Google depende de nova indexação.
+- [x] Pedido 07/11: acrescentar áreas de consulta administrativa de equipa e limites/histórico; recusa verificada na conta customer. Leitura numa conta admin ainda requer sessão dessa conta; escrita desativada.
+- [x] Rever convite por token vinculado à identidade no SQL M2 v4, incluindo cancelamento e hash fora da auditoria; sem aplicar na base partilhada, aguarda aprovação e ensaio.
+- [ ] Ativar equipa/edição de limites: bloqueado por aprovação do SQL completo revisto e integração indivisível de permissões/RPCs/RLS.
+- [x] Preparar contrato interno de identidade bancária e checklist oficial sem inventar protocolo; 9 testes unitários internos OK, nenhum teste bancário PASS.
+- [ ] Implementar assinatura/confirmação Banco Atlântico: aguarda documentação e credenciais oficiais.
+- [ ] Ensaio de levantamento fictício: base própria confirmada no rascunho; execução deve ocorrer no chat isolado após instalação aprovada, ferramentas atuais apontam para base principal.
+- [ ] Publicar metadados Live Teká: suspenso pelo utilizador para revisão dos acessos; diagnóstico em docs/finance/entrega-07-11-2026.md. Google depende de nova indexação.
 
 - [x] Atualizar metadados de todas as páginas para a marca oficial e imagem de partilha verde com logótipo existente; preservar domínio e funcionalidades. Verificado SSR/navegador; publicação não solicitada.
 

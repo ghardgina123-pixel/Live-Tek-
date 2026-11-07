@@ -1,4 +1,4 @@
-# Live Teká — proposta v3 de integração mínima
+# Live Teká — proposta de integração mínima (M1 v3 / M2 v4)
 
 07/11/2026. Preparação aprovada; SQL NÃO aplicado. Aprovação do plano não autoriza SQL ainda não apresentado.
 
@@ -6,7 +6,7 @@
 
 Reutilizar withdrawal_limits, user_roles/has_role, financial_audit_log, painel e RPCs existentes. Versões v2 preservadas em *-v2-retirada; não executar. Não criar mercados/regras/quota/ledger/checkout paralelos.
 
-M2 v3: um único complemento staff_members, inexistente na inspeção direcionada, sem duplicar identidade/papéis. Convites para contas confirmadas, vinculados por UUID, poderes iniciais só consultar/preparar, suspensão/revogação e histórico no log existente. Sem grants sensíveis positivos, autoelevação ou promoção a admin.
+M2 v4: um único complemento staff_members, inexistente na inspeção direcionada, sem duplicar identidade/papéis. Convites por token aleatório de 256 bits para contas confirmadas, vinculados por UUID, validade de sete dias, hash SHA-256 armazenado, consumo atómico e cancelamento de convite pendente. Hash/token excluídos da auditoria; hash sem SELECT das roles da aplicação. A futura entrega deve usar fragmento removido imediatamente, sem logs do token. Poderes iniciais só consultar/preparar, suspensão/revogação e histórico no log existente. Sem grants sensíveis positivos, autoelevação ou promoção a admin. Sintaxe inspecionada (21 statements/6 PLpgSQL); não instalada nem validada funcionalmente.
 
 M1 v3: acrescenta metadados country/market/revision à linha existente; preserva 10.000/200.000 AOA e Africa/Luanda na instalação. RPC de edição com revisão/motivo/auditoria; helpers sem fallback/NULL. Sem nova tabela financeira.
 
@@ -19,6 +19,12 @@ O catálogo ativo confirmou incompatibilidade adicional: payout_requests NÃO co
 Rever ACL nativas/memberships/owners de todas as assinaturas e writers antes da aplicação. Não reduzir isolamento nem revogar pertenças da plataforma para conseguir executar. No âmbito desta preparação nenhuma migração nem dado real foi alterado.
 
 Revisão independente adicional: verificar comportamento RLS/owner de staff_can e ausência de recursão; bloqueante antes de qualquer instalação, inclusive isolada. Convites são one-shot, sem reconvite/reativação de revogados. A unicidade de AOA já está comprovada pela PRIMARY KEY(currency) do catálogo atual; não acrescentar índice equivalente duplicado. Privilégios herdados continuam por ensaiar. Gramática local válida: M1 21 statements/5 definições PL/pgSQL, M2 21/6; não constitui PASS financeiro.
+
+## Entrega de consulta em 07/11
+
+Acrescentadas páginas /admin/equipa e /admin/limites ao painel existente. Leituras autenticadas, validação has_role no servidor e RLS existentes; sem cliente privilegiado. A equipa consulta apenas administradores atuais e papéis existentes, não funcionários fictícios. Limites e histórico são lidos de withdrawal_limits e financial_audit_log, sem reconstrução histórica. Convites/edição permanecem explicitamente indisponíveis. A conta do solicitante usada na verificação tem papel customer: recusa das duas páginas confirmada; visualização administrativa com conta admin ainda MANUAL ACTION REQUIRED. Conta desligada redirecionada ao login.
+
+Base de teste existente confirmada pelo catálogo de rascunhos: “Testes financeiros isolados”, base própria, pronta mas atrasada, sem alterações. As ferramentas desta conversa atuam na base principal; não foi criado levantamento nem saldo fictício aqui. Execução no chat daquele rascunho exige completar instalação/validação dos RPCs existentes e do SQL revisto, sem aceitar o rascunho. Não foi emitido PASS de saldo, teto diário ou auditoria.
 
 ## Próxima autorização necessária
 

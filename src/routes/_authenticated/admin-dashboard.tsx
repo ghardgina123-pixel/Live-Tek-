@@ -37,6 +37,8 @@ function AdminHub() {
       </header>
 
       <div className="cv-auto px-5 py-4 space-y-3">
+        <Button variant="outline" asChild className="h-auto w-full justify-start gap-3 whitespace-normal py-4"><Link to="/admin/equipa"><UserPlus className="shrink-0 text-primary" /><span>Gestão de Equipa</span></Link></Button>
+        <Button variant="outline" asChild className="h-auto w-full justify-start gap-3 whitespace-normal py-4"><Link to="/admin/limites"><Wallet className="shrink-0 text-primary" /><span>Gestão de Limites Financeiros</span></Link></Button>
         <Link to="/admin/lojas" className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm">
           <StoreIcon className="text-primary" />
           <div className="flex-1">
