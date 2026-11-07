@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminWithdrawals } from "@/components/AdminWithdrawals";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -14,14 +15,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/financeiro")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Admin · Financeiro — Live Teká" },
       { name: "description", content: "Painel financeiro do gestor: vendas, comissões, taxas de adesão, subscrições e pedidos de saque." },
       { property: "og:title", content: "Admin · Financeiro — Live Teká" },
       { property: "og:description", content: "Receita real, comissões da plataforma, transações e liquidação de saques." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();

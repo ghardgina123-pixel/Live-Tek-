@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Home as HomeIcon, MapPin, BedDouble, Bath, Maximize2, Loader2 } from "lucide-react";
@@ -7,13 +8,13 @@ import { StorageImage } from "@/lib/storage";
 
 export const Route = createFileRoute("/imoveis")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Imóveis — Live Teká" },
       { name: "description", content: "Casas, apartamentos e terrenos para venda e arrendamento em Angola." },
       { property: "og:title", content: "Imóveis — Live Teká" },
       { property: "og:description", content: "Encontre casas, apartamentos e terrenos para venda ou arrendamento." },
       { property: "og:url", content: "https://www.livemarketplece.live/imoveis" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/imoveis" }],
     scripts: [{
       type: "application/ld+json",

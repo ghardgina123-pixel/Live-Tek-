@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Mail, Lock, User as UserIcon, Phone, ShieldCheck, Loader2, ShoppingBag, Store as StoreIcon, Sparkles, AlertCircle } from "lucide-react";
@@ -13,7 +14,7 @@ import type { SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Criar conta — Live Teká" },
       { name: "description", content: "Crie a sua conta na Live Teká em segundos: registe-se como cliente para comprar em lives ou como lojista para vender e receber pedidos em Angola." },
       { property: "og:title", content: "Criar conta — Live Teká" },
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/cadastro")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/cadastro" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/cadastro" }],
   }),
 

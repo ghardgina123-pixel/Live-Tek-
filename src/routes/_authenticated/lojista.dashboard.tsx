@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Package, ShoppingBag, Wallet, TrendingUp, Loader2 } from "lucide-react";
@@ -9,7 +10,7 @@ import { computeDashboardStats } from "@/lib/settlement";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/dashboard")({
-  head: () => ({ meta: [{ title: "Visão Geral — Lojista" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Visão Geral — Lojista" }]) }),
   component: Dashboard,
 });
 

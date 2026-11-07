@@ -1,10 +1,11 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/termos")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Termos e privacidade — Live Teká" },
       { name: "description", content: "Consulte os termos de uso e a política de privacidade da Live Teká: regras para clientes e lojistas, tratamento de dados pessoais e condições de pagamento." },
       { property: "og:title", content: "Termos e privacidade — Live Teká" },
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/termos")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/termos" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/termos" }],
   }),
 

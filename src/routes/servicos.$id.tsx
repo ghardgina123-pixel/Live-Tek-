@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, BadgeCheck, Clock, Loader2, MapPin, MessageCircle, Phone, Share2 } from "lucide-react";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/servicos/$id")({
     );
     const image = s?.cover_url ?? s?.logo_url ?? null;
     return {
-      meta: [
+      meta: brandMeta([
         { title },
         { name: "description", content: description },
         { property: "og:title", content: title },
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/servicos/$id")({
               { name: "twitter:image", content: image },
             ]
           : []),
-      ],
+      ], true),
       links: [{ rel: "canonical", href: url }],
       scripts: [
         {

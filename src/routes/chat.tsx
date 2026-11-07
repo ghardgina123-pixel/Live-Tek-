@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Search, Send, ShieldCheck, ArrowLeft, Loader2, MessageCircle } from "lucide-react";
@@ -14,10 +15,10 @@ const searchSchema = z.object({ c: z.string().uuid().optional() });
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Chat — Live Teká" },
       { name: "description", content: "Converse em tempo real com as lojas do Live Teká." },
-    ],
+    ]),
   }),
   validateSearch: searchSchema,
   component: ChatPage,

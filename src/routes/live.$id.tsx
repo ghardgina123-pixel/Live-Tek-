@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -30,7 +31,7 @@ const LivePlayer = lazy(() =>
 
 export const Route = createFileRoute("/live/$id")({
   head: ({ params }) => ({
-    meta: [
+    meta: brandMeta([
       { title: "Live ao vivo — Live Teká" },
       {
         name: "description",
@@ -44,7 +45,7 @@ export const Route = createFileRoute("/live/$id")({
       { property: "og:type", content: "video.other" },
       { name: "twitter:card", content: "summary" },
       { property: "og:url", content: `https://www.livemarketplece.live/live/${params.id}` },
-    ],
+    ]),
   }),
   component: LivePage,
 });

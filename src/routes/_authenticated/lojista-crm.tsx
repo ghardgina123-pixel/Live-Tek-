@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Sparkles, Users, MessageSquare, BarChart3, Tag, Loader2, Upload, XCircle, Clock, FileCheck2, Send, TrendingUp, ShoppingBag } from "lucide-react";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
 
 export const Route = createFileRoute("/_authenticated/lojista-crm")({
-  head: () => ({ meta: [{ title: "CRM Premium — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "CRM Premium — Live Teká" }]) }),
   component: CRM,
 });
 

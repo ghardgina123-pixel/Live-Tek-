@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { ArrowLeft } from "lucide-react";
@@ -11,14 +12,14 @@ import escalaLocal from "@/assets/marketing/escala-local.png.asset.json";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Sobre o Live Teká — Compre, Converse e Receba em Angola" },
       { name: "description", content: "Conheça o Live Teká: o marketplace angolano onde lives atraem, o pagamento é num toque e a entrega é em tempo real." },
       { property: "og:title", content: "Sobre o Live Teká" },
       { property: "og:description", content: "O marketplace angolano em tempo real." },
       { property: "og:image", content: livesAtraem.url },
       { property: "og:url", content: `${SITE_URL}/sobre` },
-    ],
+    ]),
     links: [{ rel: "canonical", href: `${SITE_URL}/sobre` }],
   }),
   component: Sobre,

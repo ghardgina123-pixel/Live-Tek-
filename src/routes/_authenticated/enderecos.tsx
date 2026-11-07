@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Plus, MapPin, Trash2, Loader2, Star, LocateFixed } from "lucide-react";
@@ -13,7 +14,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/enderecos")({
-  head: () => ({ meta: [{ title: "Endereços para entrega — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Endereços para entrega — Live Teká" }]) }),
   component: AddressesPage,
 });
 

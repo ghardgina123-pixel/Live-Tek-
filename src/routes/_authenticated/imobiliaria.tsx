@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Home as HomeIcon, MapPin, Loader2, Plus, BadgeCheck, Clock, XCircle, Radio, Upload, Calendar } from "lucide-react";
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/imobiliaria")({
-  head: () => ({ meta: [{ title: "Imobiliária — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Imobiliária — Live Teká" }]) }),
   component: ImobiliariaPage,
 });
 

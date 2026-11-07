@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Users, Share2, Gift, Copy, Check, Loader2, Wallet, Store as StoreIcon, BadgePercent } from "lucide-react";
@@ -45,7 +46,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/_authenticated/afiliados")({
-  head: () => ({ meta: [{ title: "Afiliados — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Afiliados — Live Teká" }]) }),
   component: Afiliados,
 });
 

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Heart, MessageCircle, Share2, ShoppingBag, Loader2, ArrowLeft, Play, Volume2, VolumeX } from "lucide-react";
@@ -12,10 +13,10 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/shorts")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Shorts — Live Teká" },
       { name: "description", content: "Vídeos curtos dos produtos das lojas em destaque no Live Teká." },
-    ],
+    ]),
   }),
   component: ShortsFeed,
 });

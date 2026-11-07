@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, ShoppingBag } from "lucide-react";
@@ -8,7 +9,7 @@ import { useT } from "@/lib/i18n";
 import { ORDER_STATUS_LABEL, formatAoa } from "@/lib/commerce";
 
 export const Route = createFileRoute("/_authenticated/compras")({
-  head: () => ({ meta: [{ title: "Minhas compras — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Minhas compras — Live Teká" }]) }),
   component: Compras,
 });
 

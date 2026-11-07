@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Search, MapPin, Phone, Loader2, BadgeCheck } from "lucide-react";
@@ -30,7 +31,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/servicos/")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Serviços — Live Teká" },
       { name: "description", content: "Encontre salões, barbearias, hotéis, farmácias, restaurantes e outros prestadores de serviço na Live Teká." },
       { property: "og:title", content: "Serviços — Live Teká" },
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/servicos/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://www.livemarketplece.live/servicos" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/servicos" }],
     scripts: [
       {

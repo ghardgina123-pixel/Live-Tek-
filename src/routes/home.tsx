@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Search, Radio, ShieldCheck, Truck, BadgeCheck, ChevronRight, Star, PlayCircle, Store as StoreIcon } from "lucide-react";
@@ -19,13 +20,13 @@ type FeedProduct = { id: string; name: string; price: number; oldPrice?: number;
 
 export const Route = createFileRoute("/home")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Explorar Lojas e Lives — Live Teká" },
       { name: "description", content: "Descubra lojas ao vivo, compre direto da live, converse com vendedores e receba em casa." },
       { property: "og:title", content: "Explorar Lojas e Lives ao Vivo — Live Teká" },
       { property: "og:description", content: "Descubra lojas ao vivo, compre direto da live e receba em casa." },
       { property: "og:url", content: "https://www.livemarketplece.live/home" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/home" }],
   }),
   component: Home,

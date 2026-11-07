@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, RefreshCw, Truck, Power, PowerOff, Save, Plus } from "lucide-react";
@@ -21,14 +22,14 @@ import {
 
 export const Route = createFileRoute("/_authenticated/admin/tarifario")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Admin · Tarifário de entrega — Live Teká" },
       { name: "description", content: "Gestão do tarifário de entrega: tarifa base, preço por km, mínimo, peso, volume e regras por classe logística." },
       { property: "og:title", content: "Admin · Tarifário de entrega — Live Teká" },
       { property: "og:description", content: "Criar, activar e consultar o histórico das tarifas de entrega da Live Teká." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();

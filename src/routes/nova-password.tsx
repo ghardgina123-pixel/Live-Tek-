@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
@@ -9,14 +10,14 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/nova-password")({
   ssr: false,
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Definir nova palavra-passe — Live Teká" },
       { name: "description", content: "Defina uma nova palavra-passe para a sua conta Live Teká através do link seguro recebido por e-mail." },
       { property: "og:title", content: "Definir nova palavra-passe — Live Teká" },
       { property: "og:description", content: "Defina uma nova palavra-passe para a sua conta Live Teká." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   component: NovaPassword,
 });

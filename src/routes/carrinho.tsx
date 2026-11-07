@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, Trash2, ShieldCheck, ShoppingBag } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -8,7 +9,7 @@ import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/carrinho")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Carrinho — Live Teká" },
       { name: "description", content: "Reveja os produtos do seu carrinho na Live Teká, confirme quantidades e avance para o checkout com entrega em Angola." },
       { property: "og:title", content: "Carrinho — Live Teká" },
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/carrinho")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/carrinho" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/carrinho" }],
   }),
 

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Mail, Lock, Radio, Loader2, Chrome, Eye, EyeOff } from "lucide-react";
@@ -16,7 +17,7 @@ import {
 
 export const Route = createFileRoute("/login")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Entrar — Live Teká" },
       { name: "description", content: "Entre na sua conta Live Teká para acompanhar lives, falar com as lojas, seguir pedidos e gerir a sua loja em Angola." },
       { property: "og:title", content: "Entrar — Live Teká" },
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/login")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://www.livemarketplece.live/login" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/login" }],
   }),
 

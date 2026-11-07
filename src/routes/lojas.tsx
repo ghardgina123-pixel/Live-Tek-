@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Search, Radio, BadgeCheck } from "lucide-react";
 import { AppShell, StoreCover } from "@/components/AppShell";
@@ -26,13 +27,13 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/lojas")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Lojas — Live Teká" },
       { name: "description", content: "Explore todas as lojas ativas da Live Teká em Angola, com lives ao vivo, produtos e avaliações." },
       { property: "og:title", content: "Lojas — Live Teká" },
       { property: "og:description", content: "Explore todas as lojas ativas da Live Teká em Angola." },
       { property: "og:url", content: "https://www.livemarketplece.live/lojas" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/lojas" }],
     scripts: [{
       type: "application/ld+json",

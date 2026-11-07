@@ -17,7 +17,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { RealtimeNotifier } from "@/components/RealtimeNotifier";
 import { PushRegistrar } from "@/components/PushRegistrar";
 import { PresenceHeartbeat } from "@/components/PresenceHeartbeat";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_OFFICIAL_NAME } from "@/lib/site";
 
 function NotFoundComponent() {
   return (
@@ -111,26 +111,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "google", content: "notranslate" },
       { name: "google-site-verification", content: "t7Goa-sWL3huevWPpJSWMJ40yiH08tDnDjdWxV1IQWw" },
-      { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
-      { name: "description", content: SITE_DESCRIPTION },
       { name: "author", content: "Live Teká" },
-      { property: "og:site_name", content: "Live Teká" },
-      { property: "og:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
-      { property: "og:description", content: SITE_DESCRIPTION },
+      { property: "og:site_name", content: SITE_OFFICIAL_NAME },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
-      { name: "twitter:description", content: SITE_DESCRIPTION },
-      {
-        property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/2bb7f51d-5545-493a-b3fe-0dbdc13d5156",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/2bb7f51d-5545-493a-b3fe-0dbdc13d5156",
-      },
     ],
     links: [
       {

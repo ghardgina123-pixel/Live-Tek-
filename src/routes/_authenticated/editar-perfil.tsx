@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
@@ -11,7 +12,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/editar-perfil")({
-  head: () => ({ meta: [{ title: "Editar perfil — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Editar perfil — Live Teká" }]) }),
   component: EditarPerfil,
 });
 

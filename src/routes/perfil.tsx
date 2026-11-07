@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Settings, Package, Heart, MapPin, HelpCircle, LogOut, ChevronRight, BadgeCheck, Store as StoreIcon, Truck, Home as HomeIcon, Shield, Camera, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +14,7 @@ import { useT, type TKey } from "@/lib/i18n";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Perfil — Live Teká" },
       { name: "description", content: "Gira o seu perfil Live Teká: dados pessoais, endereços de entrega, pedidos, favoritos e definições da conta." },
       { property: "og:title", content: "Perfil — Live Teká" },
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/perfil")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://www.livemarketplece.live/perfil" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/perfil" }],
   }),
 

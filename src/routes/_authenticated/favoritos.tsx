@@ -1,10 +1,11 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Heart } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/favoritos")({
-  head: () => ({ meta: [{ title: "Favoritos — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Favoritos — Live Teká" }]) }),
   component: Favoritos,
 });
 

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Loader2, KeyRound } from "lucide-react";
@@ -8,14 +9,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/recuperar-password")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Recuperar palavra-passe — Live Teká" },
       { name: "description", content: "Receba um link seguro por e-mail para definir uma nova palavra-passe na Live Teká." },
       { property: "og:title", content: "Recuperar palavra-passe — Live Teká" },
       { property: "og:description", content: "Receba um link seguro por e-mail para definir uma nova palavra-passe na Live Teká." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   component: Recuperar,
 });

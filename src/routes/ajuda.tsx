@@ -1,16 +1,17 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Mail, MessageCircle, Phone } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/ajuda")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Ajuda e suporte — Live Teká" },
       { name: "description", content: "Fale com a equipa da Live Teká por email, WhatsApp ou telefone e veja respostas para as perguntas mais frequentes." },
       { property: "og:title", content: "Ajuda e suporte — Live Teká" },
       { property: "og:description", content: "Fale com a equipa da Live Teká por email, WhatsApp ou telefone." },
       { property: "og:url", content: "https://www.livemarketplece.live/ajuda" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/ajuda" }],
     scripts: [{
       type: "application/ld+json",

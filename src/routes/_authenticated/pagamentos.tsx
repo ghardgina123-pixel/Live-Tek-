@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, ChevronRight, Check, Trash2 } from "lucide-react";
@@ -13,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/pagamentos")({
-  head: () => ({ meta: [{ title: "Métodos de pagamento — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Métodos de pagamento — Live Teká" }]) }),
   component: Pagamentos,
 });
 

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Loader2, UploadCloud, Trash2, Film, Link as LinkIcon, Unlink } from "lucide-react";
@@ -13,7 +14,7 @@ import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/videos")({
-  head: () => ({ meta: [{ title: "Shorts da loja — Lojista" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Shorts da loja — Lojista" }]) }),
   component: ShellPage,
 });
 

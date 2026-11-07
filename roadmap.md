@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Atualizar metadados de todas as páginas para a marca oficial e imagem de partilha verde com logótipo existente; preservar domínio e funcionalidades. Verificado SSR/navegador; publicação não solicitada.
+
 - [x] Inventariar equivalentes e apresentar plano/SQL v3 limitado sobre withdrawal_limits, autenticação/papéis e histórico existentes; não aplicar.
 - [x] Retirar da proposta ativa os mecanismos financeiros v2 paralelos e arquivar referência/matriz; preservar dados e Angola 10.000/200.000 AOA.
 - [ ] Integrar UI, permissões granulares, soma diária conjunta e corrigir incompatibilidades de liquidação existentes; bloqueado por revisão/autorização do SQL e ensaio isolado ainda não autorizado.

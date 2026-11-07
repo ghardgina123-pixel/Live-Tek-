@@ -2,3 +2,4 @@
 - Withdrawal limits live in the `withdrawal_limits` table (per currency, with timezone) and are enforced inside the withdrawal RPCs — why: limits must be configurable per market without code changes and never trusted from the frontend.
 - Unapproved financial SQL proposals stay in `docs/finance`, outside executable migration directories — why: review must never apply a database change accidentally.
 - Financial limits/team changes must extend existing configuration, auth roles, audit and administrative RPCs, not install the retired parallel v2 financial foundation — why: a single authority preserves current financial contracts and data.
+- Every content route completes its own metadata through brandMeta; root holds only sitewide defaults and no social image — why: consistent branding without inherited images overriding entity previews.

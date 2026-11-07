@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Check, Crown, Download, ShieldCheck, AlertTriangle, Copy, Radio, Ban } from "lucide-react";
@@ -20,14 +21,14 @@ import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/lojista/subscricao")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Subscrição e faturação — Live Teká" },
       { name: "description", content: "Gerir o plano de parceiro, pagar por Multicaixa Express e descarregar faturas." },
       { property: "og:title", content: "Subscrição e faturação — Live Teká" },
       { property: "og:description", content: "Planos de parceiro Live Teká com preços oficiais e faturação automática." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   component: ShellPage,
 });

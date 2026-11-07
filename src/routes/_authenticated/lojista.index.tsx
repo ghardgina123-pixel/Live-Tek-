@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Loader2, MapPin, Upload, XCircle, ImagePlus, Sparkles, AlertCircle } from "lucide-react";
@@ -16,7 +17,7 @@ import { SERVICE_CATEGORIES } from "@/lib/services";
 import { formatAoa, REVIEW_STATE_LABEL, FEE_STATUS_LABEL, type SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
-  head: () => ({ meta: [{ title: "Minha Loja — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Minha Loja — Live Teká" }]) }),
   component: LojistaIndex,
 });
 

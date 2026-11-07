@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, MapPin, Truck, BadgeCheck, Clock, XCircle } from "lucide-react";
@@ -13,7 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/_authenticated/transportador")({
-  head: () => ({ meta: [{ title: "Cadastro de transportador — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Cadastro de transportador — Live Teká" }]) }),
   component: TransportadorPage,
 });
 

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -8,14 +9,14 @@ import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/idioma")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Idioma, moeda e região — Live Teká" },
       { name: "description", content: "Escolha entre 20 idiomas, a moeda e o país da sua conta Live Teká." },
       { property: "og:title", content: "Idioma, moeda e região — Live Teká" },
       { property: "og:description", content: "Escolha entre 20 idiomas, a moeda e o país da sua conta Live Teká." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   component: Idioma,
 });

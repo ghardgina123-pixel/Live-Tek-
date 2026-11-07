@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, RefreshCw, CheckCircle2, XCircle, Copy, Search } from "lucide-react";
@@ -11,14 +12,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/subscricoes")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Admin · Subscrições — Live Teká" },
       { name: "description", content: "Gestão de intenções de subscrição, referências Multicaixa e reprocessamento de pagamentos." },
       { property: "og:title", content: "Admin · Subscrições — Live Teká" },
       { property: "og:description", content: "Estados, referências e reprocessamento manual de subscrições de parceiros." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShoppingBag, Store as StoreIcon } from "lucide-react";
 import { SITE_URL } from "@/lib/site";
@@ -5,13 +6,13 @@ import bannerAsset from "@/assets/live-teka-banner.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Live Teká — A Plataforma de Venda em Tempo Real" },
       { name: "description", content: "Entre na Live Teká como cliente ou lojista: compre em lives, converse com a loja e receba em casa. Comece em segundos." },
       { property: "og:title", content: "Live Teká — A Plataforma de Venda em Tempo Real" },
       { property: "og:description", content: "Entre na Live Teká como cliente ou lojista: compre em lives, converse com a loja e receba em casa. Comece em segundos." },
       { property: "og:url", content: `${SITE_URL}/` },
-    ],
+    ]),
     links: [
       { rel: "canonical", href: `${SITE_URL}/` },
       { rel: "preload", as: "image", href: bannerAsset.url },

@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PanelErrorBoundary } from "@/components/PanelErrorBoundary";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { toast } from "sonner";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
 
 export const Route = createFileRoute("/_authenticated/admin-crm")({
-  head: () => ({ meta: [{ title: "Admin · CRM — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Admin · CRM — Live Teká" }]) }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) throw redirect({ to: "/login" });

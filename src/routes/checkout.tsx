@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, MapPin, ShieldCheck, Check, Plus, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ import { createMulticaixaExpressIntent } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Checkout — Live Teká" },
       { name: "description", content: "Finalize a sua compra na Live Teká: escolha o endereço de entrega, o método de pagamento e confirme o pedido em segurança." },
       { property: "og:title", content: "Checkout — Live Teká" },
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/checkout")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://www.livemarketplece.live/checkout" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: "https://www.livemarketplece.live/checkout" }],
   }),
 

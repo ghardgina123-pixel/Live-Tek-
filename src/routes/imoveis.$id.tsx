@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, MapPin, BedDouble, Bath, Maximize2, Car, Phone, MessageCircle, Calendar, Loader2 } from "lucide-react";
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/imoveis/$id")({
     );
     const image = p?.cover_url ?? null;
     return {
-      meta: [
+      meta: brandMeta([
         { title },
         { name: "description", content: description },
         { property: "og:title", content: title },
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/imoveis/$id")({
               { name: "twitter:image", content: image },
             ]
           : []),
-      ],
+      ], true),
       links: [{ rel: "canonical", href: url }],
       scripts: [
         {

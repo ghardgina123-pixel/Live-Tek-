@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, MapPin, Package, Truck, Wallet } from "lucide-react";
@@ -24,7 +25,7 @@ function acceptErrorMessage(message: string): string {
 }
 
 export const Route = createFileRoute("/_authenticated/entregador/")({
-  head: () => ({ meta: [{ title: "Painel do entregador — Live Teká" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Painel do entregador — Live Teká" }, { name: "robots", content: "noindex" }]) }),
   component: EntregadorIndex,
 });
 

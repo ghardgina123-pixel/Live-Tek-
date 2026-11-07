@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import {
@@ -54,7 +55,7 @@ function liveErrorMessage(msg: string) {
 
 export const Route = createFileRoute("/_authenticated/lojista/lives")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Transmissões em direto — Live Teká" },
       {
         name: "description",
@@ -67,7 +68,7 @@ export const Route = createFileRoute("/_authenticated/lojista/lives")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-    ],
+    ]),
   }),
   component: ShellPage,
 });

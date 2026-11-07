@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Loader2, MapPin, Package, Truck, CheckCircle2, Clock } from "lucide-react";
@@ -9,7 +10,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/rastreio/$orderId")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: "Rastreio de encomenda — Live Teká" },
       { name: "description", content: "Acompanhe em tempo real o estado e a localização da sua encomenda Live Teká, desde a recolha na loja até à entrega." },
       { property: "og:title", content: "Rastreio de encomenda — Live Teká" },
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/rastreio/$orderId")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
-    ],
+    ]),
   }),
 
   component: RastreioPage,

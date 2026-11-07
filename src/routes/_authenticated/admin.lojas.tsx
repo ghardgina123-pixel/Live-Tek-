@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { PanelErrorBoundary } from "@/components/PanelErrorBoundary";
 import { useEffect, useState } from "react";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 import { formatAoa, FEE_STATUS_LABEL, type SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/_authenticated/admin/lojas")({
-  head: () => ({ meta: [{ title: "Admin · Aprovação de Lojas — Live Teká" }] }),
+  head: () => ({ meta: brandMeta([{ title: "Admin · Aprovação de Lojas — Live Teká" }]) }),
   beforeLoad: async () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) throw redirect({ to: "/login" });

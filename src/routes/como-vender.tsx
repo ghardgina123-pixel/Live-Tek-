@@ -1,3 +1,4 @@
+import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Store, Sparkles, Users, ShoppingBag, Wallet, HelpCircle, Loader2 } from "lucide-react";
@@ -29,7 +30,7 @@ const FAQ: Array<{ q: string; a: string }> = [
 
 export const Route = createFileRoute("/como-vender")({
   head: () => ({
-    meta: [
+    meta: brandMeta([
       { title: TITLE },
       { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE },
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/como-vender")({
       { property: "og:type", content: "article" },
       { property: "og:url", content: URL },
       { name: "twitter:card", content: "summary_large_image" },
-    ],
+    ]),
     links: [{ rel: "canonical", href: URL }],
     scripts: [
       {
