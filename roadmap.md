@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Corrigir os três documentos de proposta M1/M2: fundação dormente, dependências/owner, RBAC, quota conjunta privada, mercados, histórico e contrato de cutover/repli; sem executar SQL ou alterar funcionalidades. Integração financeira completa não incluída nem autorizada.
+- [x] Consolidar matriz dos 12 testes financeiros/bancários e 43 cenários adicionais; todos os 55 testes e reversão permanecem PENDENTES, exigem ambiente isolado e integração oficial quando aplicável.
+
 - [x] Concluir proposta completa e aditiva da Migration B, com estados terminais, identidade bancária conjunta, idempotência, auditoria de saldos e permissões; somente revisão, sem aplicar nem modificar dados.
 - [x] Preparar riscos, evidências de inspeção e matriz dos 12 testes obrigatórios; todos PENDENTES, sem execução financeira.
 - [ ] Aplicar Migration B somente após nova autorização expressa; proposta não pronta para produção, concorrência e integração oficial por validar.

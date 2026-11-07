@@ -1,317 +1,344 @@
--- ============================================================================
--- PROPOSTA M2 — Gestão de Equipa e Permissões (APENAS PARA REVISÃO — NÃO APLICAR)
--- Live Teká · 2026-11-07
--- Aditiva: não altera user_roles nem as funções admin_* existentes nesta fase.
--- ============================================================================
+-- LIVE TEKÁ — REVISÃO CORRETIVA v2 · 2026-11-07
+-- DOCUMENTO DE PROPOSTA. NÃO EXECUTAR / NÃO APLICAR SEM NOVA AUTORIZAÇÃO.
+-- Nada neste ficheiro foi executado. Testes funcionais e reversão: PENDENTES.
+-- Instalação futura numa transação do executor; sem BEGIN/COMMIT neste documento.
+-- Contrato: PostgreSQL 15+, auth.uid(), auth.users, public.countries existentes.
+-- NÃO substitui has_role, auxiliares AOA, pedidos, liquidação, ledger ou políticas atuais.
+-- Pré-requisitos de execução futura, por ligação dedicada:
+--   app.review_owner = role NOLOGIN isolada, sem membros não-superuser nem
+--                      pertença a outras roles; mesmo proprietário em M2 e M1.
+--   app.review_actor = UUID REAL do gestor, confirmado no diretório de auth.
+-- Essas definições NÃO são autoridade para clientes; usadas apenas na instalação.
+-- Sem CREATE ROLE, REVOKE de membership de plataforma ou redução de isolamento.
 
--- 1. Funções administrativas configuráveis
-CREATE TABLE public.staff_roles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  code text NOT NULL UNIQUE,
-  label text NOT NULL,
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
--- 2. Permissões atómicas
-CREATE TABLE public.staff_permissions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  code text NOT NULL UNIQUE,
-  label text NOT NULL
-);
-
--- 3. Permissões por função
-CREATE TABLE public.staff_role_permissions (
-  role_id uuid NOT NULL REFERENCES public.staff_roles(id) ON DELETE CASCADE,
-  permission_id uuid NOT NULL REFERENCES public.staff_permissions(id) ON DELETE CASCADE,
-  PRIMARY KEY (role_id, permission_id)
-);
-
--- 4. Membros da equipa (contas individuais)
-CREATE TABLE public.staff_members (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL UNIQUE,
-  role_id uuid NOT NULL REFERENCES public.staff_roles(id),
-  full_name text NOT NULL,
-  phone text,
-  status text NOT NULL DEFAULT 'active' CHECK (status IN ('invited','active','suspended','revoked')),
-  invited_by uuid,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
--- 5. Exceções de permissão por funcionário
-CREATE TABLE public.staff_member_permissions (
-  member_id uuid NOT NULL REFERENCES public.staff_members(id) ON DELETE CASCADE,
-  permission_id uuid NOT NULL REFERENCES public.staff_permissions(id) ON DELETE CASCADE,
-  granted boolean NOT NULL,
-  reason text NOT NULL,
-  granted_by uuid NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (member_id, permission_id)
-);
-
--- 6. Convites
-CREATE TABLE public.staff_invites (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  email text NOT NULL,
-  role_id uuid NOT NULL REFERENCES public.staff_roles(id),
-  token text NOT NULL UNIQUE,
-  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','expired','cancelled')),
-  invited_by uuid NOT NULL,
-  expires_at timestamptz NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
--- Grants
-GRANT SELECT ON public.staff_roles, public.staff_permissions, public.staff_role_permissions,
-  public.staff_members, public.staff_member_permissions TO authenticated;
-GRANT ALL ON public.staff_roles, public.staff_permissions, public.staff_role_permissions,
-  public.staff_members, public.staff_member_permissions, public.staff_invites TO service_role;
-
--- RLS
-ALTER TABLE public.staff_roles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.staff_permissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.staff_role_permissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.staff_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.staff_member_permissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.staff_invites ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY staff_roles_read ON public.staff_roles FOR SELECT TO authenticated
-  USING (public.has_role(auth.uid(), 'admin') OR public.has_staff_permission(auth.uid(), 'team.manage'));
-CREATE POLICY staff_permissions_read ON public.staff_permissions FOR SELECT TO authenticated
-  USING (public.has_role(auth.uid(), 'admin') OR public.has_staff_permission(auth.uid(), 'team.manage'));
-CREATE POLICY staff_role_permissions_read ON public.staff_role_permissions FOR SELECT TO authenticated
-  USING (public.has_role(auth.uid(), 'admin') OR public.has_staff_permission(auth.uid(), 'team.manage'));
-CREATE POLICY staff_members_read ON public.staff_members FOR SELECT TO authenticated
-  USING (user_id = auth.uid() OR public.has_role(auth.uid(), 'admin')
-         OR public.has_staff_permission(auth.uid(), 'team.manage'));
-CREATE POLICY staff_member_permissions_read ON public.staff_member_permissions FOR SELECT TO authenticated
-  USING (public.has_role(auth.uid(), 'admin') OR public.has_staff_permission(auth.uid(), 'team.manage'));
--- staff_invites: sem acesso direto; apenas via RPCs security definer.
-
--- 7. Verificação central de permissão de equipa
-CREATE OR REPLACE FUNCTION public.has_staff_permission(p_user_id uuid, p_permission text)
-RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.staff_members m
-    JOIN public.staff_roles r ON r.id = m.role_id AND r.is_active
-    JOIN public.staff_role_permissions rp ON rp.role_id = r.id
-    JOIN public.staff_permissions p ON p.id = rp.permission_id AND p.code = p_permission
-    WHERE m.user_id = p_user_id AND m.status = 'active'
-      AND NOT EXISTS (
-        SELECT 1 FROM public.staff_member_permissions mp
-        WHERE mp.member_id = m.id AND mp.permission_id = p.id AND mp.granted = false
-      )
-  )
-  OR EXISTS (
-    SELECT 1
-    FROM public.staff_members m
-    JOIN public.staff_member_permissions mp ON mp.member_id = m.id AND mp.granted = true
-    JOIN public.staff_permissions p ON p.id = mp.permission_id AND p.code = p_permission
-    WHERE m.user_id = p_user_id AND m.status = 'active'
-  )
-$$;
-
-REVOKE ALL ON FUNCTION public.has_staff_permission(uuid, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.has_staff_permission(uuid, text) TO authenticated;
-
--- 8. Funções e permissões iniciais (Contabilista e Financeiro)
-INSERT INTO public.staff_roles (code, label) VALUES
-  ('contabilista', 'Contabilista'),
-  ('financeiro', 'Financeiro');
-
-INSERT INTO public.staff_permissions (code, label) VALUES
-  ('finance.view', 'Consultar operações financeiras'),
-  ('finance.prepare', 'Preparar operações financeiras'),
-  ('finance.approve', 'Aprovar operações financeiras'),
-  ('finance.execute', 'Executar pagamentos e liquidações'),
-  ('limits.manage', 'Gerir limites financeiros'),
-  ('team.manage', 'Gerir equipa e permissões');
-
--- Contabilista: consulta e prepara; NUNCA executa dinheiro
-INSERT INTO public.staff_role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM public.staff_roles r, public.staff_permissions p
-WHERE r.code = 'contabilista' AND p.code IN ('finance.view', 'finance.prepare');
-
--- Financeiro: consulta, prepara e aprova (execução só por exceção individual)
-INSERT INTO public.staff_role_permissions (role_id, permission_id)
-SELECT r.id, p.id FROM public.staff_roles r, public.staff_permissions p
-WHERE r.code = 'financeiro' AND p.code IN ('finance.view', 'finance.prepare', 'finance.approve');
-
--- 9. Convite de funcionário
-CREATE OR REPLACE FUNCTION public.admin_invite_staff(
-  p_email text, p_role_code text, p_full_name text
-)
-RETURNS uuid
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_role_id uuid;
-  v_id uuid;
+-- M2 / PHASE A : fondation RBAC dormante, à installer AVANT M1.
+-- Répétition contrôlée: journal de migration + SHA256 dans la procédure du document MD.
+-- CREATE strict volontaire: une deuxième exécution manuelle échoue et est annulée;
+-- ne pas masquer un schéma divergent avec IF NOT EXISTS / ON CONFLICT DO NOTHING.
+DO $preflight$
+DECLARE o text := current_setting('app.review_owner',true); a uuid;
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin')
-     AND NOT public.has_staff_permission(auth.uid(), 'team.manage') THEN
-    RAISE EXCEPTION 'not authorized';
+  IF o IS NULL OR o IN ('anon','authenticated','service_role','postgres','supabase_admin') THEN
+    RAISE EXCEPTION 'review_owner_missing_or_unsafe';
   END IF;
-  SELECT id INTO v_role_id FROM public.staff_roles WHERE code = p_role_code AND is_active;
-  IF NOT FOUND THEN RAISE EXCEPTION 'unknown role'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname=o AND NOT rolcanlogin
+    AND NOT rolsuper AND NOT rolbypassrls) THEN RAISE EXCEPTION 'isolated_nologin_owner_required'; END IF;
+  -- Isolamento transitivo de TODOS os principals não-superuser, não só três roles.
+  -- Política estrita: nenhuma exceção de executor não-superuser neste pacote.
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname<>o AND NOT rolsuper
+    AND pg_catalog.pg_has_role(oid,o,'MEMBER')) THEN RAISE EXCEPTION 'owner_membership_not_isolated'; END IF;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname<>o
+    AND pg_catalog.pg_has_role(o,oid,'MEMBER')) THEN RAISE EXCEPTION 'owner_inherits_other_role'; END IF;
+  IF NOT (SELECT rolsuper FROM pg_catalog.pg_roles WHERE rolname=current_user) THEN
+    RAISE EXCEPTION 'approved_isolated_superuser_executor_required'; END IF;
+  IF NOT pg_catalog.has_schema_privilege(o,'public','CREATE') THEN RAISE EXCEPTION 'owner_transfer_schema_create_missing'; END IF;
+  IF to_regprocedure('auth.uid()') IS NULL OR to_regprocedure('public.has_role(uuid,public.app_role)') IS NULL THEN
+    RAISE EXCEPTION 'required_auth_functions_missing'; END IF;
+  IF NOT pg_catalog.has_function_privilege(o,'auth.uid()','EXECUTE')
+    OR NOT pg_catalog.has_function_privilege(o,'public.has_role(uuid,public.app_role)','EXECUTE') THEN
+    RAISE EXCEPTION 'owner_auth_function_execute_missing'; END IF;
+  a := nullif(current_setting('app.review_actor',true),'')::uuid;
+  IF a IS NULL OR NOT EXISTS (SELECT 1 FROM auth.users WHERE id=a AND email_confirmed_at IS NOT NULL)
+    OR NOT public.has_role(a,'admin') THEN RAISE EXCEPTION 'confirmed_real_admin_required'; END IF;
+  IF NOT pg_catalog.has_column_privilege(o,'auth.users','id','SELECT')
+    OR NOT pg_catalog.has_column_privilege(o,'auth.users','email','SELECT')
+    OR NOT pg_catalog.has_column_privilege(o,'auth.users','email_confirmed_at','SELECT') THEN
+    RAISE EXCEPTION 'owner_auth_read_not_provisioned';
+  END IF;
+  IF NOT pg_catalog.has_schema_privilege(o,'public','USAGE')
+    OR NOT pg_catalog.has_schema_privilege(o,'auth','USAGE') THEN RAISE EXCEPTION 'owner_schema_usage_missing'; END IF;
+END $preflight$;
+CREATE TABLE public.lt_staff_control_v2 (
+ user_id uuid PRIMARY KEY, status text NOT NULL CHECK(status IN ('active','suspended','revoked')),
+ version bigint NOT NULL DEFAULT 1, updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+REVOKE ALL ON public.lt_staff_control_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_control_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_control_v2 TO authenticated;
+ALTER TABLE public.lt_staff_control_v2 ENABLE ROW LEVEL SECURITY;
 
-  INSERT INTO public.staff_invites (email, role_id, token, invited_by, expires_at)
-  VALUES (lower(btrim(p_email)), v_role_id, encode(gen_random_bytes(24), 'hex'),
-          auth.uid(), now() + interval '7 days')
-  RETURNING id INTO v_id;
+CREATE TABLE public.lt_root_managers_v2 (
+ user_id uuid PRIMARY KEY REFERENCES public.lt_staff_control_v2(user_id), created_by uuid NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+REVOKE ALL ON public.lt_root_managers_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_root_managers_v2 TO service_role;
+GRANT SELECT ON public.lt_root_managers_v2 TO authenticated;
+ALTER TABLE public.lt_root_managers_v2 ENABLE ROW LEVEL SECURITY;
 
-  INSERT INTO public.security_audit_log (event, severity, actor_id, metadata)
-  VALUES ('staff_invite_created', 'info', auth.uid(),
-          jsonb_build_object('invite_id', v_id, 'email', lower(btrim(p_email)), 'role', p_role_code));
+CREATE TABLE public.lt_staff_roles_v2 (
+ code text PRIMARY KEY CHECK(code IN ('contabilista','financeiro','operador_equipa')),
+ is_active boolean NOT NULL DEFAULT true
+);
+REVOKE ALL ON public.lt_staff_roles_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_roles_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_roles_v2 TO authenticated;
+ALTER TABLE public.lt_staff_roles_v2 ENABLE ROW LEVEL SECURITY;
 
-  RETURN v_id;
-END;
-$$;
+CREATE TABLE public.lt_staff_permissions_v2 (
+ code text PRIMARY KEY, sensitive boolean NOT NULL DEFAULT true
+);
+REVOKE ALL ON public.lt_staff_permissions_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_permissions_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_permissions_v2 TO authenticated;
+ALTER TABLE public.lt_staff_permissions_v2 ENABLE ROW LEVEL SECURITY;
 
-REVOKE ALL ON FUNCTION public.admin_invite_staff(text, text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_invite_staff(text, text, text) TO authenticated;
+CREATE TABLE public.lt_staff_role_permissions_v2 (
+ role_code text NOT NULL REFERENCES public.lt_staff_roles_v2(code),
+ permission text NOT NULL REFERENCES public.lt_staff_permissions_v2(code), PRIMARY KEY(role_code,permission)
+);
+REVOKE ALL ON public.lt_staff_role_permissions_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_role_permissions_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_role_permissions_v2 TO authenticated;
+ALTER TABLE public.lt_staff_role_permissions_v2 ENABLE ROW LEVEL SECURITY;
 
--- 10. Aceitar convite (conta individual do utilizador autenticado)
-CREATE OR REPLACE FUNCTION public.accept_staff_invite(p_token text, p_full_name text)
-RETURNS uuid
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_invite public.staff_invites;
-  v_member_id uuid;
+CREATE TABLE public.lt_staff_members_v2 (
+ user_id uuid PRIMARY KEY REFERENCES public.lt_staff_control_v2(user_id),
+ role_code text NOT NULL REFERENCES public.lt_staff_roles_v2(code), created_by uuid NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+REVOKE ALL ON public.lt_staff_members_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_members_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_members_v2 TO authenticated;
+ALTER TABLE public.lt_staff_members_v2 ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE public.lt_staff_invites_v2 (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text NOT NULL CHECK(email=lower(btrim(email))),
+ role_code text NOT NULL REFERENCES public.lt_staff_roles_v2(code), token_hash text NOT NULL UNIQUE,
+ inviter uuid NOT NULL REFERENCES public.lt_staff_control_v2(user_id), inviter_version bigint NOT NULL,
+ status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','accepted','cancelled','expired')),
+ expires_at timestamptz NOT NULL, accepted_by uuid, accepted_at timestamptz,
+ created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+REVOKE ALL ON public.lt_staff_invites_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_invites_v2 TO service_role;
+ALTER TABLE public.lt_staff_invites_v2 ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE public.lt_staff_audit_v2 (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), actor_id uuid NOT NULL,
+ action text NOT NULL, subject_id text NOT NULL, reason text NOT NULL CHECK(btrim(reason)<>''),
+ previous_state jsonb, new_state jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+REVOKE ALL ON public.lt_staff_audit_v2 FROM PUBLIC, anon, authenticated, service_role;
+GRANT SELECT ON public.lt_staff_audit_v2 TO service_role;
+GRANT SELECT ON public.lt_staff_audit_v2 TO authenticated;
+ALTER TABLE public.lt_staff_audit_v2 ENABLE ROW LEVEL SECURITY;
+
+CREATE UNIQUE INDEX lt_staff_one_pending_email_v2 ON public.lt_staff_invites_v2(email) WHERE status='pending';
+-- Catalogue initial: aucun grant positif individuel ni édition de rôle partagé exposés.
+INSERT INTO public.lt_staff_roles_v2(code) VALUES ('contabilista'),('financeiro'),('operador_equipa');
+INSERT INTO public.lt_staff_permissions_v2(code,sensitive) VALUES
+ ('finance.view',false),('finance.prepare',false),('finance.approve',true),('finance.execute',true),
+ ('finance.reject',true),('finance.invoice.register',true),('limits.manage',true),
+ ('limits.audit.read',true),('team.read',true),('team.invite',true),('team.suspend',true),
+ ('team.reactivate',true),('team.revoke',true),('team.audit.read',true);
+INSERT INTO public.lt_staff_role_permissions_v2(role_code,permission) VALUES
+ ('contabilista','finance.view'),('contabilista','finance.prepare'),
+ ('financeiro','finance.view'),('financeiro','finance.prepare'),
+ ('operador_equipa','team.read');
+-- Financeiro NÃO recebe aprovação/execução nesta fundação.
+-- Gestor raiz só recebe gestão da equipa/limites; NÃO autoridade financeira automática.
+DO $bootstrap$
+DECLARE a uuid := current_setting('app.review_actor')::uuid;
 BEGIN
-  IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not authenticated'; END IF;
+ INSERT INTO public.lt_staff_control_v2(user_id,status) VALUES(a,'active');
+ INSERT INTO public.lt_root_managers_v2(user_id,created_by) VALUES(a,a);
+ INSERT INTO public.lt_staff_audit_v2(actor_id,action,subject_id,reason,new_state)
+ VALUES(a,'bootstrap_root',a::text,'Inicialização autorizada do gestor real',jsonb_build_object('status','active','root',true));
+END $bootstrap$;
+CREATE FUNCTION public.lt_review_block_mutation_v2() RETURNS trigger
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+BEGIN RAISE EXCEPTION 'immutable_record:%',TG_TABLE_NAME; END;
+$fn$;
 
-  SELECT * INTO v_invite FROM public.staff_invites
-  WHERE token = p_token AND status = 'pending' AND expires_at > now()
-  FOR UPDATE;
-  IF NOT FOUND THEN RAISE EXCEPTION 'invalid or expired invite'; END IF;
+CREATE FUNCTION public.lt_staff_allowed_internal_v2(p_user uuid, p_permission text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+SELECT p_user IS NOT NULL AND EXISTS (
+ SELECT 1 FROM public.lt_staff_control_v2 c WHERE c.user_id=p_user AND c.status='active'
+ AND (
+  (EXISTS(SELECT 1 FROM public.lt_root_managers_v2 r WHERE r.user_id=c.user_id)
+   AND p_permission IN ('limits.manage','limits.audit.read','team.read','team.invite','team.suspend',
+                        'team.reactivate','team.revoke','team.audit.read'))
+  OR EXISTS(SELECT 1 FROM public.lt_staff_members_v2 m
+    JOIN public.lt_staff_roles_v2 r ON r.code=m.role_code AND r.is_active
+    JOIN public.lt_staff_role_permissions_v2 g ON g.role_code=r.code
+    WHERE m.user_id=c.user_id AND g.permission=p_permission
+      AND NOT (r.code='contabilista' AND p_permission='finance.execute'))
+ ))
+$fn$;
 
-  -- uma conta individual só pode ter um lugar na equipa
-  IF EXISTS (SELECT 1 FROM public.staff_members WHERE user_id = auth.uid()) THEN
-    RAISE EXCEPTION 'user already in staff';
-  END IF;
+CREATE FUNCTION public.lt_staff_can_v2(p_permission text) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+SELECT public.lt_staff_allowed_internal_v2(auth.uid(),p_permission)
+$fn$;
 
-  INSERT INTO public.staff_members (user_id, role_id, full_name, status, invited_by)
-  VALUES (auth.uid(), v_invite.role_id, p_full_name, 'active', v_invite.invited_by)
-  RETURNING id INTO v_member_id;
-
-  UPDATE public.staff_invites SET status = 'accepted' WHERE id = v_invite.id;
-
-  INSERT INTO public.security_audit_log (event, severity, actor_id, metadata)
-  VALUES ('staff_invite_accepted', 'info', auth.uid(),
-          jsonb_build_object('member_id', v_member_id, 'invite_id', v_invite.id));
-
-  RETURN v_member_id;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.accept_staff_invite(text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.accept_staff_invite(text, text) TO authenticated;
-
--- 11. Alterar função / suspender / revogar
-CREATE OR REPLACE FUNCTION public.admin_set_staff_status(
-  p_member_id uuid, p_status text, p_reason text
-)
-RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_prev public.staff_members;
+CREATE FUNCTION public.lt_staff_lock_authorize_v2(p_permission text) RETURNS uuid
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+DECLARE a uuid := auth.uid();
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin')
-     AND NOT public.has_staff_permission(auth.uid(), 'team.manage') THEN
-    RAISE EXCEPTION 'not authorized';
-  END IF;
-  IF p_status NOT IN ('active','suspended','revoked') THEN
-    RAISE EXCEPTION 'invalid status';
-  END IF;
-  SELECT * INTO v_prev FROM public.staff_members WHERE id = p_member_id FOR UPDATE;
-  IF NOT FOUND THEN RAISE EXCEPTION 'member not found'; END IF;
-  IF v_prev.status = 'revoked' THEN RAISE EXCEPTION 'revoked is terminal'; END IF;
-  IF v_prev.user_id = auth.uid() THEN RAISE EXCEPTION 'cannot change own status'; END IF;
-
-  UPDATE public.staff_members SET status = p_status, updated_at = now() WHERE id = p_member_id;
-
-  INSERT INTO public.security_audit_log (event, severity, actor_id, subject_id, metadata)
-  VALUES ('staff_status_changed', 'warning', auth.uid(), v_prev.user_id,
-          jsonb_build_object('member_id', p_member_id, 'from', v_prev.status,
-                             'to', p_status, 'reason', p_reason));
+ IF a IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+ -- Sérialise mutations d'autorisation et appels sensibles; acquis avant les locks financiers.
+ PERFORM pg_advisory_xact_lock(hashtextextended('lt:staff:authorization:v2',0));
+ IF NOT public.lt_staff_allowed_internal_v2(a,p_permission) THEN RAISE EXCEPTION 'not_authorized'; END IF;
+ RETURN a;
 END;
-$$;
+$fn$;
 
-REVOKE ALL ON FUNCTION public.admin_set_staff_status(uuid, text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_set_staff_status(uuid, text, text) TO authenticated;
-
--- 12. Exceção individual de permissão
-CREATE OR REPLACE FUNCTION public.admin_grant_staff_permission(
-  p_member_id uuid, p_permission text, p_granted boolean, p_reason text
-)
-RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_permission_id uuid;
+CREATE FUNCTION public.lt_staff_create_invite_v2(p_actor uuid, p_email text, p_role text, p_token_hash text, p_reason text) RETURNS uuid
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+DECLARE c public.lt_staff_control_v2; i uuid; e text:=lower(btrim(p_email));
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin')
-     AND NOT public.has_staff_permission(auth.uid(), 'team.manage') THEN
-    RAISE EXCEPTION 'not authorized';
-  END IF;
-  SELECT id INTO v_permission_id FROM public.staff_permissions WHERE code = p_permission;
-  IF NOT FOUND THEN RAISE EXCEPTION 'unknown permission'; END IF;
-
-  INSERT INTO public.staff_member_permissions (member_id, permission_id, granted, reason, granted_by)
-  VALUES (p_member_id, v_permission_id, p_granted, p_reason, auth.uid())
-  ON CONFLICT (member_id, permission_id)
-  DO UPDATE SET granted = p_granted, reason = p_reason, granted_by = auth.uid(), created_at = now();
-
-  INSERT INTO public.security_audit_log (event, severity, actor_id, metadata)
-  VALUES ('staff_permission_override', 'warning', auth.uid(),
-          jsonb_build_object('member_id', p_member_id, 'permission', p_permission,
-                             'granted', p_granted, 'reason', p_reason));
+ -- EXECUTE service_role seulement: backend authentifie p_actor avant cet appel.
+ PERFORM pg_advisory_xact_lock(hashtextextended('lt:staff:authorization:v2',0));
+ SELECT * INTO c FROM public.lt_staff_control_v2 WHERE user_id=p_actor;
+ IF NOT FOUND OR NOT public.lt_staff_allowed_internal_v2(p_actor,'team.invite')
+  OR NOT EXISTS(SELECT 1 FROM public.lt_root_managers_v2 WHERE user_id=p_actor) THEN RAISE EXCEPTION 'not_authorized'; END IF;
+ IF e IS NULL OR e='' OR p_reason IS NULL OR btrim(p_reason)=''
+  OR p_token_hash IS NULL OR p_token_hash !~ '^[0-9a-f]{64}$'
+  OR p_role IS NULL OR p_role NOT IN ('contabilista','financeiro','operador_equipa') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.lt_staff_roles_v2 WHERE code=p_role AND is_active)
+   OR EXISTS(SELECT 1 FROM public.lt_staff_role_permissions_v2 WHERE role_code=p_role AND permission NOT IN
+      ('finance.view','finance.prepare','team.read')) THEN RAISE EXCEPTION 'role_outside_delegation_cap'; END IF;
+ IF EXISTS(SELECT 1 FROM auth.users WHERE id=p_actor AND lower(btrim(email))=e) THEN RAISE EXCEPTION 'self_invitation_forbidden'; END IF;
+ -- Pas de remplacement silencieux d'un invite pending, même expiré: annulation explicite requise.
+ INSERT INTO public.lt_staff_invites_v2(email,role_code,token_hash,inviter,inviter_version,expires_at)
+ VALUES(e,p_role,p_token_hash,p_actor,c.version,clock_timestamp()+interval '7 days') RETURNING id INTO i;
+ INSERT INTO public.lt_staff_audit_v2(actor_id,action,subject_id,reason,new_state)
+ VALUES(p_actor,'invite_created',i::text,p_reason,jsonb_build_object('role',p_role,'email',e,'inviter_version',c.version));
+ RETURN i;
 END;
-$$;
+$fn$;
 
-REVOKE ALL ON FUNCTION public.admin_grant_staff_permission(uuid, text, boolean, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_grant_staff_permission(uuid, text, boolean, text) TO authenticated;
-
--- 13. Supervisão: atividade de um membro (consultas, alterações, aprovações, pagamentos)
-CREATE OR REPLACE FUNCTION public.admin_staff_activity(
-  p_member_id uuid, p_from timestamptz DEFAULT NULL, p_to timestamptz DEFAULT NULL
-)
-RETURNS TABLE(source text, action text, result text, occurred_at timestamptz, metadata jsonb)
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  v_user_id uuid;
+CREATE FUNCTION public.lt_staff_accept_invite_v2(p_token_hash text) RETURNS uuid
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+DECLARE a uuid:=auth.uid(); e text; i public.lt_staff_invites_v2; c public.lt_staff_control_v2;
 BEGIN
-  IF NOT public.has_role(auth.uid(), 'admin')
-     AND NOT public.has_staff_permission(auth.uid(), 'team.manage') THEN
-    RAISE EXCEPTION 'not authorized';
-  END IF;
-  SELECT user_id INTO v_user_id FROM public.staff_members WHERE id = p_member_id;
-  IF NOT FOUND THEN RAISE EXCEPTION 'member not found'; END IF;
-
-  RETURN QUERY
-    SELECT 'financial'::text, f.action, f.result, f.created_at, f.metadata
-    FROM public.financial_audit_log f
-    WHERE f.actor_id = v_user_id
-      AND (p_from IS NULL OR f.created_at >= p_from)
-      AND (p_to IS NULL OR f.created_at <= p_to)
-    UNION ALL
-    SELECT 'security'::text, s.event, s.severity, s.occurred_at, s.metadata
-    FROM public.security_audit_log s
-    WHERE s.actor_id = v_user_id
-      AND (p_from IS NULL OR s.occurred_at >= p_from)
-      AND (p_to IS NULL OR s.occurred_at <= p_to)
-    ORDER BY occurred_at DESC;
+ IF a IS NULL OR p_token_hash IS NULL OR p_token_hash !~ '^[0-9a-f]{64}$' THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended('lt:staff:authorization:v2',0));
+ SELECT lower(btrim(email)) INTO e FROM auth.users WHERE id=a AND email_confirmed_at IS NOT NULL;
+ IF NOT FOUND THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+ SELECT * INTO i FROM public.lt_staff_invites_v2 WHERE token_hash=p_token_hash FOR UPDATE;
+ IF NOT FOUND OR i.status<>'pending' OR i.email<>e OR i.expires_at<=clock_timestamp()
+  OR i.inviter=a THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+ SELECT * INTO c FROM public.lt_staff_control_v2 WHERE user_id=i.inviter;
+ IF NOT FOUND OR c.version<>i.inviter_version OR NOT public.lt_staff_allowed_internal_v2(i.inviter,'team.invite') THEN
+  RAISE EXCEPTION 'invalid_invitation'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.lt_staff_roles_v2 WHERE code=i.role_code AND is_active)
+  OR EXISTS(SELECT 1 FROM public.lt_staff_role_permissions_v2 WHERE role_code=i.role_code
+      AND permission NOT IN ('finance.view','finance.prepare','team.read'))
+  OR EXISTS(SELECT 1 FROM public.lt_staff_control_v2 WHERE user_id=a)
+  OR public.has_role(a,'admin') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+ INSERT INTO public.lt_staff_control_v2(user_id,status) VALUES(a,'active');
+ INSERT INTO public.lt_staff_members_v2(user_id,role_code,created_by) VALUES(a,i.role_code,i.inviter);
+ UPDATE public.lt_staff_invites_v2 SET status='accepted',accepted_by=a,accepted_at=clock_timestamp() WHERE id=i.id;
+ INSERT INTO public.lt_staff_audit_v2(actor_id,action,subject_id,reason,new_state)
+ VALUES(a,'invite_accepted',i.id::text,'Aceitação pelo email confirmado destinatário',jsonb_build_object('user_id',a,'role',i.role_code));
+ RETURN a;
 END;
-$$;
+$fn$;
 
-REVOKE ALL ON FUNCTION public.admin_staff_activity(uuid, timestamptz, timestamptz) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_staff_activity(uuid, timestamptz, timestamptz) TO authenticated;
+CREATE FUNCTION public.lt_staff_cancel_invite_v2(p_id uuid, p_reason text) RETURNS void
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+DECLARE a uuid; i public.lt_staff_invites_v2;
+BEGIN
+ a:=public.lt_staff_lock_authorize_v2('team.invite');
+ IF p_reason IS NULL OR btrim(p_reason)='' THEN RAISE EXCEPTION 'reason_required'; END IF;
+ SELECT * INTO i FROM public.lt_staff_invites_v2 WHERE id=p_id FOR UPDATE;
+ IF NOT FOUND OR i.status<>'pending' THEN RAISE EXCEPTION 'invite_not_pending'; END IF;
+ UPDATE public.lt_staff_invites_v2 SET status='cancelled' WHERE id=p_id;
+ INSERT INTO public.lt_staff_audit_v2(actor_id,action,subject_id,reason,previous_state,new_state)
+ VALUES(a,'invite_cancelled',p_id::text,p_reason,
+  jsonb_build_object('status',i.status),jsonb_build_object('status','cancelled'));
+END;
+$fn$;
 
--- NOTA: a passagem das funções admin_* financeiras (admin_settle_payout,
--- admin_withdrawal_action, admin_register_external_invoice) de "só admin" para
--- "admin OU permissão específica" (finance.approve / finance.execute) fica para
--- a fase de implementação, após testes em ambiente isolado, para não alterar
--- fluxos financeiros ativos sem validação.
+CREATE FUNCTION public.lt_staff_set_status_v2(p_user uuid, p_status text, p_reason text) RETURNS void
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp AS $fn$
+DECLARE a uuid; c public.lt_staff_control_v2;
+BEGIN
+ IF p_status IS NULL OR p_status NOT IN ('active','suspended','revoked') OR p_reason IS NULL OR btrim(p_reason)='' THEN
+  RAISE EXCEPTION 'invalid_status_or_reason'; END IF;
+ a:=public.lt_staff_lock_authorize_v2(CASE p_status WHEN 'active' THEN 'team.reactivate' WHEN 'suspended' THEN 'team.suspend' ELSE 'team.revoke' END);
+ IF p_user IS NULL OR p_user=a OR EXISTS(SELECT 1 FROM public.lt_root_managers_v2 WHERE user_id=p_user) THEN
+  RAISE EXCEPTION 'self_or_root_change_forbidden'; END IF;
+ SELECT * INTO c FROM public.lt_staff_control_v2 WHERE user_id=p_user FOR UPDATE;
+ IF NOT FOUND OR c.status='revoked' THEN RAISE EXCEPTION 'missing_or_terminal_principal'; END IF;
+ IF EXISTS(SELECT 1 FROM public.lt_staff_members_v2 m JOIN public.lt_staff_role_permissions_v2 g ON g.role_code=m.role_code
+     WHERE m.user_id=p_user AND g.permission NOT IN ('finance.view','finance.prepare','team.read')) THEN
+  RAISE EXCEPTION 'sensitive_member_requires_independent_approval_not_available'; END IF;
+ IF c.status=p_status THEN RETURN; END IF;
+ UPDATE public.lt_staff_control_v2 SET status=p_status,version=version+1,updated_at=clock_timestamp() WHERE user_id=p_user;
+ INSERT INTO public.lt_staff_audit_v2(actor_id,action,subject_id,reason,previous_state,new_state)
+ SELECT a,'status_changed',p_user::text,p_reason,to_jsonb(c),to_jsonb(n) FROM public.lt_staff_control_v2 n WHERE n.user_id=p_user;
+END;
+$fn$;
+
+-- NON inclus: grants individuels positifs, modification de rôles partagés,
+-- attribution root, finance.approve/execute/reject, augmentation de délégation.
+-- Aucun endpoint ne les permet. Une phase future exige proposal/approver indépendants,
+-- payload immuable/versionné, cap explicite et revalidation; ne pas simuler ce mécanisme.
+-- Appels existants has_role/admin et RLS historiques restent intacts en phase A.
+-- Suspension v2 est effective uniquement sur v2: activation globale BLOQUÉE tant que
+-- inventaire/cutover des chemins legacy, workers, RLS permissives et user_roles est incomplet.
+-- Propriétaire commun vérifié: contourne RLS uniquement pour les tables dont il est propriétaire.
+-- Pas de FORCE RLS: les évaluateurs internes ne doivent pas récursivement appeler leurs politiques.
+DO $ownership$
+DECLARE o text := current_setting('app.review_owner'); r record;
+BEGIN
+  EXECUTE format('ALTER TABLE public.lt_staff_control_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_root_managers_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_roles_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_permissions_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_role_permissions_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_members_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_invites_v2 OWNER TO %I',o);
+  EXECUTE format('ALTER TABLE public.lt_staff_audit_v2 OWNER TO %I',o);
+  FOR r IN SELECT p.oid::regprocedure AS signature FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.proname IN ('lt_review_block_mutation_v2','lt_staff_allowed_internal_v2','lt_staff_can_v2','lt_staff_lock_authorize_v2','lt_staff_create_invite_v2','lt_staff_accept_invite_v2','lt_staff_cancel_invite_v2','lt_staff_set_status_v2') LOOP
+    EXECUTE format('ALTER FUNCTION %s OWNER TO %I',r.signature,o);
+    EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC, anon, authenticated, service_role',r.signature);
+  END LOOP;
+END $ownership$;
+GRANT EXECUTE ON FUNCTION public.lt_staff_can_v2(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.lt_staff_create_invite_v2(uuid,text,text,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.lt_staff_accept_invite_v2(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.lt_staff_cancel_invite_v2(uuid,text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.lt_staff_set_status_v2(uuid,text,text) TO authenticated;
+CREATE POLICY lt_staff_control_v2_read_v2 ON public.lt_staff_control_v2 FOR SELECT TO authenticated USING (user_id=auth.uid() OR public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_root_managers_v2_read_v2 ON public.lt_root_managers_v2 FOR SELECT TO authenticated USING (public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_staff_roles_v2_read_v2 ON public.lt_staff_roles_v2 FOR SELECT TO authenticated USING (public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_staff_permissions_v2_read_v2 ON public.lt_staff_permissions_v2 FOR SELECT TO authenticated USING (public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_staff_role_permissions_v2_read_v2 ON public.lt_staff_role_permissions_v2 FOR SELECT TO authenticated USING (public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_staff_members_v2_read_v2 ON public.lt_staff_members_v2 FOR SELECT TO authenticated USING (user_id=auth.uid() OR public.lt_staff_can_v2('team.read'));
+CREATE POLICY lt_staff_audit_v2_read_v2 ON public.lt_staff_audit_v2 FOR SELECT TO authenticated USING (public.lt_staff_can_v2('team.audit.read'));
+CREATE TRIGGER lt_staff_audit_v2_immutable_v2 BEFORE UPDATE OR DELETE ON public.lt_staff_audit_v2
+ FOR EACH ROW EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_audit_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_audit_v2
+ FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_control_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_control_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_root_managers_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_root_managers_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_roles_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_roles_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_permissions_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_permissions_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_role_permissions_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_role_permissions_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_members_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_members_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+CREATE TRIGGER lt_staff_invites_v2_no_truncate_v2 BEFORE TRUNCATE ON public.lt_staff_invites_v2 FOR EACH STATEMENT EXECUTE FUNCTION public.lt_review_block_mutation_v2();
+-- Préflight ultérieur: auditer ACL effectives/inherited de TOUTES les signatures ci-dessus,
+-- propriétaire isolé, extensions, auth.uid EXECUTE, et absence de writers hors RPCs.
+-- Toute impossibilité de provisioning du propriétaire fait ABORTER, pas élargir les grants.
+
+-- Digest do ficheiro M2: calculado/verificado pelo executor antes da transação.
+DO $attestation$
+DECLARE d text:=current_setting('app.review_package_sha256',true);
+BEGIN
+ IF d IS NULL OR d !~ '^[0-9a-f]{64}$' THEN RAISE EXCEPTION 'approved_package_checksum_required'; END IF;
+ EXECUTE format('COMMENT ON TABLE public.lt_staff_control_v2 IS %L','LiveTeka:M2:v2:approved-sha256='||d);
+END $attestation$;
