@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Pedido 08/11: identificar causa dos bloqueios de equipa/limites; controlos desativados no código, SQL de ativação não aplicado, não há aprovação Lovable nem dependência bancária para estes módulos.
+- [ ] Pedido 08/11: preparar SQL completo revisto para equipa, funções configuráveis, permissões granulares e limites sobre estruturas existentes; apresentar e obter aprovação expressa antes de aplicar.
+- [ ] Pedido 08/11: após autorização, ensaiar isoladamente e integrar convites enviados por email, aceitação, edição/suspensão/revogação, limites e auditoria nas operações reais; validar os fluxos autenticados sem dados financeiros fictícios na base partilhada.
+
 - [x] Pedido 07/11 22:32: eliminar pagamento na entrega do checkout e exigir seleção explícita entre seis métodos digitais, com validação autenticada e sem referências fictícias.
 - [ ] Pedido 07/11 22:32: bloquear também chamadas diretas à base: SQL completo em docs/finance/checkout-digital-only-review.sql aguarda aprovação expressa e ensaio isolado.
 - [ ] Pedido 07/11 22:32: iniciar os seis fluxos nativos reais e notificações: nenhum adaptador de checkout ativo ou credencial existente; aguarda contratos oficiais, credenciais e homologação dos fornecedores.
