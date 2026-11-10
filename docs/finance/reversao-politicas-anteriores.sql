@@ -1,0 +1,19 @@
+-- LIVE TEKÁ — inventário literal de políticas anteriores, 10/11/2026.
+-- SOMENTE REFERÊNCIA. NÃO APLICAR: restauração automática perderia permissões M2.
+-- Todas as instruções estão comentadas deliberadamente.
+-- ALTER POLICY fin_audit_select_admin ON public.financial_audit_log USING (has_role(auth.uid(), 'admin'::app_role));
+-- ALTER POLICY invoice_items_read_via_owned_invoice ON public.invoice_items USING ((EXISTS ( SELECT 1
+--    FROM invoices i
+--   WHERE ((i.id = invoice_items.invoice_id) AND (has_role(auth.uid(), 'admin'::app_role) OR ((i.store_id IS NOT NULL) AND (EXISTS ( SELECT 1
+--            FROM stores s
+--           WHERE ((s.id = i.store_id) AND (s.owner_id = auth.uid()))))) OR ((i.order_id IS NOT NULL) AND (EXISTS ( SELECT 1
+--            FROM orders o
+--           WHERE ((o.id = i.order_id) AND (o.customer_id = auth.uid()))))))))));
+-- ALTER POLICY invoices_admin_read ON public.invoices USING (has_role(auth.uid(), 'admin'::app_role));
+-- ALTER POLICY ledger_select_owner_admin ON public.ledger_entries USING ((has_role(auth.uid(), 'admin'::app_role) OR (EXISTS ( SELECT 1
+--    FROM stores s
+--   WHERE ((s.id = ledger_entries.store_id) AND (s.owner_id = auth.uid()))))));
+-- ALTER POLICY "own payout requests" ON public.payout_requests USING (((user_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role)));
+-- ALTER POLICY withdrawals_select_owner_admin ON public.store_withdrawals USING ((has_role(auth.uid(), 'admin'::app_role) OR (EXISTS ( SELECT 1
+--    FROM stores s
+--   WHERE ((s.id = store_withdrawals.store_id) AND (s.owner_id = auth.uid()))))));

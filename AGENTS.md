@@ -4,6 +4,7 @@
 - Financial limits/team changes must extend existing configuration, auth roles, audit and administrative RPCs, not install the retired parallel v2 financial foundation — why: a single authority preserves current financial contracts and data.
 - Every content route completes its own metadata through brandMeta; root holds only sitewide defaults and no social image — why: consistent branding without inherited images overriding entity previews.
 - Management consultation uses authenticated server functions and existing roles/RLS; no write controls are enabled before approved financial SQL and isolated validation — why: the panel must not imply unimplemented authority.
+- M1/M2 rollback freezes affected mutations and preserves data and current authorization/payment guards; old definitions are reference-only — why: reverting automatically must not reopen financial or privilege bypasses.
 - Bank identity comparison is a pure internal module, never payment evidence or a provider adapter — why: only officially authenticated bank evidence can authorize settlement.
 - Courier logistics RPCs project no customer payment method; orders retain existing customer/seller/admin RLS — why: hiding a label does not prevent data disclosure to the courier device.
 - Checkout submits through authenticated digital-method validation and fails before order/intent writes until official provider initiation exists; catalog flags and locally generated references never prove integration — why: prevent false payment success and stock reservations without a real payment flow.

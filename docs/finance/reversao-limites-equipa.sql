@@ -1,0 +1,592 @@
+-- LIVE TEKÁ — reversão de contenção M1/M2, 10/11/2026.
+-- SOMENTE REVISÃO. NÃO EXECUTADO. Requer autorização separada.
+-- Executar transacionalmente por migration, com escrita da aplicação interrompida.
+-- Não apagar tabelas/colunas, membros, pedidos, ledger ou auditoria.
+-- Não restaurar automaticamente validadores antigos: perderiam teto conjunto,
+-- deny-first e proteção bancária. A reversão segura congela mutações e preserva
+-- as leituras e proteções atuais até correção e nova autorização.
+-- A aplicação deve regressar às áreas de consulta existentes no mesmo cutover.
+-- As definições anteriores abaixo são inventário literal, NÃO comandos ativos.
+
+DO $guard$
+BEGIN
+ IF to_regprocedure('public.staff_can(text)') IS NULL
+ THEN RAISE EXCEPTION 'm2_not_installed'; END IF;
+END $guard$;
+REVOKE ALL ON FUNCTION public.admin_request_staff_change(text,jsonb,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.admin_review_staff_change(uuid,boolean,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.admin_invite_staff(text,uuid,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.staff_invitation_recipient(uuid,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.staff_invitation_delivery(uuid,bigint,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.accept_staff_invite(text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.admin_set_staff_status(uuid,text,bigint,text) FROM PUBLIC,anon,authenticated,service_role;
+DO $freeze_m1$
+DECLARE signature text;
+BEGIN
+ FOREACH signature IN ARRAY ARRAY[
+ 'public.admin_save_withdrawal_limit(text,text,text,numeric,numeric,bigint,text)',
+ 'public.request_store_withdrawal(uuid,numeric)',
+ 'public.request_payout(text,text,jsonb)',
+ 'public.admin_withdrawal_action(uuid,text,text,text,text)',
+ 'public.admin_settle_payout(uuid,text,text,text)',
+ 'public.admin_register_external_invoice(uuid,text,text,timestamp with time zone,numeric,text)'
+ ] LOOP
+  IF to_regprocedure(signature) IS NOT NULL THEN
+   EXECUTE 'REVOKE ALL ON FUNCTION '||signature||' FROM PUBLIC,anon,authenticated,service_role';
+  END IF;
+ END LOOP;
+END $freeze_m1$;
+REVOKE INSERT,UPDATE,DELETE,TRUNCATE ON public.staff_members,public.staff_roles,
+ public.staff_change_requests,public.withdrawal_limits,public.financial_audit_log
+ FROM PUBLIC,anon,authenticated,service_role;
+-- Conservar configurações atuais; nunca repor valores monetários silenciosamente.
+-- Conservar staff_can e políticas M1: não devolver acessos a membros revogados.
+
+-- INVENTÁRIO ANTERIOR CAPTURADO EM LEITURA EM 10/11/2026.
+-- Não executar as definições seguintes depois de ativação sem revisão específica.
+
+-- Assinatura: admin_financial_summary()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_financial_summary()
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE res jsonb;
+-- BEGIN
+--   IF NOT public.has_role(auth.uid(), 'admin'::app_role) THEN
+--     RAISE EXCEPTION 'forbidden';
+--   END IF;
+-- 
+--   WITH verified_orders AS (
+--     SELECT o.* FROM public.orders o
+--     WHERE o.paid_at IS NOT NULL
+--       AND EXISTS (
+--         SELECT 1 FROM public.payment_intents pi
+--         WHERE pi.order_id = o.id AND pi.status = 'paid'
+--           AND pi.verified_at IS NOT NULL
+--           AND public.is_trusted_payment_source(pi.verified_source)
+--       )
+--   ), unverified_orders AS (
+--     SELECT o.* FROM public.orders o
+--     WHERE o.paid_at IS NOT NULL
+--       AND NOT EXISTS (
+--         SELECT 1 FROM public.payment_intents pi
+--         WHERE pi.order_id = o.id AND pi.status = 'paid'
+--           AND pi.verified_at IS NOT NULL
+--           AND public.is_trusted_payment_source(pi.verified_source)
+--       )
+--   )
+--   SELECT jsonb_build_object(
+--     'orders_total', (SELECT count(*) FROM public.orders),
+--     'orders_paid', (SELECT count(*) FROM verified_orders),
+--     'orders_pending', (SELECT count(*) FROM public.orders WHERE status = 'pending'),
+--     'orders_cancelled', (SELECT count(*) FROM public.orders WHERE status = 'cancelled'),
+--     'gross_aoa', COALESCE((SELECT sum(total_aoa) FROM verified_orders), 0),
+--     'commission_aoa', COALESCE((SELECT sum(o.subtotal_aoa * public.store_commission_pct(o.store_id) / 100) FROM verified_orders o), 0),
+--     'net_sellers_aoa', COALESCE((SELECT sum(o.subtotal_aoa - (o.subtotal_aoa * public.store_commission_pct(o.store_id) / 100)) FROM verified_orders o), 0),
+--     'gross_unverified_aoa', COALESCE((SELECT sum(total_aoa) FROM unverified_orders), 0),
+--     'orders_unverified', (SELECT count(*) FROM unverified_orders),
+--     'signup_fees_paid_aoa', COALESCE((SELECT sum(amount_aoa) FROM public.store_signup_fees WHERE status = 'paid'), 0),
+--     'signup_fees_pending_aoa', COALESCE((SELECT sum(amount_aoa) FROM public.store_signup_fees WHERE status = 'pending'), 0),
+--     'subscriptions_active', (SELECT count(*) FROM public.store_subscriptions WHERE status = 'active' AND verified_at IS NOT NULL),
+--     'subscriptions_paid_aoa', COALESCE((
+--       SELECT sum(sp.amount_aoa) FROM public.subscription_payments sp
+--       JOIN public.store_subscriptions ss ON ss.id = sp.subscription_id
+--       WHERE sp.status = 'paid' AND sp.paid_at IS NOT NULL
+--         AND ss.verified_at IS NOT NULL
+--         AND public.is_trusted_payment_source(ss.verified_source)), 0),
+--     'subscriptions_unverified_aoa', COALESCE((
+--       SELECT sum(ss.price_aoa) FROM public.store_subscriptions ss
+--       WHERE ss.verified_at IS NULL AND ss.status <> 'rejected'), 0),
+--     'payouts_pending_aoa', COALESCE((SELECT sum(amount_aoa) FROM public.payout_requests WHERE status IN ('pending','processing')), 0),
+--     'payouts_paid_aoa', COALESCE((SELECT sum(amount_aoa) FROM public.payout_requests WHERE status = 'paid'), 0),
+--     'stores_total', (SELECT count(*) FROM public.stores),
+--     'stores_active', (SELECT count(*) FROM public.stores WHERE status = 'active')
+--   ) INTO res;
+--   RETURN res;
+-- END;
+-- $function$
+
+-- Assinatura: admin_financial_transactions(text,uuid,text,timestamp with time zone,timestamp with time zone,integer)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_financial_transactions(_status text DEFAULT NULL::text, _store_id uuid DEFAULT NULL::uuid, _method text DEFAULT NULL::text, _from timestamp with time zone DEFAULT NULL::timestamp with time zone, _to timestamp with time zone DEFAULT NULL::timestamp with time zone, _limit integer DEFAULT 100)
+--  RETURNS TABLE(id uuid, created_at timestamp with time zone, paid_at timestamp with time zone, status text, customer_name text, store_name text, store_id uuid, gross_aoa numeric, commission_aoa numeric, net_aoa numeric, payment_method text, reference text, items integer, verified boolean, verified_source text)
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--   IF NOT public.has_role(auth.uid(), 'admin'::app_role) THEN
+--     RAISE EXCEPTION 'forbidden';
+--   END IF;
+--   RETURN QUERY
+--   SELECT o.id, o.created_at, o.paid_at, o.status::text,
+--          COALESCE(p.display_name, 'Cliente'), s.name, s.id,
+--          o.total_aoa,
+--          round(o.subtotal_aoa * public.store_commission_pct(o.store_id) / 100, 2),
+--          round(o.subtotal_aoa - (o.subtotal_aoa * public.store_commission_pct(o.store_id) / 100), 2),
+--          COALESCE(o.payment_method, '—'),
+--          (SELECT pi.reference FROM public.payment_intents pi WHERE pi.order_id = o.id ORDER BY pi.created_at DESC LIMIT 1),
+--          (SELECT count(*)::int FROM public.order_items oi WHERE oi.order_id = o.id),
+--          EXISTS (SELECT 1 FROM public.payment_intents pi WHERE pi.order_id = o.id AND pi.status = 'paid'
+--                    AND pi.verified_at IS NOT NULL AND public.is_trusted_payment_source(pi.verified_source)),
+--          (SELECT pi.verified_source FROM public.payment_intents pi WHERE pi.order_id = o.id AND pi.verified_at IS NOT NULL
+--             ORDER BY pi.verified_at DESC LIMIT 1)
+--   FROM public.orders o
+--   JOIN public.stores s ON s.id = o.store_id
+--   LEFT JOIN public.profiles p ON p.id = o.customer_id
+--   WHERE (_status IS NULL OR o.status::text = _status)
+--     AND (_store_id IS NULL OR o.store_id = _store_id)
+--     AND (_method IS NULL OR o.payment_method = _method)
+--     AND (_from IS NULL OR o.created_at >= _from)
+--     AND (_to IS NULL OR o.created_at <= _to)
+--   ORDER BY o.created_at DESC
+--   LIMIT GREATEST(1, LEAST(COALESCE(_limit, 100), 500));
+-- END;
+-- $function$
+
+-- Assinatura: admin_payout_requests()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_payout_requests()
+--  RETURNS TABLE(id uuid, user_id uuid, user_name text, kind text, amount_aoa numeric, method text, status text, created_at timestamp with time zone, due_at timestamp with time zone, processed_at timestamp with time zone)
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- BEGIN
+--   IF NOT public.has_role(auth.uid(), 'admin'::app_role) THEN
+--     RAISE EXCEPTION 'forbidden';
+--   END IF;
+--   RETURN QUERY
+--   SELECT pr.id, pr.user_id, COALESCE(p.display_name, 'Utilizador'), pr.kind,
+--          pr.amount_aoa, pr.method, pr.status, pr.created_at, pr.due_at, pr.processed_at
+--   FROM public.payout_requests pr
+--   LEFT JOIN public.profiles p ON p.id = pr.user_id
+--   ORDER BY pr.created_at DESC
+--   LIMIT 200;
+-- END;
+-- $function$
+
+-- Assinatura: admin_platform_fiscal_documents(text,integer)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_platform_fiscal_documents(_state text DEFAULT NULL::text, _limit integer DEFAULT 100)
+--  RETURNS TABLE(id uuid, doc_kind text, full_number text, series text, number bigint, store_id uuid, store_name text, order_id uuid, subscription_id uuid, total_aoa numeric, currency_code text, issued_at timestamp with time zone, fiscal_state text, agt_number text, agt_series text, agt_issued_at timestamp with time zone, agt_total_aoa numeric, agt_pdf_path text, agt_registered_at timestamp with time zone)
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--   SELECT i.id, i.doc_kind, i.full_number, i.series, i.number,
+--          i.store_id, s.name, i.order_id, i.subscription_id,
+--          i.total_aoa, i.currency_code, i.issued_at,
+--          i.fiscal_state, i.agt_number, i.agt_series, i.agt_issued_at,
+--          i.agt_total_aoa, i.agt_pdf_path, i.agt_registered_at
+--     FROM public.invoices i
+--     LEFT JOIN public.stores s ON s.id = i.store_id
+--    WHERE public.has_role(auth.uid(), 'admin')
+--      AND i.issuer_kind = 'platform'
+--      AND (_state IS NULL OR i.fiscal_state = _state)
+--    ORDER BY i.issued_at DESC
+--    LIMIT GREATEST(1, LEAST(COALESCE(_limit, 100), 500));
+-- $function$
+
+-- Assinatura: admin_register_external_invoice(uuid,text,text,timestamp with time zone,numeric,text)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_register_external_invoice(_invoice_id uuid, _number text, _series text, _issued_at timestamp with time zone, _total_aoa numeric, _pdf_path text DEFAULT NULL::text)
+--  RETURNS uuid
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_inv record;
+-- BEGIN
+--   IF auth.uid() IS NULL OR NOT public.has_role(auth.uid(), 'admin') THEN
+--     RAISE EXCEPTION 'not_authorized';
+--   END IF;
+--   IF _number IS NULL OR btrim(_number) = '' THEN RAISE EXCEPTION 'invalid_document_number'; END IF;
+--   IF _series IS NULL OR btrim(_series) = '' THEN RAISE EXCEPTION 'invalid_document_series'; END IF;
+--   IF _issued_at IS NULL THEN RAISE EXCEPTION 'invalid_issue_date'; END IF;
+--   IF _total_aoa IS NULL OR _total_aoa < 0 THEN RAISE EXCEPTION 'invalid_amount'; END IF;
+-- 
+--   SELECT * INTO v_inv FROM public.invoices WHERE id = _invoice_id;
+--   IF v_inv.id IS NULL THEN RAISE EXCEPTION 'invoice_not_found'; END IF;
+--   IF v_inv.issuer_kind <> 'platform' THEN RAISE EXCEPTION 'only_platform_documents'; END IF;
+--   IF v_inv.fiscal_state = 'externally_issued' THEN RAISE EXCEPTION 'already_registered'; END IF;
+-- 
+--   UPDATE public.invoices
+--      SET fiscal_state = 'externally_issued',
+--          agt_number = btrim(_number),
+--          agt_series = btrim(_series),
+--          agt_issued_at = _issued_at,
+--          agt_total_aoa = round(_total_aoa, 2),
+--          agt_pdf_path = _pdf_path,
+--          agt_registered_by = auth.uid(),
+--          agt_registered_at = now(),
+--          updated_at = now()
+--    WHERE id = _invoice_id;
+-- 
+--   RETURN _invoice_id;
+-- END; $function$
+
+-- Assinatura: admin_settle_payout(uuid,text,text,text)
+-- Proprietário: postgres
+-- ACL anterior: {=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_settle_payout(_payout_id uuid, _status text DEFAULT 'paid'::text, _note text DEFAULT NULL::text, _bank_reference text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_row record;
+-- BEGIN
+--   IF NOT public.has_role(auth.uid(), 'admin'::app_role) THEN RAISE EXCEPTION 'not_authorized'; END IF;
+--   IF _status NOT IN ('processing','paid','cancelled','rejected') THEN RAISE EXCEPTION 'invalid_status'; END IF;
+--   IF _status = 'paid' AND COALESCE(TRIM(_bank_reference),'') = '' THEN RAISE EXCEPTION 'bank_reference_required'; END IF;
+--   SELECT * INTO v_row FROM public.payout_requests WHERE id = _payout_id FOR UPDATE;
+--   IF v_row.id IS NULL THEN RETURN jsonb_build_object('ok', false, 'reason', 'not_found'); END IF;
+--   IF v_row.status NOT IN ('pending','processing') THEN
+--     PERFORM public.fin_audit('payout_'||_status, v_row.kind, _payout_id::text, v_row.status, _status, 'rejected:invalid_transition', NULL, jsonb_build_object('attempted',_status));
+--     RETURN jsonb_build_object('ok', false, 'reason', 'invalid_transition', 'current_status', v_row.status);
+--   END IF;
+--   UPDATE public.payout_requests
+--      SET status = _status, note = COALESCE(_note, note),
+--          bank_reference = COALESCE(NULLIF(TRIM(_bank_reference),''), bank_reference),
+--          verification_state = CASE WHEN _status = 'paid' THEN 'verified' ELSE verification_state END,
+--          verification_source = CASE WHEN _status = 'paid' THEN 'manual' ELSE verification_source END,
+--          verified_at = CASE WHEN _status = 'paid' THEN now() ELSE verified_at END,
+--          processed_at = CASE WHEN _status IN ('paid','cancelled','rejected') THEN now() ELSE processed_at END,
+--          updated_at = now()
+--    WHERE id = _payout_id;
+--   PERFORM public.fin_audit('payout_'||_status, v_row.kind, _payout_id::text, v_row.status, _status, 'ok', _bank_reference,
+--     jsonb_build_object('payout_id',_payout_id,'user_id',v_row.user_id,'amount_aoa',v_row.amount_aoa,'note',_note));
+--   INSERT INTO public.user_notifications (user_id, kind, title, body, url, ref_id)
+--   VALUES (v_row.user_id, 'payout.' || _status,
+--           CASE _status WHEN 'paid' THEN 'Levantamento pago' WHEN 'cancelled' THEN 'Levantamento cancelado'
+--                        WHEN 'rejected' THEN 'Levantamento recusado' ELSE 'Levantamento em processamento' END,
+--           'Kz ' || to_char(v_row.amount_aoa, 'FM999G999G999D00'),
+--           CASE WHEN v_row.kind = 'affiliate' THEN '/afiliados' ELSE '/transportador' END, v_row.id);
+--   RETURN jsonb_build_object('ok', true, 'status', _status);
+-- END $function$
+
+-- Assinatura: admin_withdrawal_action(uuid,text,text,text,text)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.admin_withdrawal_action(_id uuid, _action text, _bank_reference text DEFAULT NULL::text, _proof_path text DEFAULT NULL::text, _reason text DEFAULT NULL::text)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE w public.store_withdrawals; v_owner uuid; v_new text;
+-- BEGIN
+--   IF auth.uid() IS NULL OR NOT public.has_role(auth.uid(),'admin') THEN
+--     PERFORM public.fin_audit('withdrawal_'||coalesce(_action,'?'),'withdrawal',_id::text,NULL,NULL,'rejected:not_admin',NULL);
+--     RAISE EXCEPTION 'not_authorized';
+--   END IF;
+--   SELECT * INTO w FROM public.store_withdrawals WHERE id=_id FOR UPDATE;
+--   IF w.id IS NULL THEN RAISE EXCEPTION 'not_found'; END IF;
+--   SELECT owner_id INTO v_owner FROM public.stores WHERE id = w.store_id;
+--   IF v_owner = auth.uid() OR w.requested_by = auth.uid() THEN
+--     PERFORM public.fin_audit('withdrawal_'||_action,'withdrawal',_id::text,w.status,NULL,'rejected:self_approval',NULL);
+--     RAISE EXCEPTION 'self_approval_forbidden';
+--   END IF;
+--   v_new := CASE _action WHEN 'approve' THEN 'APPROVED' WHEN 'process' THEN 'PROCESSING' WHEN 'pay' THEN 'PAID' WHEN 'reject' THEN 'REJECTED' END;
+--   IF v_new IS NULL THEN RAISE EXCEPTION 'invalid_action'; END IF;
+--   IF v_new='PAID' AND coalesce(trim(_bank_reference),'') = '' THEN RAISE EXCEPTION 'bank_reference_required'; END IF;
+--   IF v_new='REJECTED' AND coalesce(trim(_reason),'') = '' THEN RAISE EXCEPTION 'reason_required'; END IF;
+-- 
+--   UPDATE public.store_withdrawals SET status=v_new,
+--     reviewed_by = CASE WHEN v_new IN ('APPROVED','REJECTED') THEN auth.uid() ELSE reviewed_by END,
+--     reviewed_at = CASE WHEN v_new IN ('APPROVED','REJECTED') THEN now() ELSE reviewed_at END,
+--     processed_by = CASE WHEN v_new='PROCESSING' THEN auth.uid() ELSE processed_by END,
+--     processed_at = CASE WHEN v_new='PROCESSING' THEN now() ELSE processed_at END,
+--     paid_by = CASE WHEN v_new='PAID' THEN auth.uid() ELSE paid_by END,
+--     paid_at = CASE WHEN v_new='PAID' THEN now() ELSE paid_at END,
+--     bank_reference = COALESCE(_bank_reference, bank_reference),
+--     proof_path = COALESCE(_proof_path, proof_path),
+--     rejection_reason = COALESCE(_reason, rejection_reason)
+--   WHERE id=_id;
+-- 
+--   IF v_new='PAID' THEN
+--     INSERT INTO public.ledger_entries(store_id, withdrawal_id, kind, net_aoa, delta_reserved, origin, event_ref, idempotency_key, created_by)
+--     VALUES (w.store_id, w.id, 'withdrawal_paid', w.amount_aoa, -w.amount_aoa, 'bank_transfer', _bank_reference, 'wd_paid:'||w.id, auth.uid());
+--   ELSIF v_new='REJECTED' THEN
+--     INSERT INTO public.ledger_entries(store_id, withdrawal_id, kind, net_aoa, delta_available, delta_reserved, origin, event_ref, idempotency_key, created_by)
+--     VALUES (w.store_id, w.id, 'withdrawal_release', w.amount_aoa, w.amount_aoa, -w.amount_aoa, 'withdrawal_rejected', 'withdrawal:'||w.id, 'wd_release:'||w.id, auth.uid());
+--   END IF;
+--   PERFORM public.fin_audit('withdrawal_'||_action,'withdrawal',_id::text,w.status,v_new,'ok','withdrawal:'||w.id,
+--     jsonb_build_object('bank_reference',_bank_reference,'proof',_proof_path,'reason',_reason));
+--   RETURN jsonb_build_object('ok',true,'status',v_new);
+-- END $function$
+
+-- Assinatura: affiliate_withdrawable()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.affiliate_withdrawable()
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_uid uuid := auth.uid(); v_aff uuid; v_released numeric := 0; v_requested numeric := 0; v_open record; v_min numeric;
+-- BEGIN
+--   IF v_uid IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+--   SELECT id INTO v_aff FROM public.affiliate_accounts WHERE user_id = v_uid;
+--   IF v_aff IS NOT NULL THEN
+--     SELECT COALESCE(SUM(amount_aoa),0) INTO v_released
+--       FROM public.affiliate_commissions WHERE affiliate_id = v_aff AND status IN ('released','paid');
+--   END IF;
+--   SELECT COALESCE(SUM(amount_aoa),0) INTO v_requested
+--     FROM public.payout_requests WHERE user_id = v_uid AND kind = 'affiliate' AND status NOT IN ('cancelled','rejected');
+--   SELECT * INTO v_open FROM public.payout_requests
+--     WHERE user_id = v_uid AND kind = 'affiliate' AND status IN ('pending','processing')
+--     ORDER BY created_at DESC LIMIT 1;
+--   v_min := public.min_withdrawal_aoa();
+--   RETURN jsonb_build_object(
+--     'available_aoa', GREATEST(ROUND(v_released - v_requested, 2), 0),
+--     'min_amount_aoa', v_min,
+--     'below_minimum', GREATEST(ROUND(v_released - v_requested, 2), 0) < v_min,
+--     'max_daily_aoa', public.max_daily_withdrawal_aoa(),
+--     'remaining_today_aoa', GREATEST(public.max_daily_withdrawal_aoa() - public.payout_withdrawn_today(v_uid, 'affiliate'), 0),
+--     'has_open_request', v_open.id IS NOT NULL,
+--     'open_request', CASE WHEN v_open.id IS NULL THEN NULL ELSE jsonb_build_object(
+--       'id', v_open.id, 'amount_aoa', v_open.amount_aoa, 'status', v_open.status,
+--       'due_at', v_open.due_at, 'created_at', v_open.created_at) END
+--   );
+-- END $function$
+
+-- Assinatura: courier_withdrawable()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.courier_withdrawable()
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_uid uuid := auth.uid(); v_courier uuid; v_earned numeric := 0; v_requested numeric := 0;
+--         v_deliveries int := 0; v_open record; v_min numeric; v_available numeric;
+-- BEGIN
+--   IF v_uid IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+--   SELECT id INTO v_courier FROM public.couriers WHERE user_id = v_uid;
+--   IF v_courier IS NOT NULL THEN
+--     SELECT COALESCE(SUM(o.shipping_aoa),0), COUNT(*) INTO v_earned, v_deliveries
+--       FROM public.deliveries d JOIN public.orders o ON o.id = d.order_id
+--       WHERE d.courier_id = v_courier AND d.status = 'delivered';
+--   END IF;
+--   SELECT COALESCE(SUM(amount_aoa),0) INTO v_requested
+--     FROM public.payout_requests WHERE user_id = v_uid AND kind = 'courier' AND status NOT IN ('cancelled','rejected');
+--   SELECT * INTO v_open FROM public.payout_requests
+--     WHERE user_id = v_uid AND kind = 'courier' AND status IN ('pending','processing')
+--     ORDER BY created_at DESC LIMIT 1;
+--   v_available := GREATEST(ROUND(v_earned - v_requested, 2), 0);
+--   v_min := public.min_withdrawal_aoa();
+--   RETURN jsonb_build_object(
+--     'is_courier', v_courier IS NOT NULL, 'deliveries_done', v_deliveries,
+--     'earned_aoa', ROUND(v_earned, 2), 'withdrawn_aoa', ROUND(v_requested, 2),
+--     'available_aoa', v_available, 'min_amount_aoa', v_min, 'below_minimum', v_available < v_min,
+--     'max_daily_aoa', public.max_daily_withdrawal_aoa(),
+--     'remaining_today_aoa', GREATEST(public.max_daily_withdrawal_aoa() - public.payout_withdrawn_today(v_uid, 'courier'), 0),
+--     'has_open_request', v_open.id IS NOT NULL,
+--     'open_request', CASE WHEN v_open.id IS NULL THEN NULL ELSE jsonb_build_object(
+--       'id', v_open.id, 'amount_aoa', v_open.amount_aoa, 'status', v_open.status,
+--       'due_at', v_open.due_at, 'created_at', v_open.created_at) END
+--   );
+-- END $function$
+
+-- Assinatura: max_daily_withdrawal_aoa()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.max_daily_withdrawal_aoa()
+--  RETURNS numeric
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--   SELECT max_daily_amount FROM public.withdrawal_limits WHERE currency = 'AOA'
+-- $function$
+
+-- Assinatura: min_withdrawal_aoa()
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,service_role=X/postgres,=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.min_withdrawal_aoa()
+--  RETURNS numeric
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--   SELECT COALESCE(
+--     (SELECT min_amount FROM public.withdrawal_limits WHERE currency = 'AOA'),
+--     (SELECT min_withdrawal_aoa FROM public.financial_settings LIMIT 1),
+--     10000)
+-- $function$
+
+-- Assinatura: request_payout(text,text,jsonb)
+-- Proprietário: postgres
+-- ACL anterior: {=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.request_payout(_kind text, _method text DEFAULT 'multicaixa_express'::text, _destination jsonb DEFAULT '{}'::jsonb)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_uid uuid := auth.uid(); v_state jsonb; v_available numeric; v_amount numeric;
+--         v_min numeric; v_remaining numeric; v_id uuid; v_due timestamptz;
+-- BEGIN
+--   IF v_uid IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+--   IF _kind NOT IN ('affiliate','courier') THEN RAISE EXCEPTION 'invalid_kind'; END IF;
+--   PERFORM pg_advisory_xact_lock(hashtext('payout:'||v_uid::text||':'||_kind));
+--   v_state := CASE WHEN _kind = 'affiliate' THEN public.affiliate_withdrawable() ELSE public.courier_withdrawable() END;
+--   v_min := public.min_withdrawal_aoa();
+--   IF (v_state->>'has_open_request')::boolean THEN
+--     PERFORM public.fin_audit('payout_request',_kind,v_uid::text,NULL,NULL,'rejected:open_request',NULL);
+--     RETURN jsonb_build_object('ok', false, 'reason', 'open_request');
+--   END IF;
+--   v_available := COALESCE((v_state->>'available_aoa')::numeric, 0);
+--   IF v_available <= 0 THEN
+--     PERFORM public.fin_audit('payout_request',_kind,v_uid::text,NULL,NULL,'rejected:insufficient_balance',NULL, jsonb_build_object('available',v_available));
+--     RETURN jsonb_build_object('ok', false, 'reason', 'insufficient_balance', 'available_aoa', v_available);
+--   END IF;
+--   v_remaining := GREATEST(public.max_daily_withdrawal_aoa() - public.payout_withdrawn_today(v_uid, _kind), 0);
+--   IF v_remaining <= 0 THEN
+--     PERFORM public.fin_audit('payout_request',_kind,v_uid::text,NULL,NULL,'rejected:daily_limit',NULL);
+--     RETURN jsonb_build_object('ok', false, 'reason', 'daily_limit', 'max_daily_aoa', public.max_daily_withdrawal_aoa());
+--   END IF;
+--   v_amount := LEAST(v_available, v_remaining);
+--   IF v_amount < v_min THEN
+--     PERFORM public.fin_audit('payout_request',_kind,v_uid::text,NULL,NULL,'rejected:below_minimum',NULL,
+--       jsonb_build_object('amount',v_amount,'available',v_available,'min_amount',v_min));
+--     RETURN jsonb_build_object('ok', false, 'reason', 'below_minimum_limit', 'min_amount_aoa', v_min, 'available_aoa', v_available);
+--   END IF;
+--   v_due := now() + interval '72 hours';
+--   INSERT INTO public.payout_requests (user_id, kind, amount_aoa, method, destination, due_at)
+--   VALUES (v_uid, _kind, v_amount, COALESCE(NULLIF(_method,''), 'multicaixa_express'), COALESCE(_destination, '{}'::jsonb), v_due)
+--   RETURNING id INTO v_id;
+--   PERFORM public.fin_audit('payout_request',_kind,v_id::text,NULL,'pending','ok',NULL,
+--     jsonb_build_object('amount_aoa',v_amount,'user_id',v_uid,'due_at',v_due));
+--   INSERT INTO public.user_notifications (user_id, kind, title, body, url, ref_id)
+--   VALUES (v_uid, 'payout.requested', 'Pedido de levantamento registado',
+--           'Kz ' || to_char(v_amount, 'FM999G999G999D00') || ' — processamento até ' || to_char(v_due, 'DD/MM/YYYY HH24:MI') || '.',
+--           CASE WHEN _kind = 'affiliate' THEN '/afiliados' ELSE '/transportador' END, v_id);
+--   INSERT INTO public.admin_notifications (kind, subject, payload)
+--   VALUES ('payout.requested', 'Novo pedido de levantamento',
+--           jsonb_build_object('payout_id', v_id, 'user_id', v_uid, 'kind', _kind, 'amount_aoa', v_amount, 'due_at', v_due));
+--   RETURN jsonb_build_object('ok', true, 'payout_id', v_id, 'amount_aoa', v_amount, 'due_at', v_due, 'status', 'pending');
+-- END $function$
+
+-- Assinatura: request_store_withdrawal(uuid,numeric)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.request_store_withdrawal(_store_id uuid, _amount numeric)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_owner uuid; b record; v_id uuid; v_amt numeric := ROUND(_amount, 2);
+--         v_max numeric; v_min numeric; v_today numeric;
+-- BEGIN
+--   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+--   SELECT owner_id INTO v_owner FROM public.stores WHERE id = _store_id;
+--   IF v_owner IS NULL OR v_owner <> auth.uid() THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:not_owner',NULL);
+--     RAISE EXCEPTION 'not_authorized';
+--   END IF;
+--   PERFORM pg_advisory_xact_lock(hashtext('ledger:'||_store_id::text));
+--   IF v_amt IS NULL OR v_amt <= 0 THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:invalid_amount',NULL, jsonb_build_object('amount',v_amt));
+--     RETURN jsonb_build_object('ok',false,'reason','invalid_amount');
+--   END IF;
+--   v_max := public.max_daily_withdrawal_aoa();
+--   v_min := public.min_withdrawal_aoa();
+--   v_today := public.store_withdrawn_today(_store_id);
+--   IF v_today + v_amt > v_max THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:daily_limit',NULL,
+--       jsonb_build_object('amount',v_amt,'withdrawn_today',v_today,'max_daily',v_max));
+--     RETURN jsonb_build_object('ok',false,'reason','daily_limit','max_daily_aoa',v_max,'remaining_today_aoa',GREATEST(v_max - v_today,0));
+--   END IF;
+--   IF v_amt < v_min THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:below_minimum',NULL,
+--       jsonb_build_object('amount',v_amt,'min_amount',v_min));
+--     RETURN jsonb_build_object('ok',false,'reason','below_minimum_limit','min_amount_aoa',v_min);
+--   END IF;
+--   SELECT * INTO b FROM public.ledger_balances(_store_id);
+--   IF v_amt > b.available THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:insufficient_balance',NULL, jsonb_build_object('amount',v_amt,'available',b.available));
+--     RETURN jsonb_build_object('ok',false,'reason','insufficient_balance');
+--   END IF;
+--   IF EXISTS (SELECT 1 FROM public.store_withdrawals WHERE store_id=_store_id AND status IN ('PENDING_REVIEW','APPROVED','PROCESSING')) THEN
+--     PERFORM public.fin_audit('withdrawal_request','store',_store_id::text,NULL,NULL,'rejected:open_request',NULL);
+--     RETURN jsonb_build_object('ok',false,'reason','open_request');
+--   END IF;
+--   INSERT INTO public.store_withdrawals(store_id, requested_by, amount_aoa) VALUES (_store_id, auth.uid(), v_amt) RETURNING id INTO v_id;
+--   INSERT INTO public.ledger_entries(store_id, withdrawal_id, kind, net_aoa, delta_available, delta_reserved, origin, event_ref, idempotency_key, created_by)
+--   VALUES (_store_id, v_id, 'withdrawal_reserve', v_amt, -v_amt, v_amt, 'withdrawal_request', 'withdrawal:'||v_id, 'wd_reserve:'||v_id, auth.uid());
+--   PERFORM public.fin_audit('withdrawal_request','withdrawal',v_id::text,NULL,'PENDING_REVIEW','ok','wd_reserve:'||v_id, jsonb_build_object('amount',v_amt));
+--   RETURN jsonb_build_object('ok',true,'id',v_id);
+-- END $function$
+
+-- Assinatura: store_ledger_summary(uuid)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.store_ledger_summary(_store_id uuid)
+--  RETURNS jsonb
+--  LANGUAGE plpgsql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+-- DECLARE v_owner uuid; b record; v_sales numeric; v_comm numeric; v_withdrawn numeric;
+--         v_max numeric; v_min numeric; v_today numeric;
+-- BEGIN
+--   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+--   SELECT owner_id INTO v_owner FROM public.stores WHERE id = _store_id;
+--   IF v_owner IS NULL THEN RAISE EXCEPTION 'store_not_found'; END IF;
+--   IF v_owner <> auth.uid() AND NOT public.has_role(auth.uid(),'admin') THEN RAISE EXCEPTION 'not_authorized'; END IF;
+--   SELECT * INTO b FROM public.ledger_balances(_store_id);
+--   SELECT COALESCE(SUM(gross_aoa),0), COALESCE(SUM(commission_aoa),0) INTO v_sales, v_comm
+--     FROM public.ledger_entries WHERE store_id=_store_id AND kind='sale_credit';
+--   SELECT COALESCE(SUM(net_aoa),0) INTO v_withdrawn
+--     FROM public.ledger_entries WHERE store_id=_store_id AND kind='withdrawal_paid';
+--   v_max := public.max_daily_withdrawal_aoa();
+--   v_min := public.min_withdrawal_aoa();
+--   v_today := public.store_withdrawn_today(_store_id);
+--   RETURN jsonb_build_object('available_aoa', b.available, 'pending_aoa', b.pending, 'reserved_aoa', b.reserved,
+--     'sales_aoa', v_sales, 'commissions_aoa', v_comm, 'withdrawn_aoa', v_withdrawn,
+--     'min_amount_aoa', v_min, 'below_minimum', b.available < v_min,
+--     'max_daily_withdrawal_aoa', v_max, 'withdrawn_today_aoa', v_today,
+--     'remaining_today_aoa', GREATEST(v_max - v_today, 0));
+-- END $function$
+
+-- Assinatura: withdrawal_day_start(text)
+-- Proprietário: postgres
+-- ACL anterior: {postgres=X/postgres,service_role=X/postgres}
+-- CREATE OR REPLACE FUNCTION public.withdrawal_day_start(_currency text DEFAULT 'AOA'::text)
+--  RETURNS timestamp with time zone
+--  LANGUAGE sql
+--  STABLE SECURITY DEFINER
+--  SET search_path TO 'public'
+-- AS $function$
+--   SELECT (date_trunc('day', now() AT TIME ZONE COALESCE((SELECT timezone FROM public.withdrawal_limits WHERE currency=_currency),'Africa/Luanda')))
+--          AT TIME ZONE COALESCE((SELECT timezone FROM public.withdrawal_limits WHERE currency=_currency),'Africa/Luanda')
+-- $function$
+
+-- POLÍTICAS ANTERIORES (inventário, não restauração automática):
+-- fin_audit_select_admin: has_role(auth.uid(), 'admin'::app_role)
+-- invoices_admin_read: has_role(auth.uid(), 'admin'::app_role)
+-- ledger_select_owner_admin: admin OU proprietário da loja
+-- withdrawals_select_owner_admin: admin OU proprietário da loja
+-- own payout requests: user_id=auth.uid() OU admin
+-- invoice_items_read_via_owned_invoice: admin OU proprietário da loja
+--   OU cliente do pedido associado à fatura.
+-- Comentário anterior financial_settings.min_withdrawal_aoa:
+-- DEPRECATED: no minimum withdrawal; replaced by withdrawal_limits.max_daily_amount
+-- Restauração de snapshots antigos é análise forense, não autorização de produção.
+-- Critérios antes de reabrir: permissões, saldo/reservas, teto conjunto e auditoria
+-- lidos através da interface; estados terminais nunca reabertos.
+-- Reversão funcional e fluxos reais: PENDENTES, nenhum PASS declarado.

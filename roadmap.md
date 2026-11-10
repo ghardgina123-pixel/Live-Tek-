@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Pedido 10/11: concluir reversão de contenção preservando dados/histórico e preparar apresentação integral de M2 e M1 para aprovação expressa, sem executar SQL; inventário anterior recuperado por leitura porque o ficheiro não persistiu.
+- [ ] Pedido 10/11: após aprovação expressa, aplicar M2 → M1 e ligar convites/email, /convite, membros/permissões, edição de limites e histórico às áreas existentes; validar sem criar outra área de testes.
+
 - [x] Pedido 08/11: identificar causa dos bloqueios de equipa/limites; controlos desativados no código, SQL de ativação não aplicado, não há aprovação Lovable nem dependência bancária para estes módulos.
 - [ ] Pedido 08/11: preparar SQL completo revisto para equipa, funções configuráveis, permissões granulares e limites sobre estruturas existentes; apresentar e obter aprovação expressa antes de aplicar.
 - [ ] Pedido 08/11: após autorização, ensaiar isoladamente e integrar convites enviados por email, aceitação, edição/suspensão/revogação, limites e auditoria nas operações reais; validar os fluxos autenticados sem dados financeiros fictícios na base partilhada.
