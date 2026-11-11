@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Pedido 11/11: corrigir proposta M2/team.approve, convites sem conta e identidade exclusiva de Gestor 1 nos RPCs; rever envio/tokens e preparar SQL integral/diff para nova revisão; nenhuma migração executada.
+- [ ] Pedido 11/11: executar apenas após nova aprovação do SQL atualizado e autorização de retoma; adaptar envio existente para destinatário validado por Gestor 1, sem usar helper genérico nem anunciar entrega com base em fila.
 - [x] Pedido 10/11: concluir reversão de contenção preservando dados/histórico e preparar apresentação integral de M2 e M1 para aprovação expressa, sem executar SQL; inventário anterior recuperado por leitura porque o ficheiro não persistiu.
 - [ ] Pedido 10/11: após aprovação expressa, aplicar M2 → M1 e ligar convites/email, /convite, membros/permissões, edição de limites e histórico às áreas existentes; validar sem criar outra área de testes.
 

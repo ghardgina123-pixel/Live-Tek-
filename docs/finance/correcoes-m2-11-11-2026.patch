@@ -1,0 +1,277 @@
+diff --git a/docs/finance/proposta-m2-integracao-revisada.sql b/docs/finance/proposta-m2-integracao-revisada.sql
+index 8008918..9a93beb 100644
+--- a/docs/finance/proposta-m2-integracao-revisada.sql
++++ b/docs/finance/proposta-m2-integracao-revisada.sql
+@@ -1,10 +1,11 @@
+ -- LIVE TEKÁ M2 — equipa operacional sobre autenticação e auditoria existentes.
+--- SOMENTE REVISÃO. NÃO APLICADO. Aprovação deste SQL e ensaio isolado obrigatórios.
++-- REVISÃO 11/11/2026. NÃO APLICADO. Requer nova aprovação expressa.
++-- A tentativa anterior foi cancelada antes de execução. Nenhuma migração autorizada nesta fase.
+ -- Não modifica user_roles, não cria gestores raiz ou autenticação paralela.
+ DO $preflight$
+ BEGIN
+  IF to_regclass('public.staff_members') IS NOT NULL OR to_regclass('public.staff_roles') IS NOT NULL
+- OR to_regclass('public.staff_change_requests') IS NOT NULL OR to_regprocedure('public.staff_can(text)') IS NOT NULL
++ OR to_regclass('public.staff_invitations') IS NOT NULL OR to_regclass('public.staff_change_requests') IS NOT NULL OR to_regprocedure('public.staff_can(text)') IS NOT NULL
+  THEN RAISE EXCEPTION 'equivalent_structure_requires_reaudit'; END IF;
+  IF to_regclass('public.user_roles') IS NULL OR to_regclass('public.financial_audit_log') IS NULL
+  OR to_regprocedure('public.fin_audit(text,text,text,text,text,text,text,jsonb)') IS NULL
+@@ -14,6 +15,9 @@ BEGIN
+  IF EXISTS(SELECT 1 FROM pg_auth_members am JOIN pg_roles r ON r.oid=am.roleid
+  JOIN pg_roles m ON m.oid=am.member WHERE r.rolname='postgres' AND m.rolname IN ('anon','authenticated','service_role'))
+  THEN RAISE EXCEPTION 'application_must_not_inherit_owner'; END IF;
++ IF NOT EXISTS(SELECT 1 FROM auth.users u WHERE u.id='ec01cf61-f7cb-438e-a864-2e7020198658'::uuid
++ AND lower(btrim(u.email))='antoniogarciagarcia375@gmail.com' AND u.email_confirmed_at IS NOT NULL
++ AND public.has_role(u.id,'admin')) THEN RAISE EXCEPTION 'designated_inviter_identity_mismatch'; END IF;
+ END $preflight$;
+ CREATE TABLE public.staff_roles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), name text NOT NULL UNIQUE,
+@@ -52,11 +56,12 @@ LANGUAGE sql IMMUTABLE SET search_path=pg_catalog,pg_temp AS $fn$
+  SELECT _permissions IS NOT NULL AND _category IN ('contabilista','financeiro','gestor')
+  AND array_position(_permissions,NULL) IS NULL
+  AND _permissions <@ ARRAY['finance.view','finance.prepare','finance.approve','finance.process','finance.reject',
+- 'finance.execute','finance.invoice.register','limits.read','limits.manage','team.read','team.manage']::text[]
++ 'finance.execute','finance.invoice.register','limits.read','limits.manage','team.read','team.manage','team.approve']::text[]
+  AND NOT (_category='contabilista' AND _permissions && ARRAY['finance.execute','finance.process']::text[])
+  AND (NOT (_permissions && ARRAY['finance.prepare','finance.approve','finance.process','finance.reject','finance.execute','finance.invoice.register']::text[]) OR 'finance.view'=ANY(_permissions))
+  AND (NOT ('limits.manage'=ANY(_permissions)) OR 'limits.read'=ANY(_permissions))
+- AND (NOT ('team.manage'=ANY(_permissions)) OR 'team.read'=ANY(_permissions))
++ AND (NOT (_permissions && ARRAY['team.manage','team.approve']::text[]) OR 'team.read'=ANY(_permissions))
++ AND (NOT ('team.approve'=ANY(_permissions)) OR _category='gestor')
+ $fn$;
+ REVOKE ALL ON FUNCTION public.staff_permissions_valid(text[],text) FROM PUBLIC,anon,authenticated,service_role;
+ 
+@@ -69,10 +74,10 @@ BEGIN
+  'finance.invoice.register','limits.read','limits.manage','team.read','team.manage','team.approve') THEN RETURN false; END IF;
+  SELECT * INTO m FROM public.staff_members WHERE user_id=a;
+  IF FOUND THEN
+-  IF m.status<>'active' OR _permission='team.approve' THEN RETURN false; END IF;
++  IF m.status<>'active' THEN RETURN false; END IF;
+   SELECT * INTO r FROM public.staff_roles WHERE id=m.role_id;
+   IF NOT FOUND OR NOT public.staff_permissions_valid(m.permissions,r.category) THEN RETURN false; END IF;
+-  RETURN _permission=ANY(m.permissions);
++  RETURN _permission=ANY(m.permissions) AND (_permission<>'team.approve' OR r.category='gestor');
+  END IF;
+  RETURN public.has_role(a,'admin');
+ END $fn$;
+@@ -90,6 +95,49 @@ BEGIN
+ END $fn$;
+ ALTER FUNCTION public.staff_authorize(text) OWNER TO postgres;
+ REVOKE ALL ON FUNCTION public.staff_authorize(text) FROM PUBLIC,anon,authenticated,service_role;
++-- Identidade protegida, fixada ao UUID real confirmado; nunca usar email do browser/JWT metadata.
++CREATE FUNCTION public.staff_inviter_valid(_user uuid) RETURNS boolean
++LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
++ SELECT _user='ec01cf61-f7cb-438e-a864-2e7020198658'::uuid
++ AND EXISTS(SELECT 1 FROM auth.users u WHERE u.id=_user
++ AND lower(btrim(u.email))='antoniogarciagarcia375@gmail.com' AND u.email_confirmed_at IS NOT NULL)
++ AND public.has_role(_user,'admin')
++ AND NOT EXISTS(SELECT 1 FROM public.staff_members m WHERE m.user_id=_user AND m.status<>'active')
++$fn$;
++ALTER FUNCTION public.staff_inviter_valid(uuid) OWNER TO postgres;
++REVOKE ALL ON FUNCTION public.staff_inviter_valid(uuid) FROM PUBLIC,anon,authenticated,service_role;
++CREATE FUNCTION public.staff_invite_authorize() RETURNS uuid
++LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
++DECLARE a uuid:=auth.uid();
++BEGIN
++ PERFORM pg_advisory_xact_lock(hashtextextended('liveteka:staff:authorization',0));
++ IF a IS NULL OR NOT public.staff_inviter_valid(a) THEN RAISE EXCEPTION 'designated_inviter_only'; END IF;
++ RETURN a;
++END $fn$;
++ALTER FUNCTION public.staff_invite_authorize() OWNER TO postgres;
++REVOKE ALL ON FUNCTION public.staff_invite_authorize() FROM PUBLIC,anon,authenticated,service_role;
++-- Complemento mínimo necessário: convite por email antes de existir auth.users/user_id.
++-- Não alterar a PK de staff_members, nem criar contas fictícias ou autenticação paralela.
++CREATE TABLE public.staff_invitations (
++ id uuid PRIMARY KEY DEFAULT gen_random_uuid(), email text NOT NULL UNIQUE,
++ role_id uuid NOT NULL REFERENCES public.staff_roles(id), role_version bigint NOT NULL,
++ permissions text[] NOT NULL, invited_by uuid NOT NULL, token_hash bytea,
++ expires_at timestamptz NOT NULL, version bigint NOT NULL DEFAULT 1,
++ status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','accepted','revoked')),
++ delivery text NOT NULL DEFAULT 'not_queued' CHECK(delivery IN ('not_queued','queued','failed','suppressed')),
++ accepted_by uuid, accepted_at timestamptz, created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++ updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
++ CHECK(email=lower(btrim(email)))
++);
++GRANT SELECT(id,email,role_id,role_version,permissions,invited_by,expires_at,version,status,delivery,
++ accepted_by,accepted_at,created_at,updated_at) ON public.staff_invitations TO authenticated;
++GRANT ALL ON public.staff_invitations TO service_role;
++ALTER TABLE public.staff_invitations ENABLE ROW LEVEL SECURITY;
++CREATE POLICY staff_invitations_read ON public.staff_invitations FOR SELECT TO authenticated
++ USING(public.staff_can('team.read'));
++CREATE TRIGGER staff_invitations_no_truncate BEFORE TRUNCATE ON public.staff_invitations
++ FOR EACH STATEMENT EXECUTE FUNCTION public.block_mutation();
++
+ CREATE POLICY staff_roles_read ON public.staff_roles FOR SELECT TO authenticated
+  USING(public.staff_can('team.read') OR EXISTS(SELECT 1 FROM public.staff_members m WHERE m.user_id=auth.uid() AND m.role_id=staff_roles.id));
+ CREATE POLICY staff_members_read ON public.staff_members FOR SELECT TO authenticated
+@@ -141,8 +189,10 @@ BEGIN
+  IF NOT FOUND OR q.status<>'pending' THEN RAISE EXCEPTION 'missing_or_terminal_request'; END IF;
+  IF q.requested_by=a THEN RAISE EXCEPTION 'self_approval_forbidden'; END IF;
+  -- The initiating account must still have authority when its request is approved.
+- IF NOT public.has_role(q.requested_by,'admin') AND NOT EXISTS(SELECT 1 FROM public.staff_members s
+- WHERE s.user_id=q.requested_by AND s.status='active' AND 'team.manage'=ANY(s.permissions))
++ IF NOT EXISTS(SELECT 1 FROM public.staff_members x JOIN public.staff_roles y ON y.id=x.role_id
++ WHERE x.user_id=q.requested_by AND x.status='active' AND public.staff_permissions_valid(x.permissions,y.category)
++ AND 'team.manage'=ANY(x.permissions)) AND NOT (public.has_role(q.requested_by,'admin')
++ AND NOT EXISTS(SELECT 1 FROM public.staff_members x WHERE x.user_id=q.requested_by))
+  THEN RAISE EXCEPTION 'requester_no_longer_authorized'; END IF;
+  IF EXISTS(SELECT 1 FROM public.staff_members s WHERE s.user_id=q.requested_by AND s.status<>'active')
+  THEN RAISE EXCEPTION 'requester_no_longer_authorized'; END IF;
+@@ -187,69 +237,97 @@ END $fn$;
+ 
+ CREATE FUNCTION public.admin_invite_staff(_email text,_role_id uuid,_reason text) RETURNS jsonb
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
+-DECLARE a uuid; t uuid; r public.staff_roles; m public.staff_members; token text;
++DECLARE a uuid; t uuid; r public.staff_roles; i public.staff_invitations; token text; e text;
+ BEGIN
+- a:=public.staff_authorize('team.manage');
+- IF _email IS NULL OR _reason IS NULL OR length(btrim(_reason))<3 OR length(_reason)>2000 THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+- SELECT id INTO STRICT t FROM auth.users WHERE lower(btrim(email))=lower(btrim(_email)) AND email_confirmed_at IS NOT NULL;
++ a:=public.staff_invite_authorize();
++ e:=lower(btrim(_email));
++ IF e IS NULL OR length(e)>254 OR e !~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'
++ OR _reason IS NULL OR length(btrim(_reason))<3 OR length(_reason)>2000 THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
++ SELECT u.id INTO t FROM auth.users u WHERE lower(btrim(u.email))=e;
+  IF t=a OR public.has_role(t,'admin') THEN RAISE EXCEPTION 'self_or_admin_invitation_forbidden'; END IF;
++ IF EXISTS(SELECT 1 FROM public.staff_members m WHERE m.user_id=t AND m.status<>'revoked')
++ THEN RAISE EXCEPTION 'member_already_exists'; END IF;
+  SELECT * INTO r FROM public.staff_roles WHERE id=_role_id;
+  IF NOT FOUND OR NOT public.staff_permissions_valid(r.permissions,r.category) THEN RAISE EXCEPTION 'invalid_role'; END IF;
+- SELECT * INTO m FROM public.staff_members WHERE user_id=t FOR UPDATE;
+- IF FOUND AND m.status NOT IN ('invited','revoked') THEN RAISE EXCEPTION 'member_already_exists'; END IF;
+  token:=encode(extensions.gen_random_bytes(32),'hex');
+- INSERT INTO public.staff_members(user_id,role_id,permissions,invited_by,invite_token_hash,invite_expires_at)
+- VALUES(t,r.id,r.permissions,a,extensions.digest(token,'sha256'),clock_timestamp()+interval '7 days')
+- ON CONFLICT(user_id) DO UPDATE SET role_id=EXCLUDED.role_id,permissions=EXCLUDED.permissions,status='invited',
+- invited_by=a,invited_at=clock_timestamp(),accepted_at=NULL,invite_token_hash=EXCLUDED.invite_token_hash,
+- invite_expires_at=EXCLUDED.invite_expires_at,invitation_delivery='not_queued',version=staff_members.version+1,updated_at=clock_timestamp()
+- RETURNING * INTO m;
+- PERFORM public.fin_audit('team.invited','staff_members',t::text,NULL,(to_jsonb(m)-'invite_token_hash')::text,'ok',NULL,jsonb_build_object('reason',_reason));
+- -- Returned only to the authenticated server flow for immediate email delivery; never log.
+- RETURN jsonb_build_object('user_id',t,'token',token,'version',m.version,'expires_at',m.invite_expires_at);
++ INSERT INTO public.staff_invitations(email,role_id,role_version,permissions,invited_by,token_hash,expires_at)
++ VALUES(e,r.id,r.version,r.permissions,a,extensions.digest(token,'sha256'),clock_timestamp()+interval '7 days')
++ ON CONFLICT(email) DO UPDATE SET role_id=EXCLUDED.role_id,role_version=EXCLUDED.role_version,
++ permissions=EXCLUDED.permissions,invited_by=a,token_hash=EXCLUDED.token_hash,expires_at=EXCLUDED.expires_at,
++ status='pending',delivery='not_queued',accepted_by=NULL,accepted_at=NULL,
++ version=staff_invitations.version+1,updated_at=clock_timestamp() RETURNING * INTO i;
++ PERFORM public.fin_audit('team.invited','staff_members',i.id::text,NULL,
++ (to_jsonb(i)-'token_hash')::text,'ok',NULL,jsonb_build_object('reason',_reason));
++ -- Token entregue uma vez ao fluxo autenticado de Gestor 1; nunca logar/retornar ao browser.
++ RETURN jsonb_build_object('invitation_id',i.id,'token',token,'version',i.version,'expires_at',i.expires_at);
+ END $fn$;
++-- _user é o UUID do convite, não um UUID fictício de utilizador sem conta.
+ CREATE FUNCTION public.staff_invitation_recipient(_user uuid,_token text) RETURNS text
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
+-DECLARE m public.staff_members; e text;
++DECLARE i public.staff_invitations; r public.staff_roles;
+ BEGIN
+- PERFORM public.staff_authorize('team.manage');
+- SELECT * INTO m FROM public.staff_members WHERE user_id=_user;
+- IF NOT FOUND OR m.invited_by<>auth.uid() OR m.status<>'invited' OR m.invite_expires_at<=clock_timestamp()
+- OR _token IS NULL OR _token !~ '^[a-f0-9]{64}$' OR m.invite_token_hash IS NULL
+- OR m.invite_token_hash<>extensions.digest(_token,'sha256') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+- SELECT email INTO e FROM auth.users WHERE id=_user AND email_confirmed_at IS NOT NULL;
+- IF e IS NULL THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+- RETURN e;
++ PERFORM public.staff_invite_authorize();
++ SELECT * INTO i FROM public.staff_invitations WHERE id=_user;
++ IF NOT FOUND OR i.invited_by<>auth.uid() OR i.status<>'pending' OR i.expires_at<=clock_timestamp()
++ OR _token IS NULL OR _token !~ '^[a-f0-9]{64}$' OR i.token_hash IS NULL
++ OR i.token_hash<>extensions.digest(_token,'sha256') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
++ SELECT * INTO r FROM public.staff_roles WHERE id=i.role_id;
++ IF NOT FOUND OR r.version<>i.role_version OR r.permissions IS DISTINCT FROM i.permissions
++ OR NOT public.staff_permissions_valid(i.permissions,r.category) THEN RAISE EXCEPTION 'invitation_role_changed'; END IF;
++ RETURN i.email;
+ END $fn$;
+ CREATE FUNCTION public.staff_invitation_delivery(_user uuid,_version bigint,_delivery text) RETURNS void
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
+ BEGIN
+- PERFORM public.staff_authorize('team.manage');
++ PERFORM public.staff_invite_authorize();
+  IF _delivery IS NULL OR _delivery NOT IN ('queued','failed','suppressed') THEN RAISE EXCEPTION 'invalid_delivery'; END IF;
+- UPDATE public.staff_members SET invitation_delivery=_delivery,updated_at=clock_timestamp()
+- WHERE user_id=_user AND invited_by=auth.uid() AND version=_version AND status='invited';
++ UPDATE public.staff_invitations SET delivery=_delivery,updated_at=clock_timestamp()
++ WHERE id=_user AND invited_by=auth.uid() AND version=_version AND status='pending'
++ AND expires_at>clock_timestamp();
+  IF NOT FOUND THEN RAISE EXCEPTION 'invitation_changed'; END IF;
++ -- queued é fila confirmada, nunca prova de chegada à caixa do destinatário.
+  PERFORM public.fin_audit('team.invitation.'||_delivery,'staff_members',_user::text,NULL,_delivery,'ok',NULL);
+ END $fn$;
++CREATE FUNCTION public.admin_revoke_staff_invitation(_id uuid,_version bigint,_reason text) RETURNS jsonb
++LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
++DECLARE i public.staff_invitations;
++BEGIN
++ PERFORM public.staff_invite_authorize();
++ IF _reason IS NULL OR length(btrim(_reason))<3 OR length(_reason)>2000 THEN RAISE EXCEPTION 'reason_required'; END IF;
++ SELECT * INTO i FROM public.staff_invitations WHERE id=_id FOR UPDATE;
++ IF NOT FOUND OR i.status<>'pending' OR i.version IS DISTINCT FROM _version THEN RAISE EXCEPTION 'invitation_changed'; END IF;
++ UPDATE public.staff_invitations SET status='revoked',token_hash=NULL,version=version+1,updated_at=clock_timestamp() WHERE id=i.id;
++ PERFORM public.fin_audit('team.invitation.revoked','staff_members',i.id::text,NULL,'revoked','ok',NULL,jsonb_build_object('reason',_reason));
++ RETURN jsonb_build_object('ok',true);
++END $fn$;
+ CREATE FUNCTION public.accept_staff_invite(_token text) RETURNS jsonb
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $fn$
+-DECLARE a uuid:=auth.uid(); m public.staff_members; n public.staff_members; inviter public.staff_members;
++DECLARE a uuid:=auth.uid(); e text; i public.staff_invitations; r public.staff_roles; m public.staff_members; n public.staff_members;
+ BEGIN
+  IF a IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+  IF _token IS NULL OR _token !~ '^[a-f0-9]{64}$' THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+  PERFORM pg_advisory_xact_lock(hashtextextended('liveteka:staff:authorization',0));
++ SELECT lower(btrim(u.email)) INTO e FROM auth.users u WHERE u.id=a AND u.email_confirmed_at IS NOT NULL;
++ IF e IS NULL OR public.has_role(a,'admin') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
++ SELECT * INTO i FROM public.staff_invitations WHERE email=e AND status='pending' FOR UPDATE;
++ IF NOT FOUND OR i.invited_by=a OR i.expires_at<=clock_timestamp() OR i.token_hash IS NULL
++ OR i.token_hash<>extensions.digest(_token,'sha256') THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
++ IF NOT public.staff_inviter_valid(i.invited_by) THEN RAISE EXCEPTION 'inviter_no_longer_authorized'; END IF;
++ SELECT * INTO r FROM public.staff_roles WHERE id=i.role_id;
++ IF NOT FOUND OR r.version<>i.role_version OR r.permissions IS DISTINCT FROM i.permissions
++ OR NOT public.staff_permissions_valid(i.permissions,r.category) THEN RAISE EXCEPTION 'invitation_role_changed'; END IF;
+  SELECT * INTO m FROM public.staff_members WHERE user_id=a FOR UPDATE;
+- IF NOT FOUND OR m.status<>'invited' OR m.invited_by=a OR m.invite_expires_at IS NULL
+- OR m.invite_expires_at<=clock_timestamp() OR m.invite_token_hash IS NULL
+- OR m.invite_token_hash<>extensions.digest(_token,'sha256') OR public.has_role(a,'admin')
+- OR NOT EXISTS(SELECT 1 FROM auth.users WHERE id=a AND email_confirmed_at IS NOT NULL) THEN RAISE EXCEPTION 'invalid_invitation'; END IF;
+- SELECT * INTO inviter FROM public.staff_members WHERE user_id=m.invited_by;
+- IF FOUND THEN
+-  IF inviter.status<>'active' OR NOT ('team.manage'=ANY(inviter.permissions)) THEN RAISE EXCEPTION 'inviter_no_longer_authorized'; END IF;
+- ELSIF NOT public.has_role(m.invited_by,'admin') THEN RAISE EXCEPTION 'inviter_no_longer_authorized'; END IF;
+- UPDATE public.staff_members SET status='active',invite_token_hash=NULL,accepted_at=clock_timestamp(),version=version+1,updated_at=clock_timestamp()
+- WHERE user_id=a RETURNING * INTO n;
+- PERFORM public.fin_audit('team.accepted','staff_members',a::text,(to_jsonb(m)-'invite_token_hash')::text,(to_jsonb(n)-'invite_token_hash')::text,'ok',NULL);
++ IF FOUND AND m.status<>'revoked' THEN RAISE EXCEPTION 'member_already_exists'; END IF;
++ INSERT INTO public.staff_members(user_id,role_id,status,permissions,invited_by,invited_at,accepted_at)
++ VALUES(a,r.id,'active',i.permissions,i.invited_by,i.created_at,clock_timestamp())
++ ON CONFLICT(user_id) DO UPDATE SET role_id=EXCLUDED.role_id,status='active',permissions=EXCLUDED.permissions,
++ invited_by=EXCLUDED.invited_by,invited_at=EXCLUDED.invited_at,accepted_at=EXCLUDED.accepted_at,
++ invite_token_hash=NULL,invite_expires_at=NULL,version=staff_members.version+1,updated_at=clock_timestamp()
++ RETURNING * INTO n;
++ UPDATE public.staff_invitations SET status='accepted',token_hash=NULL,accepted_by=a,
++ accepted_at=clock_timestamp(),version=version+1,updated_at=clock_timestamp() WHERE id=i.id;
++ PERFORM public.fin_audit('team.accepted','staff_members',a::text,(to_jsonb(m)-'invite_token_hash')::text,
++ (to_jsonb(n)-'invite_token_hash')::text,'ok',NULL,jsonb_build_object('invitation_id',i.id));
+  RETURN jsonb_build_object('ok',true);
+ END $fn$;
+ CREATE FUNCTION public.admin_set_staff_status(_user uuid,_status text,_version bigint,_reason text) RETURNS jsonb
+@@ -273,6 +351,7 @@ END $fn$;
+ -- never silently grant new role defaults to every existing member.
+ ALTER FUNCTION public.admin_request_staff_change(text,jsonb,text) OWNER TO postgres;
+ ALTER FUNCTION public.admin_review_staff_change(uuid,boolean,text) OWNER TO postgres;
++ALTER FUNCTION public.admin_revoke_staff_invitation(uuid,bigint,text) OWNER TO postgres;
+ ALTER FUNCTION public.admin_invite_staff(text,uuid,text) OWNER TO postgres;
+ ALTER FUNCTION public.staff_invitation_recipient(uuid,text) OWNER TO postgres;
+ ALTER FUNCTION public.staff_invitation_delivery(uuid,bigint,text) OWNER TO postgres;
+@@ -280,10 +359,10 @@ ALTER FUNCTION public.accept_staff_invite(text) OWNER TO postgres;
+ ALTER FUNCTION public.admin_set_staff_status(uuid,text,bigint,text) OWNER TO postgres;
+ REVOKE ALL ON FUNCTION public.admin_request_staff_change(text,jsonb,text),public.admin_review_staff_change(uuid,boolean,text),
+ public.admin_invite_staff(text,uuid,text),public.staff_invitation_recipient(uuid,text),public.staff_invitation_delivery(uuid,bigint,text),
+-public.accept_staff_invite(text),public.admin_set_staff_status(uuid,text,bigint,text) FROM PUBLIC,anon,authenticated,service_role;
++public.admin_revoke_staff_invitation(uuid,bigint,text),public.accept_staff_invite(text),public.admin_set_staff_status(uuid,text,bigint,text) FROM PUBLIC,anon,authenticated,service_role;
+ GRANT EXECUTE ON FUNCTION public.admin_request_staff_change(text,jsonb,text),public.admin_review_staff_change(uuid,boolean,text),
+ public.admin_invite_staff(text,uuid,text),public.staff_invitation_recipient(uuid,text),public.staff_invitation_delivery(uuid,bigint,text),
+-public.accept_staff_invite(text),public.admin_set_staff_status(uuid,text,bigint,text) TO authenticated;
++public.admin_revoke_staff_invitation(uuid,bigint,text),public.accept_staff_invite(text),public.admin_set_staff_status(uuid,text,bigint,text) TO authenticated;
+ CREATE TRIGGER staff_members_no_truncate BEFORE TRUNCATE ON public.staff_members FOR EACH STATEMENT EXECUTE FUNCTION public.block_mutation();
+ CREATE TRIGGER staff_roles_no_truncate BEFORE TRUNCATE ON public.staff_roles FOR EACH STATEMENT EXECUTE FUNCTION public.block_mutation();
+ CREATE TRIGGER staff_changes_no_truncate BEFORE TRUNCATE ON public.staff_change_requests FOR EACH STATEMENT EXECUTE FUNCTION public.block_mutation();
