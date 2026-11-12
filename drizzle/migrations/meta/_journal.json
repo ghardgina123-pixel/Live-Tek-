@@ -64,6 +64,13 @@
       "when": 1794062593690,
       "tag": "0008_courier_delivery_payment_privacy",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794474978478,
+      "tag": "0009_restrict_financial_settings_read_to_admin",
+      "breakpoints": true
     }
   ]
 }
