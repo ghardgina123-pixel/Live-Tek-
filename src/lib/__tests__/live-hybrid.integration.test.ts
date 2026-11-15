@@ -174,6 +174,7 @@ function makeTable(rows: () => Row[]) {
 
 vi.mock("@/integrations/supabase/client.server", () => ({
   supabaseAdmin: {
+    rpc: vi.fn(async () => ({ data: true, error: null })),
     from: (name: string) => {
       if (name === "lives") return makeTable(() => state.lives);
       if (name === "live_events") return makeTable(() => state.events);

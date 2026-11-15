@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscriptionStatus } from "@/hooks/use-subscription";
+import { liveAccess } from "@/lib/live-access";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
@@ -98,10 +99,7 @@ function LivesManager() {
 
   const storeId = store?.id;
   const { status: subStatus, usage, reload: reloadSub } = useSubscriptionStatus(storeId);
-  const limitReached =
-    !!usage && !usage.unlimited && usage.limit !== null && usage.used >= usage.limit;
-  const canGoLive = (subStatus ? subStatus.can_go_live : true) && !limitReached;
-  const blocked = subStatus ? !subStatus.can_go_live : false;
+  const { allowed: canGoLive, subscriptionBlocked: blocked, limitReached } = liveAccess(store?.partner_type, subStatus, usage);
 
   const load = async (sid: string) => {
     const { data } = await supabase
@@ -129,7 +127,7 @@ function LivesManager() {
     };
   }, [storeId]);
 
-  const makeRoom = () => `store-${storeId!.slice(0, 8)}-${Date.now().toString(36)}`;
+  const makeRoom = (sid: string) => `store-${sid.slice(0, 8)}-${Date.now().toString(36)}`;
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +140,7 @@ function LivesManager() {
       .insert({
         store_id: storeId,
         title: title.trim(),
-        livekit_room: makeRoom(),
+        livekit_room: makeRoom(storeId),
         status: "scheduled",
       })
       .select("id")
@@ -171,7 +169,7 @@ function LivesManager() {
       .insert({
         store_id: storeId,
         title: defaultTitle,
-        livekit_room: makeRoom(),
+        livekit_room: makeRoom(storeId),
         status: "scheduled",
       })
       .select("id")
@@ -280,7 +278,7 @@ function LivesManager() {
             </Link>
           </div>
         )}
-        {usage && !blocked && subStatus?.subscription_required && (
+        {usage && !blocked && store?.partner_type === "service" && subStatus?.subscription_required && (
           <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3 text-xs">
             <p className="font-medium">
               Lives usadas este mês: {usage.used}
@@ -298,7 +296,7 @@ function LivesManager() {
             )}
           </div>
         )}
-        <Button onClick={quickCreate} disabled={creating || blocked} className="w-full" size="lg">
+        <Button onClick={quickCreate} disabled={creating || !canGoLive} className="w-full" size="lg">
           {creating ? (
             <Loader2 className="animate-spin" size={18} />
           ) : (
@@ -323,7 +321,7 @@ function LivesManager() {
           </div>
           <Button
             type="submit"
-            disabled={!title.trim() || creating || blocked}
+            disabled={!title.trim() || creating || !canGoLive}
             variant="outline"
             className="w-full"
           >

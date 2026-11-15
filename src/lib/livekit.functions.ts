@@ -32,7 +32,7 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: live } = await supabaseAdmin
       .from("lives")
-      .select("livekit_room, status, stores:store_id(owner_id)")
+      .select("store_id, livekit_room, status, stores:store_id(owner_id)")
       .eq("id", data.liveId)
       .maybeSingle();
     const room = (live as { livekit_room?: string } | null)?.livekit_room;
@@ -41,6 +41,10 @@ export const issueLiveKitToken = createServerFn({ method: "POST" })
     if ((live as { status?: string } | null)?.status === "ended") throw new Error("LIVE_ENDED");
     const ownerId = (live as { stores?: { owner_id?: string } } | null)?.stores?.owner_id;
     const canPublish = !!data.canPublish && !!ownerId && ownerId === context.userId;
+    if (canPublish && live?.store_id) {
+      const { data: allowed, error } = await context.supabase.rpc("can_store_go_live", { _store_id: live.store_id });
+      if (error || !allowed) throw new Error("subscription_inactive");
+    }
     const { recordSecurityEvent, requestAuditMeta } = await import("./audit.server");
     const { getRequest } = await import("@tanstack/react-start/server");
     const meta = requestAuditMeta(getRequest());

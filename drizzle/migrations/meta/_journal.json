@@ -71,6 +71,13 @@
       "when": 1794474978478,
       "tag": "0009_restrict_financial_settings_read_to_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794740075616,
+      "tag": "0010_retail_live_access_unlimited",
+      "breakpoints": true
     }
   ]
 }

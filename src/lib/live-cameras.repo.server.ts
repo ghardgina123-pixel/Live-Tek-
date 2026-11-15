@@ -314,6 +314,8 @@ export async function addCamera(
 /** Cria (ou recria) o ingress LiveKit que capta o stream real da câmara. */
 async function provisionIngress(live: OwnedLive, row: CameraRow): Promise<LiveCameraDTO> {
   const db = await admin();
+  const { data: allowed, error: accessError } = await db.rpc("can_store_go_live", { _store_id: live.storeId });
+  if (accessError || !allowed) throw new Error("subscription_inactive");
   const cfg = livekitConfig();
   const client = ingressClient(cfg);
 
