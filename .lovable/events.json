@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.live_created": {
+      "event_schema_version": 1,
+      "description": "A Live was successfully created through an existing store creation handler.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entry_point",
+          "category"
+        ],
+        "properties": {
+          "entry_point": {
+            "type": "string",
+            "enum": [
+              "quick",
+              "custom_title"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "retail",
+              "service",
+              "unknown"
+            ]
+          }
+        }
+      }
+    },
+    "project.live_failed": {
+      "event_schema_version": 1,
+      "description": "An existing Live creation, phone publication, connection, status update or ending handler failed; only bounded categories, no error text.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "stage",
+          "reason"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "publisher",
+              "viewer"
+            ]
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "creation",
+              "publishing",
+              "connection",
+              "status_update",
+              "ending"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "request_failed",
+              "unconfigured",
+              "permission_denied",
+              "device_missing",
+              "media_or_connection_failed",
+              "disconnected"
+            ]
+          }
+        }
+      }
+    },
+    "project.live_started": {
+      "event_schema_version": 1,
+      "description": "Phone video publication succeeded and the store handler confirmed the Live status write.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "phone"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

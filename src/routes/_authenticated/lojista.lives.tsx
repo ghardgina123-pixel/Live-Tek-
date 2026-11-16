@@ -147,9 +147,11 @@ function LivesManager() {
       .single();
     setCreating(false);
     if (error) {
+      window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "creation", reason: "request_failed" });
       await reloadSub();
       return toast.error(liveErrorMessage(error.message));
     }
+    window.__lovableEvents?.track?.("project.live_created", { entry_point: "custom_title", category: store?.partner_type ?? "unknown" });
     setTitle("");
     toast.success(t("s_live_criada_a_preparar_camara"));
     if (data?.id) {
@@ -176,9 +178,11 @@ function LivesManager() {
       .single();
     setCreating(false);
     if (error) {
+      window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "creation", reason: "request_failed" });
       await reloadSub();
       return toast.error(liveErrorMessage(error.message));
     }
+    window.__lovableEvents?.track?.("project.live_created", { entry_point: "quick", category: store?.partner_type ?? "unknown" });
     toast.success(t("s_live_criada_a_preparar_camara"));
     if (data?.id) {
       if (storeId) await load(storeId);
@@ -199,7 +203,12 @@ function LivesManager() {
       .from("lives")
       .update({ status: "live", started_at: new Date().toISOString() })
       .eq("id", id);
-    if (error) toast.error(error.message);
+    if (error) {
+      window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "status_update", reason: "request_failed" });
+      toast.error(error.message);
+      return;
+    }
+    window.__lovableEvents?.track?.("project.live_started", { source: "phone" });
   };
 
   const rollbackLive = async (id: string, reason: string) => {
@@ -210,16 +219,20 @@ function LivesManager() {
   // Encerrar passa pelo servidor: destrói a sala LiveKit e revoga as chaves
   // de ingestão antes de marcar a live como terminada.
   const endLive = async (id: string) => {
+    let completion = "server";
     try {
       await endLiveRemote({ data: { liveId: id } });
     } catch (e) {
+      window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "ending", reason: "request_failed" });
       const { error } = await supabase
         .from("lives")
         .update({ status: "ended", ended_at: new Date().toISOString() })
         .eq("id", id);
       if (error) return toast.error(error.message);
       console.error("endLive fallback", e);
+      completion = "status_only_fallback";
     }
+    window.__lovableEvents?.track?.("project.live_ended", { completion });
     if (activeId === id) setActiveId(null);
   };
 

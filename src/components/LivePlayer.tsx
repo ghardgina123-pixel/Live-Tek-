@@ -3,21 +3,26 @@ import {
   Room,
   RoomEvent,
   ConnectionState,
+  ConnectionQuality,
   Track,
   type RemoteTrack,
   type RemoteTrackPublication,
   type RemoteParticipant,
+  type Participant,
 } from "livekit-client";
 import { Loader2, Video, WifiOff, AlertTriangle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { issueLiveKitToken } from "@/lib/livekit.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { LiveConnectionIndicator } from "@/components/LiveConnectionIndicator";
+import { liveConnectionStatus, type LiveConnection } from "@/lib/live-connection";
 
 type Props = { liveId: string };
 
 type State =
   | "connecting"
   | "reconnecting"
+  | "disconnected"
   | "live"
   | "waiting"
   | "error"
@@ -38,7 +43,9 @@ export function LivePlayer({ liveId }: Props) {
   const videoTracksRef = useRef<Map<string, RemoteTrack>>(new Map());
   const activeIdentityRef = useRef<string | null>(null);
   const [state, setState] = useState<State>("connecting");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [connection, setConnection] = useState<LiveConnection>("connecting");
+  const qualityRef = useRef(ConnectionQuality.Unknown);
+  const stalledRef = useRef(false);
   const issue = useServerFn(issueLiveKitToken);
 
   const attachActive = useCallback(() => {
@@ -46,7 +53,7 @@ export function LivePlayer({ liveId }: Props) {
     if (!video) return;
     const map = videoTracksRef.current;
     if (map.size === 0) {
-      setState((s) => (s === "error" || s === "unconfigured" ? s : "waiting"));
+      setState((s) => (s === "error" || s === "unconfigured" || s === "reconnecting" || s === "disconnected" ? s : "waiting"));
       return;
     }
     const wanted = activeIdentityRef.current;
@@ -58,7 +65,7 @@ export function LivePlayer({ liveId }: Props) {
     });
     track.attach(video);
     void video.play().catch(() => undefined);
-    setState("live");
+    if (roomRef.current?.state === ConnectionState.Connected) setState("live");
   }, []);
 
   useEffect(() => {
@@ -68,6 +75,10 @@ export function LivePlayer({ liveId }: Props) {
       dynacast: true,
     });
     roomRef.current = room;
+    qualityRef.current = ConnectionQuality.Unknown;
+    stalledRef.current = false;
+    setState("connecting");
+    setConnection("connecting");
 
     const onSubscribed = (
       track: RemoteTrack,
@@ -103,10 +114,21 @@ export function LivePlayer({ liveId }: Props) {
     };
     const onStateChange = (s: ConnectionState) => {
       if (cancelled) return;
-      if (s === ConnectionState.Reconnecting) setState("reconnecting");
+      setConnection(liveConnectionStatus(s, qualityRef.current, stalledRef.current));
+      if (s === ConnectionState.Reconnecting || s === ConnectionState.SignalReconnecting) setState("reconnecting");
       else if (s === ConnectionState.Connected) {
         setState(videoTracksRef.current.size > 0 ? "live" : "waiting");
-      } else if (s === ConnectionState.Disconnected) setState("reconnecting");
+      } else if (s === ConnectionState.Disconnected) setState("disconnected");
+    };
+    const onQuality = (quality: ConnectionQuality, participant: Participant) => {
+      if (cancelled) return;
+      if (participant !== room.localParticipant && !videoTracksRef.current.has(participant.identity)) return;
+      qualityRef.current = quality;
+      setConnection(liveConnectionStatus(room.state, quality, stalledRef.current));
+    };
+    const onDisconnected = () => {
+      if (cancelled) return;
+      window.__lovableEvents?.track?.("project.live_failed", { role: "viewer", stage: "connection", reason: "disconnected" });
     };
     const onMetadata = (metadata: string | undefined) => {
       if (!metadata) return;
@@ -125,6 +147,8 @@ export function LivePlayer({ liveId }: Props) {
       .on(RoomEvent.TrackSubscribed, onSubscribed)
       .on(RoomEvent.TrackUnsubscribed, onUnsubscribed)
       .on(RoomEvent.RoomMetadataChanged, onMetadata)
+      .on(RoomEvent.ConnectionQualityChanged, onQuality)
+      .on(RoomEvent.Disconnected, onDisconnected)
       .on(RoomEvent.ConnectionStateChanged, onStateChange);
 
     (async () => {
@@ -152,10 +176,11 @@ export function LivePlayer({ liveId }: Props) {
       } catch (e) {
         if (cancelled) return;
         const msg = e instanceof Error ? e.message : String(e);
+        window.__lovableEvents?.track?.("project.live_failed", { role: "viewer", stage: "connection", reason: msg.includes("LIVEKIT_NOT_CONFIGURED") ? "unconfigured" : "media_or_connection_failed" });
+        setConnection("disconnected");
         if (msg.includes("LIVEKIT_NOT_CONFIGURED")) {
           setState("unconfigured");
         } else {
-          setErrorMsg(msg);
           setState("error");
         }
       }
@@ -193,11 +218,30 @@ export function LivePlayer({ liveId }: Props) {
         autoPlay
         playsInline
         muted
+        onWaiting={() => {
+          if (!videoTracksRef.current.size) return;
+          stalledRef.current = true;
+          setConnection(liveConnectionStatus(roomRef.current?.state ?? ConnectionState.Disconnected, qualityRef.current, true));
+        }}
+        onStalled={() => {
+          if (!videoTracksRef.current.size) return;
+          stalledRef.current = true;
+          setConnection(liveConnectionStatus(roomRef.current?.state ?? ConnectionState.Disconnected, qualityRef.current, true));
+        }}
+        onPlaying={() => {
+          stalledRef.current = false;
+          setConnection(liveConnectionStatus(roomRef.current?.state ?? ConnectionState.Disconnected, qualityRef.current));
+        }}
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div ref={audioHostRef} className="hidden" aria-hidden />
+      {(state === "live" || state === "connecting" || state === "reconnecting" || state === "waiting" || state === "disconnected") && (
+        <div className="pointer-events-none absolute left-3 right-3 top-20 z-20">
+          <LiveConnectionIndicator status={connection} />
+        </div>
+      )}
       {state !== "live" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/80 text-center text-white/85">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-foreground/80 px-4 text-center text-background">
           {state === "connecting" && (
             <>
               <Loader2 className="animate-spin" /> <p className="text-sm">Conectando ao stream…</p>
@@ -211,6 +255,7 @@ export function LivePlayer({ liveId }: Props) {
               </p>
             </>
           )}
+          {state === "disconnected" && <><WifiOff /><p className="text-sm">Conexão interrompida</p><p className="text-xs">O vídeo está desligado. O chat continua disponível.</p></>}
           {state === "waiting" && (
             <>
               <Video /> <p className="text-sm">Aguardando o lojista iniciar a transmissão</p>
@@ -220,7 +265,7 @@ export function LivePlayer({ liveId }: Props) {
             <>
               <AlertTriangle className="text-yellow-400" />
               <p className="text-sm">Falha no stream</p>
-              <p className="text-[11px] text-white/60">{errorMsg}</p>
+              <p className="text-[11px] text-background/70">Não foi possível ligar o vídeo.</p>
             </>
           )}
           {state === "signin" && (

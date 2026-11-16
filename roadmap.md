@@ -1,5 +1,6 @@
 # Roadmap
 
+- [ ] Pedido 16/11: instrumentar criação, início confirmado, falhas e encerramento de Lives nos fluxos existentes; mostrar conexão/reconexão e vídeo instável a lojistas e espectadores; validar catálogo, testes e interface.
 - [ ] Pedido 15/11 prioritário: libertar Lives gratuitas e ilimitadas para lojas retail, mantendo subscrições exclusivamente para serviços; inspecionar e corrigir validações existentes na base e interface, validar quatro cenários e documentar evidências reais.
 - [ ] Pedido 14/11 Fase 1: concluir diagnóstico e SQL proposto de identidade/beneficiários/destinos/reservas, sem aplicar alterações; retomar após correção prioritária de Lives. Aplicação depende de aprovação expressa por conjunto; empresas apenas proposta.
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   AudioPresets,
   ConnectionState,
+  ConnectionQuality,
   LocalAudioTrack,
   Room,
   RoomEvent,
@@ -37,6 +38,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
+import { LiveConnectionIndicator } from "@/components/LiveConnectionIndicator";
+import { liveConnectionStatus, type LiveConnection } from "@/lib/live-connection";
 
 type Props = {
   liveId: string;
@@ -148,6 +151,9 @@ export function LivePublisher({
   const audioMeterRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const disconnectedByUserRef = useRef(false);
+  const publishedRef = useRef(false);
+  const connectionQualityRef = useRef(ConnectionQuality.Unknown);
+  const [connection, setConnection] = useState<LiveConnection>("disconnected");
   const voiceChainRef = useRef<AudioChain | null>(null);
   const adaptiveStopRef = useRef<(() => void) | null>(null);
   const rawMicRef = useRef<LocalAudioTrack | null>(null);
@@ -292,6 +298,8 @@ export function LivePublisher({
 
   const stop = async () => {
     disconnectedByUserRef.current = true;
+    publishedRef.current = false;
+    setConnection("disconnected");
     await cleanupRoom();
     await cleanupHardware();
     setErrorMsg(null);
@@ -302,7 +310,15 @@ export function LivePublisher({
   const fail = async (error: unknown, notify = true) => {
     console.error("[LivePublisher] falha", error);
     const message = getErrorMessage(error);
+    const name = error instanceof Error ? error.name : "";
+    window.__lovableEvents?.track?.("project.live_failed", {
+      role: "publisher",
+      stage: "publishing",
+      reason: message.includes("LIVEKIT_NOT_CONFIGURED") ? "unconfigured" : name === "NotAllowedError" ? "permission_denied" : name === "NotFoundError" ? "device_missing" : "media_or_connection_failed",
+    });
     disconnectedByUserRef.current = true;
+    publishedRef.current = false;
+    setConnection("disconnected");
     await cleanupRoom();
     await cleanupHardware();
     if (message.includes("LIVEKIT_NOT_CONFIGURED")) {
@@ -498,6 +514,9 @@ export function LivePublisher({
   const publish = async () => {
     if (state !== "preflight" || !cameraOk || tracksRef.current.length === 0) return;
     setState("connecting");
+    setConnection("connecting");
+    publishedRef.current = false;
+    connectionQualityRef.current = ConnectionQuality.Unknown;
     disconnectedByUserRef.current = false;
 
     try {
@@ -544,10 +563,24 @@ export function LivePublisher({
         videoCaptureDefaults: { resolution: { width: 640, height: 480, frameRate: 15 } },
       });
       roomRef.current = room;
-      room.on(RoomEvent.Disconnected, () => {
-        roomRef.current = null;
+      room.on(RoomEvent.ConnectionStateChanged, (next) => {
         if (disconnectedByUserRef.current) return;
-        setState("idle");
+        setConnection(liveConnectionStatus(next, connectionQualityRef.current));
+      });
+      room.on(RoomEvent.ConnectionQualityChanged, (quality, participant) => {
+        if (participant !== room.localParticipant || disconnectedByUserRef.current) return;
+        connectionQualityRef.current = quality;
+        setConnection(liveConnectionStatus(room.state, quality));
+      });
+      room.on(RoomEvent.Disconnected, () => {
+        if (disconnectedByUserRef.current || !publishedRef.current) return;
+        roomRef.current = null;
+        publishedRef.current = false;
+        setConnection("disconnected");
+        setState("error");
+        setErrorMsg("Ligação perdida. Volte a iniciar a transmissão.");
+        window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "connection", reason: "disconnected" });
+        void cleanupHardware();
         void logLiveAuditEvent({
           data: {
             liveId,
@@ -613,6 +646,8 @@ export function LivePublisher({
       }
 
       setState("publishing");
+      publishedRef.current = true;
+      setConnection(liveConnectionStatus(room.state, connectionQualityRef.current));
       onConnected?.();
       const settings = (
         tracksRef.current.find((t) => t.kind === Track.Kind.Video) as LocalVideoTrack | undefined
@@ -637,6 +672,7 @@ export function LivePublisher({
         publishedVideo,
         (report) => {
           setNet(report);
+          setConnection(liveConnectionStatus(room.state, connectionQualityRef.current, report.rttMs > 400 || report.lossPct > 5));
           // Telemetria real da câmara do telemóvel (a cada ~15s).
           const now = Date.now();
           if (now - lastReport > 15_000) {
@@ -914,11 +950,9 @@ export function LivePublisher({
               <p className="text-sm">{t("s_a_publicar_transmissao")}</p>
             </div>
           ))}
-        {state === "publishing" && (
-          <div
-            className={`absolute left-3 z-40 flex ${studio ? "top-14" : "top-3"} items-center gap-1 rounded-full bg-red-600 px-2 py-1 text-[10px] font-bold text-white`}
-          >
-            <Radio size={11} /> {t("s_ao_vivo")}
+        {(state === "publishing" || state === "connecting" || (state === "error" && connection === "disconnected")) && (
+          <div className={`absolute left-3 right-14 z-40 ${studio ? "top-14" : "top-3"}`}>
+            <LiveConnectionIndicator status={connection} />
           </div>
         )}
         {studio && (
