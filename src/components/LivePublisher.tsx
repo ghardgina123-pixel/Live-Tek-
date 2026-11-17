@@ -951,7 +951,7 @@ export function LivePublisher({
             </div>
           ))}
         {(state === "publishing" || state === "connecting" || (state === "error" && connection === "disconnected")) && (
-          <div className={`absolute left-3 right-14 z-40 ${studio ? "top-14" : "top-3"}`}>
+          <div className={`absolute left-3 right-14 z-40 ${studio ? "top-24" : "top-3"}`}>
             <LiveConnectionIndicator status={connection} />
           </div>
         )}

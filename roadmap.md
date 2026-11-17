@@ -1,7 +1,9 @@
 # Roadmap
 
-- [ ] Pedido 16/11: instrumentar criação, início confirmado, falhas e encerramento de Lives nos fluxos existentes; mostrar conexão/reconexão e vídeo instável a lojistas e espectadores; validar catálogo, testes e interface.
-- [ ] Pedido 15/11 prioritário: libertar Lives gratuitas e ilimitadas para lojas retail, mantendo subscrições exclusivamente para serviços; inspecionar e corrigir validações existentes na base e interface, validar quatro cenários e documentar evidências reais.
+- [x] Pedido 16/11: instrumentar criação, início confirmado, falhas e encerramento de Lives nos fluxos existentes; mostrar conexão/reconexão e vídeo instável a lojistas e espectadores; catálogo de quatro eventos válido, 34 testes e interface autenticada verificados; evidências em docs/live-validation-17-11-2026.md.
+- [ ] Pedido 16/11: validar vídeo recebido/reconexão real e receção dos eventos no coletor; ligação real terminou em timeout neste ensaio, nenhum início simulado. Coletor exige utilização da versão atual fora de localhost.
+- [x] Pedido 15/11 prioritário: libertar Lives gratuitas e ilimitadas para lojas retail, mantendo subscrições exclusivamente para serviços; validações implementadas e criação autenticada retail confirmada; testes de categoria aprovados e relatório entregue.
+- [ ] Pedido 15/11: restantes sessões reais de serviços e vídeo recebido aguardam contas adequadas e ligação funcional ao serviço; testes de lógica não equivalem a estas sessões.
 - [ ] Pedido 14/11 Fase 1: concluir diagnóstico e SQL proposto de identidade/beneficiários/destinos/reservas, sem aplicar alterações; retomar após correção prioritária de Lives. Aplicação depende de aprovação expressa por conjunto; empresas apenas proposta.
 
 - [x] Pedido 11/11: corrigir proposta M2/team.approve, convites sem conta e identidade exclusiva de Gestor 1 nos RPCs; rever envio/tokens e preparar SQL integral/diff para nova revisão; nenhuma migração executada.

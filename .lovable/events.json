@@ -34,6 +34,31 @@
         }
       }
     },
+    "project.live_ended": {
+      "event_schema_version": 1,
+      "description": "An existing handler confirmed Live ending or the phone publisher deliberately stopped transmitting; completion distinguishes room shutdown, status-only fallback and media-only stop.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "completion"
+        ],
+        "properties": {
+          "completion": {
+            "type": "string",
+            "enum": [
+              "server",
+              "status_only_fallback",
+              "media_stopped"
+            ]
+          }
+        }
+      }
+    },
     "project.live_failed": {
       "event_schema_version": 1,
       "description": "An existing Live creation, phone publication, connection, status update or ending handler failed; only bounded categories, no error text.",

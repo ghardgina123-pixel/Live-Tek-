@@ -202,7 +202,9 @@ function LivesManager() {
     const { error } = await supabase
       .from("lives")
       .update({ status: "live", started_at: new Date().toISOString() })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .single();
     if (error) {
       window.__lovableEvents?.track?.("project.live_failed", { role: "publisher", stage: "status_update", reason: "request_failed" });
       toast.error(error.message);
@@ -227,7 +229,9 @@ function LivesManager() {
       const { error } = await supabase
         .from("lives")
         .update({ status: "ended", ended_at: new Date().toISOString() })
-        .eq("id", id);
+        .eq("id", id)
+        .select("id")
+        .single();
       if (error) return toast.error(error.message);
       console.error("endLive fallback", e);
       completion = "status_only_fallback";
