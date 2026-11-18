@@ -4,7 +4,8 @@
 - [ ] Pedido 16/11: validar vídeo recebido/reconexão real e receção dos eventos no coletor; ligação real terminou em timeout neste ensaio, nenhum início simulado. Coletor exige utilização da versão atual fora de localhost.
 - [x] Pedido 15/11 prioritário: libertar Lives gratuitas e ilimitadas para lojas retail, mantendo subscrições exclusivamente para serviços; validações implementadas e criação autenticada retail confirmada; testes de categoria aprovados e relatório entregue.
 - [ ] Pedido 15/11: restantes sessões reais de serviços e vídeo recebido aguardam contas adequadas e ligação funcional ao serviço; testes de lógica não equivalem a estas sessões.
-- [ ] Pedido 14/11 Fase 1: concluir diagnóstico e SQL proposto de identidade/beneficiários/destinos/reservas, sem aplicar alterações; retomar após correção prioritária de Lives. Aplicação depende de aprovação expressa por conjunto; empresas apenas proposta.
+- [x] Pedido 14/11 Fase 1: relatório e SQL em docs/finance/fase1-*; nada aplicado.
+- [ ] Fase 1: aplicar conjuntos 1–4 após autorização expressa de cada um.
 
 - [x] Pedido 11/11: corrigir proposta M2/team.approve, convites sem conta e identidade exclusiva de Gestor 1 nos RPCs; rever envio/tokens e preparar SQL integral/diff para nova revisão; nenhuma migração executada.
 - [ ] Pedido 11/11: executar apenas após nova aprovação do SQL atualizado e autorização de retoma; adaptar envio existente para destinatário validado por Gestor 1, sem usar helper genérico nem anunciar entrega com base em fila.
