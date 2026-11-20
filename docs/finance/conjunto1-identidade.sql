@@ -43,7 +43,6 @@ BEGIN
   IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
   RETURN NEW;
 END $$;
-DROP TRIGGER IF EXISTS trg_cfp_identity_guard ON public.customer_fiscal_profiles;
 CREATE TRIGGER trg_cfp_identity_guard BEFORE INSERT OR UPDATE OR DELETE ON public.customer_fiscal_profiles
   FOR EACH ROW EXECUTE FUNCTION public.guard_identity_docs();
 
@@ -61,7 +60,6 @@ BEGIN
   NEW.raw_user_meta_data := NEW.raw_user_meta_data - 'nif' - 'bi_number';
   RETURN NEW;
 END $$;
-DROP TRIGGER IF EXISTS on_auth_user_identity ON auth.users;
 CREATE TRIGGER on_auth_user_identity BEFORE INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.capture_signup_identity();
 
