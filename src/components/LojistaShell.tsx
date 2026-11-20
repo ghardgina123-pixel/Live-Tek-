@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowLeft, BarChart3, Package, ShoppingBag, Menu, Wallet, Radio, Settings, Loader2, Film, Crown } from "lucide-react";
+import { ArrowLeft, BarChart3, Package, ShoppingBag, Menu, Wallet, Radio, Settings, Loader2, Film, Crown, Plus } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AppShell } from "@/components/AppShell";
 import { BackButton } from "@/components/BackButton";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StorageImage } from "@/lib/storage";
 import { useAuth } from "@/hooks/use-auth";
 import { useT } from "@/lib/i18n";
+import { ACTIVE_STORE_EVENT, getActiveStoreId, pickActiveStore, setActiveStoreId } from "@/lib/active-store";
 
 export type LojistaStore = {
   id: string;
@@ -31,26 +32,36 @@ const NAV = [
 
 export function useLojistaStore() {
   const { user } = useAuth();
+  const [stores, setStores] = useState<LojistaStore[]>([]);
   const [store, setStore] = useState<LojistaStore | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("stores")
-      .select("id, name, status, logo_url, cover_url, rejection_reason, partner_type")
-      .eq("owner_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setStore((data as LojistaStore) ?? null);
-        setLoading(false);
-      });
+    let cancelled = false;
+    const load = () =>
+      supabase
+        .from("stores")
+        .select("id, name, status, logo_url, cover_url, rejection_reason, partner_type")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: true })
+        .then(({ data }) => {
+          if (cancelled) return;
+          const list = (data as LojistaStore[] | null) ?? [];
+          setStores(list);
+          setStore(pickActiveStore(list, getActiveStoreId(user.id)));
+          setLoading(false);
+        });
+    load();
+    window.addEventListener(ACTIVE_STORE_EVENT, load);
+    return () => { cancelled = true; window.removeEventListener(ACTIVE_STORE_EVENT, load); };
   }, [user?.id]);
-  return { store, loading };
+  const select = (id: string) => { if (user) setActiveStoreId(user.id, id); };
+  return { store, stores, loading, select };
 }
 
 export function LojistaShell({ title, children }: { title: string; children: ReactNode }) {
   const { t } = useT();
-  const { store, loading } = useLojistaStore();
+  const { store, stores, loading, select } = useLojistaStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -106,6 +117,24 @@ export function LojistaShell({ title, children }: { title: string; children: Rea
                 );
               })}
               <div className="my-2 border-t" />
+              {stores.length > 1 && (
+                <div className="px-3 pb-2">
+                  <p className="mb-1 text-[11px] font-semibold uppercase text-muted-foreground">As minhas lojas</p>
+                  {stores.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => select(s.id)}
+                      className={`block w-full truncate rounded-md px-2 py-1.5 text-left text-sm ${s.id === store.id ? "bg-accent font-semibold" : "hover:bg-accent"}`}
+                    >
+                      {s.name}{s.status !== "active" ? " (em análise)" : ""}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <Link to="/lojista" search={{ nova: true }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent">
+                <Plus size={18} /> Adicionar outra loja
+              </Link>
               <Link to="/perfil" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent">
                 <ArrowLeft size={18} /> {t("s_voltar_ao_perfil")}
               </Link>

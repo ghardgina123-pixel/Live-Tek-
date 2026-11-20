@@ -66,6 +66,7 @@ function Home() {
       .select("id")
       .eq("owner_id", user.id)
       .eq("status", "active")
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => { if (!cancelled) setHasStore(Boolean(data)); });
     return () => { cancelled = true; };

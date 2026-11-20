@@ -13,11 +13,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { LocationCascade, type LocationValue } from "@/components/LocationCascade";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { getActiveStoreId, pickActiveStore, setActiveStoreId } from "@/lib/active-store";
 import { SERVICE_CATEGORIES } from "@/lib/services";
 import { formatAoa, REVIEW_STATE_LABEL, FEE_STATUS_LABEL, type SignupStatus } from "@/lib/signup-campaign";
 
 export const Route = createFileRoute("/_authenticated/lojista/")({
   head: () => ({ meta: brandMeta([{ title: "Minha Loja — Live Teká" }]) }),
+  validateSearch: (search: Record<string, unknown>): { nova?: boolean } =>
+    search.nova === true || search.nova === "true" ? { nova: true } : {},
   component: LojistaIndex,
 });
 
@@ -46,6 +49,7 @@ function LojistaIndex() {
   const [store, setStore] = useState<Store | null>(null);
   const [status, setStatus] = useState<SignupStatus | null>(null);
   const navigate = useNavigate();
+  const { nova } = Route.useSearch();
 
   const refresh = async () => {
     if (!user) return;
@@ -54,18 +58,28 @@ function LojistaIndex() {
       .from("stores")
       .select("id, name, status, rejection_reason")
       .eq("owner_id", user.id)
-      .maybeSingle(),
+      .order("created_at", { ascending: true }),
       supabase.rpc("seller_signup_status"),
     ]);
-    setStore((data as Store) ?? null);
+    const list = (data as Store[] | null) ?? [];
+    setStore(nova ? null : pickActiveStore(list, getActiveStoreId(user.id)));
     if (st) setStatus(st as unknown as SignupStatus);
     setLoading(false);
   };
 
-  useEffect(() => { refresh(); }, [user?.id]);
+  useEffect(() => { refresh(); }, [user?.id, nova]);
+
+  const onCreated = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("stores").select("id").eq("owner_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (data?.id) setActiveStoreId(user.id, data.id);
+    if (nova) navigate({ to: "/lojista", search: {} });
+    else refresh();
+  };
 
   useEffect(() => {
-    if (!loading && store?.status === "active") {
+    if (!loading && !nova && store?.status === "active") {
       navigate({ to: "/lojista/dashboard" });
     }
   }, [loading, store?.status, navigate]);
@@ -124,7 +138,7 @@ function LojistaIndex() {
           </div>
         </section>
       )}
-      {!store && <StoreRegistration onCreated={refresh} feeRequired={!!status?.fee_required} feeAoa={status?.fee_aoa ?? 0} />}
+      {!store && <StoreRegistration onCreated={onCreated} feeRequired={!!status?.fee_required} feeAoa={status?.fee_aoa ?? 0} />}
       {store?.status === "pending" && <PendingState reason={null} campaign={status} />}
       {store?.status === "rejected" && <PendingState reason={store.rejection_reason} rejected />}
       <PartnersFooter />

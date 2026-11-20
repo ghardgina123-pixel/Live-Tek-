@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { BrandLogo, getBrand } from "@/lib/payment-brands";
+import { getActiveStoreId, pickActiveStore } from "@/lib/active-store";
 
 export const Route = createFileRoute("/_authenticated/lojista-crm")({
   head: () => ({ meta: brandMeta([{ title: "CRM Premium — Live Teká" }]) }),
@@ -45,7 +46,8 @@ function CRM() {
 
   const refresh = async () => {
     if (!user) return;
-    const { data: s } = await supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle();
+    const { data: owned } = await supabase.from("stores").select("id, status").eq("owner_id", user.id).order("created_at", { ascending: true });
+    const s = pickActiveStore((owned ?? []) as { id: string; status: string }[], getActiveStoreId(user.id));
     if (!s) { setLoading(false); return; }
     setStoreId(s.id);
     const { data } = await supabase

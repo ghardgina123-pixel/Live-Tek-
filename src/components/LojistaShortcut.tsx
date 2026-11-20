@@ -21,6 +21,7 @@ export function LojistaShortcut() {
       .select("id, status")
       .eq("owner_id", user.id)
       .eq("status", "active")
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => { if (!cancelled) setShow(Boolean(data)); });
     return () => { cancelled = true; };

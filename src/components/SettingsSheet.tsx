@@ -24,7 +24,7 @@ export function SettingsSheet({ trigger }: Props) {
 
   useEffect(() => {
     if (!open || !user) return;
-    supabase.from("stores").select("id").eq("owner_id", user.id).maybeSingle()
+    supabase.from("stores").select("id").eq("owner_id", user.id).limit(1).maybeSingle()
       .then(({ data }) => setHasStore(!!data));
     supabase.from("user_roles").select("role").eq("user_id", user.id)
       .then(({ data }) => setIsAdmin((data ?? []).some((r) => r.role === "admin")));
