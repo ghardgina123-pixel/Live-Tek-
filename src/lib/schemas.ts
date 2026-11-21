@@ -13,6 +13,12 @@ export const signupSchema = z.object({
     .or(z.literal("")),
   pwd: z.string().min(6, "Senha mínima de 6 caracteres").max(72, "Senha muito longa"),
 });
+export const normalizeIdentityDoc = (v: string) => v.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+export const identitySchema = z.object({
+  nif: z.string().transform(normalizeIdentityDoc).refine((v) => /^[0-9A-Z]{9,14}$/.test(v), "NIF inválido"),
+  bi: z.string().transform(normalizeIdentityDoc).refine((v) => /^[0-9]{9}[A-Z]{2}[0-9]{3}$/.test(v), "Número do BI inválido (ex.: 005512345LA042)"),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 
 // Produtos (painel do lojista)

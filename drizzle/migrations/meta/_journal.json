@@ -85,6 +85,13 @@
       "when": 1795249749223,
       "tag": "0011_identity_unique_nif_bi",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795249800641,
+      "tag": "0012_allow_multiple_stores_per_owner",
+      "breakpoints": true
     }
   ]
 }

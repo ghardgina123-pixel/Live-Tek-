@@ -1,13 +1,13 @@
 import { brandMeta } from "@/lib/brand-meta";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Mail, Lock, User as UserIcon, Phone, ShieldCheck, Loader2, ShoppingBag, Store as StoreIcon, Sparkles, AlertCircle } from "lucide-react";
+import { Mail, Lock, User as UserIcon, Phone, ShieldCheck, Loader2, ShoppingBag, Store as StoreIcon, Sparkles, AlertCircle, IdCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
-import { signupSchema } from "@/lib/schemas";
+import { signupSchema, identitySchema } from "@/lib/schemas";
 import { checkActionThrottle } from "@/lib/auth-throttle.functions";
 import cadastroHero from "@/assets/marketing/cadastro-hero.jpg";
 import type { SignupStatus } from "@/lib/signup-campaign";
@@ -29,10 +29,12 @@ export const Route = createFileRoute("/cadastro")({
   component: Signup,
 });
 
+const IDENTITY_TAKEN = "Este NIF ou BI já está associado a uma conta pessoal. Cada pessoa só pode ter uma conta — entre com a sua conta existente (pode gerir várias lojas a partir dela).";
+
 function Signup() {
   const nav = useNavigate();
   const [accountType, setAccountType] = useState<"customer" | "seller">("customer");
-  const [f, setF] = useState({ name: "", email: "", phone: "", pwd: "" });
+  const [f, setF] = useState({ name: "", email: "", phone: "", pwd: "", nif: "", bi: "" });
   const [busy, setBusy] = useState(false);
   const { t } = useT();
   const [sellerStatus, setSellerStatus] = useState<SignupStatus | null>(null);
@@ -49,7 +51,15 @@ function Signup() {
     e.preventDefault();
     const parsed = signupSchema.safeParse(f);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos"); return; }
+    const idp = identitySchema.safeParse({ nif: f.nif, bi: f.bi });
+    if (!idp.success) { toast.error(idp.error.issues[0]?.message ?? "NIF ou BI inválido"); return; }
     setBusy(true);
+    const { data: avail } = await supabase.rpc("identity_availability", { _nif: idp.data.nif, _bi: idp.data.bi });
+    if (avail === "taken") {
+      setBusy(false);
+      toast.error(IDENTITY_TAKEN);
+      return;
+    }
     try {
       const gate = await checkActionThrottle({
         data: { action: "signup", identifier: parsed.data.email },
@@ -67,11 +77,15 @@ function Signup() {
       password: parsed.data.pwd,
       options: {
         emailRedirectTo: window.location.origin + "/home",
-        data: { display_name: parsed.data.name, phone: parsed.data.phone ?? "", account_intent: accountType },
+        data: { display_name: parsed.data.name, phone: parsed.data.phone ?? "", account_intent: accountType, nif: idp.data.nif, bi_number: idp.data.bi },
       },
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      const m = error.message ?? "";
+      toast.error(/identity|database error/i.test(m) ? IDENTITY_TAKEN : m);
+      return;
+    }
     if (accountType === "seller") {
       toast.success("Conta criada! Verifique seu e-mail e depois complete os dados da loja.");
     } else {
@@ -124,6 +138,8 @@ function Signup() {
 
         <div className="mt-6 space-y-4">
           <Field icon={<UserIcon size={18} />} placeholder={t("full_name")} value={f.name} onChange={(v) => setF({ ...f, name: v })} required />
+          <Field icon={<IdCard size={18} />} placeholder="NIF pessoal" value={f.nif} onChange={(v) => setF({ ...f, nif: v })} required />
+          <Field icon={<IdCard size={18} />} placeholder="Número do Bilhete de Identidade" value={f.bi} onChange={(v) => setF({ ...f, bi: v })} required />
           <Field icon={<Mail size={18} />} placeholder={t("email")} type="email" value={f.email} onChange={(v) => setF({ ...f, email: v })} required />
           <Field icon={<Phone size={18} />} placeholder={t("phone")} value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
           <Field icon={<Lock size={18} />} type="password" placeholder={t("password")} value={f.pwd} onChange={(v) => setF({ ...f, pwd: v })} required />

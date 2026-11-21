@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { CountrySelect } from "@/components/LocationCascade";
 import { SettingsSheet } from "@/components/SettingsSheet";
+import { IdentityCard } from "@/components/IdentityCard";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { signStorageUrl, uploadToBucket } from "@/lib/storage";
@@ -145,6 +146,7 @@ function Perfil() {
           <Stat n="9" l={t("following")} />
         </div>
       </header>
+      {user && <IdentityCard />}
 
       <ul className="cv-auto divide-y divide-border px-2">
         {user && isAdmin && (
