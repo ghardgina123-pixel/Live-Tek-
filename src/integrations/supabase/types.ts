@@ -562,39 +562,54 @@ export type Database = {
       }
       customer_fiscal_profiles: {
         Row: {
+          bi_normalized: string | null
+          bi_number: string | null
           country_code: string
           created_at: string
           email: string | null
           fiscal_address: string | null
+          identity_conflict: boolean
+          identity_locked_at: string | null
           legal_name: string | null
           municipality: string | null
           nif: string | null
+          nif_normalized: string | null
           phone: string | null
           province: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bi_normalized?: string | null
+          bi_number?: string | null
           country_code?: string
           created_at?: string
           email?: string | null
           fiscal_address?: string | null
+          identity_conflict?: boolean
+          identity_locked_at?: string | null
           legal_name?: string | null
           municipality?: string | null
           nif?: string | null
+          nif_normalized?: string | null
           phone?: string | null
           province?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bi_normalized?: string | null
+          bi_number?: string | null
           country_code?: string
           created_at?: string
           email?: string | null
           fiscal_address?: string | null
+          identity_conflict?: boolean
+          identity_locked_at?: string | null
           legal_name?: string | null
           municipality?: string | null
           nif?: string | null
+          nif_normalized?: string | null
           phone?: string | null
           province?: string | null
           updated_at?: string
@@ -4084,6 +4099,10 @@ export type Database = {
         Args: { _fee_id: string }
         Returns: undefined
       }
+      admin_correct_identity: {
+        Args: { _bi: string; _nif: string; _reason: string; _user_id: string }
+        Returns: Json
+      }
       admin_create_store_for_email: {
         Args: {
           _activate?: boolean
@@ -4463,6 +4482,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      identity_availability: {
+        Args: { _bi: string; _nif: string }
+        Returns: string
+      }
+      identity_doc_valid: {
+        Args: { _bi: string; _nif: string }
+        Returns: boolean
+      }
       is_delivery_courier: {
         Args: { _delivery_id: string; _user: string }
         Returns: boolean
@@ -4504,7 +4531,9 @@ export type Database = {
         }
         Returns: number
       }
+      my_identity_status: { Args: never; Returns: Json }
       next_invoice_number: { Args: { _code: string }; Returns: number }
+      normalize_identity_doc: { Args: { _v: string }; Returns: string }
       order_load_class: { Args: { _order_id: string }; Returns: string }
       order_logistics_snapshot: {
         Args: { _order_id: string }
@@ -4543,6 +4572,10 @@ export type Database = {
           _max_attempts?: number
           _window_minutes?: number
         }
+        Returns: Json
+      }
+      register_my_identity: {
+        Args: { _bi: string; _full_name: string; _nif: string }
         Returns: Json
       }
       reject_subscription_by_reference: {
