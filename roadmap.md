@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Pedido 21/11: corrigir identidade para BI obrigatório e único e NIF empresarial opcional/partilhável; preservar NIF antigos, lojas e permissões; aplicar e validar os três cenários sem alterar finanças.
+
 - [x] Pedido 16/11: instrumentar criação, início confirmado, falhas e encerramento de Lives nos fluxos existentes; mostrar conexão/reconexão e vídeo instável a lojistas e espectadores; catálogo de quatro eventos válido, 34 testes e interface autenticada verificados; evidências em docs/live-validation-17-11-2026.md.
 - [ ] Pedido 16/11: validar vídeo recebido/reconexão real e receção dos eventos no coletor; ligação real terminou em timeout neste ensaio, nenhum início simulado. Coletor exige utilização da versão atual fora de localhost.
 - [x] Pedido 15/11 prioritário: libertar Lives gratuitas e ilimitadas para lojas retail, mantendo subscrições exclusivamente para serviços; validações implementadas e criação autenticada retail confirmada; testes de categoria aprovados e relatório entregue.
