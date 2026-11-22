@@ -92,6 +92,13 @@
       "when": 1795249800641,
       "tag": "0012_allow_multiple_stores_per_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795345883470,
+      "tag": "0013_personal_bi_optional_company_nif",
+      "breakpoints": true
     }
   ]
 }

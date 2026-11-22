@@ -1,8 +1,10 @@
 -- Disposable LOCAL PostgreSQL only. No connection to the application database.
 CREATE SCHEMA auth;
-CREATE ROLE authenticated;
-CREATE ROLE anon;
-CREATE ROLE service_role;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role; END IF;
+END $$;
 GRANT USAGE ON SCHEMA public, auth TO authenticated, anon, service_role;
 CREATE TYPE public.app_role AS ENUM ('customer','seller','admin');
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$

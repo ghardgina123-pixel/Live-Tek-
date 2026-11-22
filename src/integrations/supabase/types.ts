@@ -564,6 +564,7 @@ export type Database = {
         Row: {
           bi_normalized: string | null
           bi_number: string | null
+          company_nif: string | null
           country_code: string
           created_at: string
           email: string | null
@@ -582,6 +583,7 @@ export type Database = {
         Insert: {
           bi_normalized?: string | null
           bi_number?: string | null
+          company_nif?: string | null
           country_code?: string
           created_at?: string
           email?: string | null
@@ -600,6 +602,7 @@ export type Database = {
         Update: {
           bi_normalized?: string | null
           bi_number?: string | null
+          company_nif?: string | null
           country_code?: string
           created_at?: string
           email?: string | null
