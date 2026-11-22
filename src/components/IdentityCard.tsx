@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { identitySchema } from "@/lib/schemas";
 
-type Status = { registered: boolean; legal_name?: string; nif_masked?: string; bi_masked?: string };
+type Status = { registered: boolean; legal_name?: string; company_nif_masked?: string | null; bi_masked?: string };
 
 const ERRORS: Record<string, string> = {
-  identity_already_registered: "Este NIF ou BI já está associado a outra conta pessoal.",
-  identity_invalid: "NIF ou BI inválido.",
+  identity_already_registered: "Este BI já está associado a outra conta pessoal.",
+  identity_invalid: "BI ou NIF empresarial inválido.",
   identity_locked: "A identidade já foi registada. Para corrigir, contacte a administração.",
   name_required: "Indique o nome completo.",
 };
@@ -28,7 +28,8 @@ export function IdentityCard() {
     return (
       <section className="mx-5 mt-4 rounded-2xl bg-card p-4 text-sm shadow-[var(--shadow-soft)]">
         <p className="flex items-center gap-2 font-semibold"><IdCard size={16} className="text-primary" /> Identidade pessoal</p>
-        <p className="mt-1 text-muted-foreground">{status.legal_name} · NIF {status.nif_masked} · BI {status.bi_masked}</p>
+        <p className="mt-1 break-words text-muted-foreground">{status.legal_name} · BI {status.bi_masked}</p>
+        {status.company_nif_masked && <p className="mt-1 text-muted-foreground">NIF empresarial {status.company_nif_masked}</p>}
       </section>
     );
   }
@@ -49,10 +50,9 @@ export function IdentityCard() {
   return (
     <form onSubmit={submit} className="mx-5 mt-4 space-y-2 rounded-2xl bg-card p-4 text-sm shadow-[var(--shadow-soft)]">
       <p className="flex items-center gap-2 font-semibold"><IdCard size={16} className="text-primary" /> Complete a sua identidade pessoal</p>
-      <p className="text-xs text-muted-foreground">Uma conta pessoal por pessoa. Depois de gravados, o NIF e o BI só podem ser corrigidos pela administração.</p>
-      <Input placeholder="Nome completo" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required />
-      <Input placeholder="NIF pessoal" value={f.nif} onChange={(e) => setF({ ...f, nif: e.target.value })} required />
-      <Input placeholder="Número do Bilhete de Identidade" value={f.bi} onChange={(e) => setF({ ...f, bi: e.target.value })} required />
+      <Input aria-label="Nome completo" placeholder="Nome completo" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required />
+      <Input aria-label="NIF empresarial (opcional)" placeholder="NIF empresarial (opcional)" value={f.nif} onChange={(e) => setF({ ...f, nif: e.target.value })} />
+      <Input aria-label="Número do Bilhete de Identidade" placeholder="Número do Bilhete de Identidade" value={f.bi} onChange={(e) => setF({ ...f, bi: e.target.value })} required />
       <Button type="submit" disabled={busy} className="w-full">{busy ? <Loader2 className="animate-spin" size={16} /> : "Gravar identidade"}</Button>
     </form>
   );

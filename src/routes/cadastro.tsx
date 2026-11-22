@@ -29,7 +29,7 @@ export const Route = createFileRoute("/cadastro")({
   component: Signup,
 });
 
-const IDENTITY_TAKEN = "Este NIF ou BI já está associado a uma conta pessoal. Cada pessoa só pode ter uma conta — entre com a sua conta existente (pode gerir várias lojas a partir dela).";
+const IDENTITY_TAKEN = "Este BI já está associado a uma conta pessoal. Cada pessoa só pode ter uma conta — entre com a sua conta existente (pode gerir várias lojas a partir dela).";
 
 function Signup() {
   const nav = useNavigate();
@@ -52,9 +52,14 @@ function Signup() {
     const parsed = signupSchema.safeParse(f);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos"); return; }
     const idp = identitySchema.safeParse({ nif: f.nif, bi: f.bi });
-    if (!idp.success) { toast.error(idp.error.issues[0]?.message ?? "NIF ou BI inválido"); return; }
+    if (!idp.success) { toast.error(idp.error.issues[0]?.message ?? "Identificação inválida"); return; }
     setBusy(true);
-    const { data: avail } = await supabase.rpc("identity_availability", { _nif: idp.data.nif, _bi: idp.data.bi });
+    const { data: avail, error: availabilityError } = await supabase.rpc("identity_availability", { _nif: idp.data.nif, _bi: idp.data.bi });
+    if (availabilityError || avail === "invalid") {
+      setBusy(false);
+      toast.error("Não foi possível validar a identificação. Verifique os dados e tente novamente.");
+      return;
+    }
     if (avail === "taken") {
       setBusy(false);
       toast.error(IDENTITY_TAKEN);
@@ -77,7 +82,7 @@ function Signup() {
       password: parsed.data.pwd,
       options: {
         emailRedirectTo: window.location.origin + "/home",
-        data: { display_name: parsed.data.name, phone: parsed.data.phone ?? "", account_intent: accountType, nif: idp.data.nif, bi_number: idp.data.bi },
+        data: { display_name: parsed.data.name, phone: parsed.data.phone ?? "", account_intent: accountType, company_nif: idp.data.nif, bi_number: idp.data.bi },
       },
     });
     setBusy(false);
@@ -138,7 +143,7 @@ function Signup() {
 
         <div className="mt-6 space-y-4">
           <Field icon={<UserIcon size={18} />} placeholder={t("full_name")} value={f.name} onChange={(v) => setF({ ...f, name: v })} required />
-          <Field icon={<IdCard size={18} />} placeholder="NIF pessoal" value={f.nif} onChange={(v) => setF({ ...f, nif: v })} required />
+          <Field icon={<IdCard size={18} />} placeholder="NIF empresarial (opcional)" value={f.nif} onChange={(v) => setF({ ...f, nif: v })} />
           <Field icon={<IdCard size={18} />} placeholder="Número do Bilhete de Identidade" value={f.bi} onChange={(v) => setF({ ...f, bi: v })} required />
           <Field icon={<Mail size={18} />} placeholder={t("email")} type="email" value={f.email} onChange={(v) => setF({ ...f, email: v })} required />
           <Field icon={<Phone size={18} />} placeholder={t("phone")} value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
@@ -205,7 +210,7 @@ function Field({ icon, value, onChange, placeholder, type = "text", required }: 
   return (
     <div className="relative">
       <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{icon}</div>
-      <Input type={type} required={required} className="h-12 pl-10" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input type={type} required={required} aria-label={placeholder} className="h-12 pl-10" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }

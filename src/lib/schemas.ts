@@ -15,7 +15,7 @@ export const signupSchema = z.object({
 });
 export const normalizeIdentityDoc = (v: string) => v.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
 export const identitySchema = z.object({
-  nif: z.string().transform(normalizeIdentityDoc).refine((v) => /^[0-9A-Z]{9,14}$/.test(v), "NIF inválido"),
+  nif: z.string().default("").transform(normalizeIdentityDoc).refine((v) => v === "" || /^[0-9A-Z]{9,14}$/.test(v), "NIF empresarial inválido"),
   bi: z.string().transform(normalizeIdentityDoc).refine((v) => /^[0-9]{9}[A-Z]{2}[0-9]{3}$/.test(v), "Número do BI inválido (ex.: 005512345LA042)"),
 });
 
