@@ -151,8 +151,8 @@ function Home() {
 
   return (
     <AppShell>
-      <header className="px-5 pt-6 pb-3 text-white" style={{ background: "var(--gradient-brand)" }}>
-        <div className="flex items-center gap-3">
+      <header className="px-5 pt-6 pb-3 text-white lg:px-10 lg:pb-5" style={{ background: "var(--gradient-brand)" }}>
+        <div className="flex items-center gap-3 lg:gap-6">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <img
               src={logoAsset.url}
@@ -182,7 +182,7 @@ function Home() {
           )}
         </div>
         <form
-          className="relative mt-4 block"
+          className="relative mt-4 block lg:mx-auto lg:max-w-2xl"
           onSubmit={(e) => {
             e.preventDefault();
             navigate({ to: "/lojas", search: { q } });
@@ -198,14 +198,14 @@ function Home() {
             className="h-11 rounded-xl border-0 bg-white pl-10 text-foreground placeholder:text-muted-foreground"
           />
         </form>
-        <div className="mt-3 flex items-center gap-3 text-[11px] text-white/85">
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-white/85 lg:justify-center lg:gap-8 lg:text-xs">
           <span className="flex items-center gap-1"><ShieldCheck size={13} /> Compra protegida</span>
           <span className="flex items-center gap-1"><Truck size={13} /> Frete rápido</span>
           <span className="flex items-center gap-1"><BadgeCheck size={13} /> Lojas verificadas</span>
         </div>
       </header>
 
-      <section className="cv-auto px-5 pt-4">
+      <section className="cv-auto px-5 pt-4 lg:px-10 lg:pt-6">
         <Link to="/lojas" className="group relative block overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
           <img
             src={homeHero}
@@ -214,7 +214,7 @@ function Home() {
             height={896}
             loading="eager"
             decoding="async"
-            className="h-44 w-full object-cover transition group-active:scale-[0.99]"
+            className="h-44 w-full object-cover md:h-64 lg:h-80 transition group-active:scale-[0.99]"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-4 text-white">
@@ -227,8 +227,8 @@ function Home() {
         </Link>
       </section>
 
-      <section className="cv-auto px-5 py-5">
-        <div className="grid grid-cols-4 gap-3">
+      <section className="cv-auto px-5 py-5 lg:px-10 lg:py-8">
+        <div className="grid grid-cols-4 gap-3 lg:grid-cols-8 lg:gap-4">
           {categories.map((c) => (
             <Link key={c.n} to={c.to} className="flex flex-col items-center gap-1.5">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-border/60">{c.e}</div>
@@ -239,7 +239,7 @@ function Home() {
       </section>
 
       <section className="cv-auto pb-5">
-        <div className="flex items-center justify-between px-5">
+        <div className="flex items-center justify-between px-5 lg:px-10">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded-full bg-[var(--live)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
               <Radio size={11} /> ao vivo
@@ -249,11 +249,11 @@ function Home() {
           <Link to="/lojas" className="flex items-center text-xs font-medium text-primary">Ver todas <ChevronRight size={14} /></Link>
         </div>
         {lives.length === 0 ? (
-          <p className="px-5 pt-3 text-xs text-muted-foreground">Nenhuma loja ao vivo no momento.</p>
+          <p className="px-5 pt-3 text-xs text-muted-foreground lg:px-10">Nenhuma loja ao vivo no momento.</p>
         ) : (
-          <div className="smooth-scroll mt-3 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="smooth-scroll mt-3 flex gap-3 overflow-x-auto px-5 pb-2 md:grid md:grid-cols-4 md:overflow-visible lg:grid-cols-6 lg:gap-4 lg:px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {lives.map((s) => (
-              <div key={s.id} className="gpu w-40 shrink-0 overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
+              <div key={s.id} className="gpu w-40 shrink-0 overflow-hidden md:w-auto rounded-2xl bg-card shadow-[var(--shadow-soft)]">
                 <Link to="/loja/$id" params={{ id: s.id }} className="block">
                   <div className="relative">
                     <img src={s.image} alt={s.name} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
@@ -290,7 +290,7 @@ function Home() {
         )}
       </section>
 
-      <section className="cv-auto px-5 pb-6">
+      <section className="cv-auto px-5 pb-6 lg:px-10 lg:pb-10">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold">Recomendados para você</h2>
         </div>
@@ -298,7 +298,7 @@ function Home() {
           <p className="mt-3 text-xs text-muted-foreground">Em breve novos produtos das lojas verificadas.</p>
         ) : (
           <div className="mt-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 lg:gap-4">
               {feed.map((p) => (
                 <Link key={p.id} to="/produto/$id" params={{ id: p.id }} className="overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-soft)]">
                   <div className="flex h-32 items-center justify-center bg-accent text-5xl">{p.emoji}</div>
@@ -319,7 +319,7 @@ function Home() {
         )}
       </section>
 
-      <footer className="mx-5 mb-8 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
+      <footer className="mx-5 mb-8 lg:mx-10 rounded-2xl bg-secondary p-5 text-center text-xs text-secondary-foreground">
         <p className="font-bold tracking-wide">LIVE TEKÁ — A Plataforma de Venda em Tempo Real</p>
         <p className="mt-1 text-[11px] opacity-80">Compre, converse e receba em tempo real.</p>
         <div className="mt-3 space-y-1 text-[11px]">

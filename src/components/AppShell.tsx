@@ -41,14 +41,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       className={
         hasFullscreenLojistaLive
           ? "flex min-h-dvh w-full flex-col overflow-hidden bg-background"
-          : "mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background pb-20"
+          : "mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background pb-20 md:max-w-3xl lg:max-w-7xl lg:shadow-[var(--shadow-soft)]"
       }
     >
       <main>{children}</main>
       {!hasFullscreenLojistaLive && (
         <nav
           aria-label="Live Teká"
-          className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background"
+          className="fixed bottom-0 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 border-t md:max-w-3xl lg:max-w-7xl border-border bg-background"
         >
           <ul className="grid grid-cols-6">
             {tabs.map((tab) => {
