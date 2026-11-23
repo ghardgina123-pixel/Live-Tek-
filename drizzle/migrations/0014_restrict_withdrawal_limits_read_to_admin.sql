@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS withdrawal_limits_read ON public.withdrawal_limits;
+CREATE POLICY withdrawal_limits_read ON public.withdrawal_limits FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));

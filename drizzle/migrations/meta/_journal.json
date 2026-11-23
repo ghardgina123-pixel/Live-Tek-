@@ -99,6 +99,13 @@
       "when": 1795345883470,
       "tag": "0013_personal_bi_optional_company_nif",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795420224751,
+      "tag": "0014_restrict_withdrawal_limits_read_to_admin",
+      "breakpoints": true
     }
   ]
 }
