@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Pedido 23/11: limitar larguras de formulários/perfil/carrinho/painel, organizar Live horizontal no desktop e verificar Painel autenticado/recomendados vazios em desktop e mobile, sem alterar operações.
+
 - [ ] Pedido 21/11: corrigir identidade para BI obrigatório e único e NIF empresarial opcional/partilhável; preservar NIF antigos, lojas e permissões; aplicar e validar os três cenários sem alterar finanças.
 
 - [x] Pedido 16/11: instrumentar criação, início confirmado, falhas e encerramento de Lives nos fluxos existentes; mostrar conexão/reconexão e vídeo instável a lojistas e espectadores; catálogo de quatro eventos válido, 34 testes e interface autenticada verificados; evidências em docs/live-validation-17-11-2026.md.
