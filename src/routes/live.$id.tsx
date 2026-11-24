@@ -486,14 +486,14 @@ function LivePage() {
   }
 
   return (
-    <main className="fixed inset-0 z-50 mx-auto isolate h-dvh w-full max-w-[480px] overflow-hidden overscroll-none bg-secondary text-secondary-foreground shadow-xl">
+    <main className="fixed inset-0 z-50 mx-auto isolate h-dvh w-full max-w-[480px] overflow-hidden lg:max-w-7xl overscroll-none bg-secondary text-secondary-foreground shadow-xl">
       <h1 className="sr-only">
         {live.store?.name
           ? `${live.store.name} ao vivo — ${live.title}`
           : `${live.title} — Live Teká`}
       </h1>
 
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 lg:right-[380px]">
         <Suspense
           fallback={
             <div className="absolute inset-0 flex items-center justify-center bg-secondary">
@@ -505,10 +505,10 @@ function LivePage() {
         </Suspense>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-secondary/85 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-secondary via-secondary/55 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 lg:right-[380px] bg-gradient-to-b from-secondary/85 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] lg:hidden bg-gradient-to-t from-secondary via-secondary/55 to-transparent" />
 
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="absolute inset-x-0 top-0 z-20 lg:right-[380px] flex items-center gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <Button
           type="button"
           size="icon"
@@ -578,7 +578,7 @@ function LivePage() {
         </Button>
       </header>
 
-      <aside className="absolute bottom-[calc(7.25rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col items-center gap-3">
+      <aside className="absolute bottom-[calc(7.25rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col items-center gap-3 lg:right-[396px]">
         <SocialAction
           label={liked ? t("s_remover_gosto") : t("s_gostar")}
           count={likeCount}
@@ -599,8 +599,8 @@ function LivePage() {
         </SocialAction>
       </aside>
 
-      <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[62dvh] min-h-0 flex-col bg-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="mb-2 max-w-[calc(100%-4.5rem)]">
+      <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[62dvh] min-h-0 flex-col bg-transparent px-3 lg:left-auto lg:top-0 lg:w-[380px] lg:max-h-none lg:justify-end lg:border-l lg:border-secondary-foreground/10 lg:bg-secondary lg:pt-6 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="mb-2 max-w-[calc(100%-4.5rem)] lg:max-w-none">
           <p className="text-sm font-bold">{live.store?.name ?? "Live Teká"}</p>
           <p className="line-clamp-2 text-xs leading-relaxed text-secondary-foreground/85">
             {live.title}
@@ -610,7 +610,7 @@ function LivePage() {
         <div
           ref={chatRef}
           tabIndex={-1}
-          className="smooth-scroll mb-2 max-h-[24dvh] min-h-0 max-w-[calc(100%-4.5rem)] space-y-1.5 overflow-y-auto overscroll-contain pr-1 outline-none"
+          className="smooth-scroll mb-2 max-h-[24dvh] min-h-0 max-w-[calc(100%-4.5rem)] lg:max-h-none lg:flex-1 lg:max-w-none space-y-1.5 overflow-y-auto overscroll-contain pr-1 outline-none"
           aria-label="Comentários da live"
         >
           {msgs.length === 0 ? (
@@ -626,7 +626,7 @@ function LivePage() {
         </div>
 
         {productItems.length > 0 && (
-          <div className="smooth-scroll mb-2 flex max-w-[calc(100%-3.5rem)] gap-2 overflow-x-auto overscroll-x-contain pb-0.5">
+          <div className="smooth-scroll mb-2 flex max-w-[calc(100%-3.5rem)] gap-2 lg:max-w-none overflow-x-auto overscroll-x-contain pb-0.5">
             {productItems.map((product) => (
               <Button
                 key={product.id}

@@ -165,7 +165,7 @@ function Home() {
             />
             <div className="min-w-0">
               <p className="text-xs text-white/70">Olá, bem-vindo 👋</p>
-              <h1 className="text-base font-bold leading-tight">Live Teká — A Plataforma de Venda em Tempo Real</h1>
+              <h1 className="truncate text-base font-bold leading-tight lg:text-lg">Live Teká — A Plataforma de Venda em Tempo Real</h1>
               <p className="text-[10px] uppercase tracking-wider text-white/70">A plataforma de venda em tempo real</p>
             </div>
           </div>
@@ -295,7 +295,7 @@ function Home() {
           <h2 className="text-base font-bold">Recomendados para você</h2>
         </div>
         {feed.length === 0 ? (
-          <p className="mt-3 text-xs text-muted-foreground">Em breve novos produtos das lojas verificadas.</p>
+          <div className="mt-3 flex min-h-24 items-center justify-center rounded-2xl border border-dashed border-border bg-card px-4 py-6 text-center text-xs text-muted-foreground lg:min-h-32">Em breve novos produtos das lojas verificadas.</div>
         ) : (
           <div className="mt-3">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 lg:gap-4">

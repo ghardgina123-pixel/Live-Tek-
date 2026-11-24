@@ -119,9 +119,9 @@ function Lojas() {
         </div>
       </header>
 
-      <ul className="space-y-3 px-5 pt-2">
+      <ul className="space-y-3 px-5 pt-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 lg:grid-cols-3 lg:px-10">
         {list.length === 0 && (
-          <li className="rounded-2xl bg-muted/40 p-6 text-center text-xs text-muted-foreground">
+          <li className="rounded-2xl bg-muted/40 p-6 text-center md:col-span-full text-xs text-muted-foreground">
             {rows.length === 0 ? "A carregar lojas…" : "Nenhuma loja encontrada."}
           </li>
         )}

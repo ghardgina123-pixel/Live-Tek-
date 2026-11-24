@@ -94,6 +94,7 @@ function Perfil() {
   };
   return (
     <AppShell>
+      <div className="w-full lg:mx-auto lg:max-w-3xl lg:pb-10">
       <header className="px-5 pt-6 pb-6 text-white" style={{ background: "var(--gradient-brand)" }}>
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold">{t("profile_title")}</h1>
@@ -242,6 +243,7 @@ function Perfil() {
           </Link>
         )}
         <p className="mt-4 text-center text-[10px] text-muted-foreground">Live Teká v1.0 · Feito com 💚</p>
+      </div>
       </div>
     </AppShell>
   );

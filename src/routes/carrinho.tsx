@@ -49,7 +49,7 @@ function Cart() {
 
   return (
     <AppShell>
-      <header className="px-5 pt-6 pb-3">
+      <header className="px-5 pt-6 pb-3 lg:mx-auto lg:max-w-5xl">
         <div className="flex items-center gap-3">
           <BackButton fallback="/home" className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-foreground" />
           <div>
@@ -59,7 +59,8 @@ function Cart() {
         </div>
       </header>
 
-      <ul className="space-y-3 px-5">
+      <div className="lg:mx-auto lg:grid lg:max-w-5xl lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8 lg:px-5">
+      <ul className="space-y-3 px-5 lg:px-0">
         {items.map(({ product: p, qty }) => (
           <li key={p.id} className="flex gap-3 rounded-2xl bg-card p-3 shadow-[var(--shadow-soft)]">
             <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-accent text-4xl">{p.emoji}</div>
@@ -79,7 +80,8 @@ function Cart() {
         ))}
       </ul>
 
-      <div className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
+      <aside className="lg:sticky lg:top-6 lg:self-start">
+      <div className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm lg:mx-0 lg:mt-0">
         <div className="flex justify-between"><span className="text-muted-foreground">Produtos ({t("subtotal")})</span><span>{formatPrice(total, currency)}</span></div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{t("delivery_fee")}</span>
@@ -91,14 +93,16 @@ function Cart() {
         </div>
       </div>
 
-      <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
+      <div className="mx-5 mt-3 lg:mx-0 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
         <ShieldCheck size={14} /> Pagamento seguro com criptografia de ponta a ponta
       </div>
 
-      <div className="px-5 pt-4">
+      <div className="px-5 pt-4 lg:px-0">
         <Link to="/checkout" className="flex h-12 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-[var(--shadow-glow)]">
           Finalizar compra
         </Link>
+      </div>
+      </aside>
       </div>
     </AppShell>
   );

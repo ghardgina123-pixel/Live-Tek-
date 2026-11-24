@@ -117,7 +117,7 @@ function Checkout() {
   const shippingBrl = shippingAoa == null ? null : fromAoa(shippingAoa);
   const totalBrl = shippingBrl == null ? subtotal : subtotal + shippingBrl;
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-32">
+    <div className="mx-auto min-h-screen w-full max-w-[480px] bg-background pb-32 lg:max-w-6xl lg:pb-12">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background px-5 py-4">
         <Button variant="ghost" size="icon" aria-label="Voltar" onClick={() => history.back()}><ArrowLeft size={20} /></Button>
         <h1 className="flex-1 text-lg font-bold">{t("s_finalizar_compra")}</h1>
@@ -126,7 +126,9 @@ function Checkout() {
         </div>
       </header>
 
-      <section className="px-5 pt-5">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8 lg:px-5">
+      <div className="min-w-0">
+      <section className="px-5 pt-5 lg:px-0">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase text-muted-foreground">{t("s_entregar_em")}</h2>
           <Link to="/enderecos" className="text-xs font-semibold text-primary">{t("s_gerenciar")}</Link>
@@ -163,7 +165,7 @@ function Checkout() {
         )}
       </section>
 
-      <section className="px-5 pt-5">
+      <section className="px-5 pt-5 lg:px-0">
         <h2 className="text-xs font-bold uppercase text-muted-foreground">Itens ({items.length})</h2>
         <ul className="mt-2 space-y-2">
           {items.map(({ product: p, qty }) => (
@@ -179,7 +181,7 @@ function Checkout() {
         </ul>
       </section>
 
-      <section className="px-5 pt-5">
+      <section className="px-5 pt-5 lg:px-0">
         <h2 className="text-xs font-bold uppercase text-muted-foreground">{t("s_forma_de_pagamento")}</h2>
         <div className="mt-2">
           <CurrencySelector variant="row" />
@@ -198,7 +200,9 @@ function Checkout() {
         </RadioGroup>
       </section>
 
-      <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm">
+      </div>
+      <aside className="lg:sticky lg:top-20 lg:self-start lg:pt-5">
+      <section className="mx-5 mt-5 rounded-2xl bg-muted p-4 text-sm lg:mx-0 lg:mt-0">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Produtos ({t("s_subtotal")})</span>
           <span>{formatPrice(subtotal, currency)}</span>
@@ -233,11 +237,11 @@ function Checkout() {
         <p className="mt-1 text-[11px] text-muted-foreground">Total = produtos + taxa de entrega, calculada no servidor. É este valor que é usado no pagamento.</p>
       </section>
 
-      <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 text-[11px] text-accent-foreground">
+      <div className="mx-5 mt-3 flex items-center gap-2 rounded-xl bg-accent p-3 lg:mx-0 text-[11px] text-accent-foreground">
         <ShieldCheck size={14} /> {t("s_garantia_live_teka_reembolso_total_se_algo_der_e")}
       </div>
 
-      <div className="fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background p-3">
+      <div className="fixed bottom-0 left-1/2 w-full max-w-[480px] -translate-x-1/2 border-t border-border bg-background p-3 lg:static lg:mt-4 lg:max-w-none lg:translate-x-0 lg:border-0 lg:p-0">
         <Button
           onClick={async () => {
             if (!user) return toast.error(t("s_faca_login_para_finalizar_a_compra"));
@@ -265,6 +269,8 @@ function Checkout() {
         >
           {submitting ? <Loader2 className="animate-spin" size={18} /> : <>Confirmar pedido · {formatPrice(totalBrl, currency)}</>}
         </Button>
+      </div>
+      </aside>
       </div>
     </div>
   );
