@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Conjunto 2 (autorização 24/11, retoma 26/11): reconstruir SQL completo sobre pedidos existentes, validar os oito grupos em PostgreSQL isolado e apresentar SQL final para aprovação conforme regra permanente; depois aplicar e ligar carteiras/histórico/gestor, sem transferências nem dados fictícios na base partilhada.
+
 - [ ] Pedido 23/11: limitar larguras de formulários/perfil/carrinho/painel, organizar Live horizontal no desktop e verificar Painel autenticado/recomendados vazios em desktop e mobile, sem alterar operações.
 
 - [ ] Pedido 21/11: corrigir identidade para BI obrigatório e único e NIF empresarial opcional/partilhável; preservar NIF antigos, lojas e permissões; aplicar e validar os três cenários sem alterar finanças.
