@@ -4629,6 +4629,10 @@ export type Database = {
       store_subscription_status: { Args: { _store_id: string }; Returns: Json }
       store_withdrawn_today: { Args: { _store_id: string }; Returns: number }
       subscription_renewal_notices: { Args: never; Returns: number }
+      withdrawal_bank_identifier_valid: {
+        Args: { _identifier: string }
+        Returns: boolean
+      }
       withdrawal_day_start: { Args: { _currency?: string }; Returns: string }
     }
     Enums: {
